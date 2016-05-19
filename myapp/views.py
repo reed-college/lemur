@@ -5,17 +5,12 @@ from main import app
 
 @app.route('/')
 def index():
-    return '<h1>Hello World!</h1>'
-
-# Responses can be pretty minimal:
-@app.route('/minimal')
-def main():
-    return "We're up!"
+    return render_template("layout.html")
 
 
-@app.route('/gifs/<gif>')
-def gif(gif):
-    return app.send_static_file('gifs/' + gif)
+# @app.route('/gifs/<gif>')
+# def gif(gif):
+#     return app.send_static_file('gifs/' + gif)
 
 
 # Another resource; this one can take a parameter. Notice that while our first
