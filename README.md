@@ -46,21 +46,20 @@ pip install -r requirement
 ```
 ###Step3: Create Local Database
 We’ll need to get a Postgres database set up to store our todo list. We’ll also add Python ORM SQLAlchemy to our app. Once you have Postgres installed, create a database and name it lemur to use as a local database.<br\>
-* Run PostgreSQL command line client.
+1.Run PostgreSQL command line client.
 ```psql```
-* Create a database user with a password.
+2.Create a database user with a password.
 ``` create user zzy with password 'mypassword'; ```
-* Create a database instance.
+3.Create a database instance.
 ``` create database lemur owner zzy encoding 'utf-8'; ```
 
-##Part2 Run the app
+###Step4 Run the app
 
 ```
 cd myapp
 python3 main.py
 ```
-
 For details of setting things up in the first place, please read Notes.md.
 
-##Part3 Acknowledgement
+##Part2 Acknowledgement
 http://www.vertabelo.com/blog/technical-articles/web-app-development-with-flask-sqlalchemy-bootstrap-part-1#step4
