@@ -54,9 +54,13 @@ We’ll need to get a Postgres database set up to store our todo list. We’ll a
 ``` create database lemur owner zzy encoding 'utf-8'; ```
 
 ##Part2 Run the app
+
 ```
 cd myapp
 python3 main.py
 ```
 
+For details of setting things up in the first place, please read Notes.md.
 
+##Part3 Acknowledgement
+http://www.vertabelo.com/blog/technical-articles/web-app-development-with-flask-sqlalchemy-bootstrap-part-1#step4
