@@ -10,6 +10,7 @@ Bio data collector
                 |-- main.py
                 |__ /templates
                         |-- layout.html
+                        |-- form.html
                 |__ /static
                         |__ /js
                                 |--boostrap-select.js
@@ -63,4 +64,6 @@ python3 main.py
 ```
 For details of setting things up in the first place, please read Notes.md.<br/>
 ##Part2 Acknowledgement
+We borrowed code and templates from the following sources as our start point.<br/>
+https://github.com/Gastove/http-demo
 http://www.vertabelo.com/blog/technical-articles/web-app-development-with-flask-sqlalchemy-bootstrap-part-1#step4

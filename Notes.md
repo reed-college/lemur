@@ -65,16 +65,16 @@ pip install Flask
 ###Step 3: Create requirements.txt File With All Dependencies Listed
 Our application must have a requirements.txt that contains all the package dependencies with the exact versions.
 ```pip freeze > requirements.txt```
+
 ###Step 4: Install PostgreSQL 9.3 and Create Local Database
 We’ll need to get a Postgres database set up to store our todo list. We’ll also add Python ORM SQLAlchemy to our app. Once you have Postgres installed, create a database and name it todoapp to use as a local database.<br\>
-* Run PostgreSQL command line client.
-```psql```
+We’ll need to get a Postgres database set up to store our todo list. We’ll also add Python ORM SQLAlchemy to our app. Once you have Postgres installed, create a database and name it lemur to use as a local database.<br\>
+* Run PostgreSQL command line client.<br\>
+* Create a database user with a password.<br\>
+* Create a database instance.<br\>
 For errors like ```psql: FATAL:  database "<user>" does not exist``` <br\>
 Please refer http://stackoverflow.com/questions/17633422/psql-fatal-database-user-does-not-exist
-* Create a database user with a password.
-``` create user zzy with password 'mypassword'; ```
-* Create a database instance.
-``` create database Flask_demo owner zzy encoding 'utf-8'; ```
+
 ###Step 5: Organize the Structure of the Application
 
 The structure for our web app will be as follows:
