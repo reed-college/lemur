@@ -31,26 +31,31 @@
 	{% if (lab_list|length)==0 %}
 		No lab exists<br>
 	{% else %}
-		<table class="tg">
-			<tr>
-			    <th class="tg-yw4l">Index</th>
-			    <th class="tg-yw4l">Lab name</th>
-			    <th class="tg-yw4l">Class name</th>
-			    <th class="tg-yw4l">Professor name</th>
-			    <th class="tg-yw4l">Choose</th>
-			</tr>
-			{% for i in range(lab_list|length) %}
-			<tr>
-			    <th class="tg-yw4l">{{ loop.index }}</th>
-			    <th class="tg-yw4l">{{ lab_list[i].lab_name }}</th>
-			    <th class="tg-yw4l">{{ lab_list[i].class_name }}</th>
-			    <th class="tg-yw4l">{{ lab_list[i].prof_name }}</th>
-			    <th class="tg-yw4l"><input type="radio" name="lab_name" data-labname="{{lab_list[i].lab_name}}"  data-classname="{{lab_list[i].class_name }}" data-profname="{{lab_list[i].prof_name}}"> </th>
-			</tr>
-			{% endfor %}
+		<table class="table sortable">
+		    <thead>
+				<tr>
+				    <th class="tg-yw4l">Index</th>
+				    <th class="tg-yw4l">Lab name</th>
+				    <th class="tg-yw4l">Class name</th>
+				    <th class="tg-yw4l">Professor name</th>
+				    <th class="tg-yw4l">Choose</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for i in range(lab_list|length) %}
+				<tr>
+				    <td class="tg-yw4l">{{ loop.index }}</td>
+				    <td class="tg-yw4l">{{ lab_list[i].lab_name }}</td>
+				    <td class="tg-yw4l">{{ lab_list[i].class_name }}</td>
+				    <td class="tg-yw4l">{{ lab_list[i].prof_name }}</td>
+				    <td class="tg-yw4l"><input type="radio" name="lab_name" data-labname="{{lab_list[i].lab_name}}"  data-classname="{{lab_list[i].class_name }}" data-profname="{{lab_list[i].prof_name}}"> </td>
+				</tr>
+				{% endfor %}
+			</tbody>
 		</table>
 	{% endif %}
 	<br>
+	<button> <a href="student_home">Go back<a></button>
 	<button name="go_to_lab">Go to lab</button>
 	<div class="temporary_message" id="error_message_no_lab_choose">You need to select one lab</div>
 

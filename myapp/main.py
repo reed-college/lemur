@@ -55,7 +55,7 @@ def student_home():
 def student_enter_data():
     lab_list = []
     db_session = db.get_session()
-    query_all_lab = db_session.query(schema.Lab_info).all()
+    query_all_lab = db_session.query(schema.Lab_info).filter(schema.Lab_info.lab_status=='Activated')
     for lab in query_all_lab:
         lab_list.append({'lab_name': lab.lab_name,
                          'class_name': lab.class_name,
@@ -348,9 +348,10 @@ def _admin_status_make_download_only(new_status):
     jsonData = request.get_json()
     lab_id = jsonData['lab_id']
     db_session = db.get_session()
+
     # Test the existence of the copies of this lab
     query_status_to_be_changed = db_session.query(schema.Lab_info).filter(
-        schema.Lab_rows.lab_id == lab_id)
+        schema.Lab_info.lab_id == lab_id)
 
     for r in query_status_to_be_changed:
         r.lab_status = new_status
