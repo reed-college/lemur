@@ -14,7 +14,7 @@ app.debug = True
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 
 
-# 1.Commands
+# Commands
 # Utility method for creating all the tables in the database
 @app.route('/admin/bootstrap')
 def bootstrap():
@@ -34,14 +34,14 @@ def clean_database():
     return "Database has been cleaned"
 
 
-# 2.Common Side
+# Common Side
 # common homepage(temporary)
 @app.route('/')
 def main():
     return render_template('common_home.html')
 
 
-# 3.Student Side
+# Student Side
 # student homepage
 @app.route('/student_home')
 def student_home():
@@ -108,14 +108,12 @@ def _student_receive_data():
     return jsonify(success=True, data=jsonData)
 
 
-# 4.Admin Side
-# admin homepage
+# Admin Side
 @app.route('/admin_home')
 def admin_home():
     return render_template('admin_home.html')
 
 
-# create a new lab/manage current labs
 @app.route('/admin_setup_labs_and_data_access', methods=['GET', 'POST'])
 def admin_setup_labs_and_data_access():
     # Collect Info of all the existing labs
@@ -201,7 +199,6 @@ def _admin_receive_setup_labs_data():
     return jsonify(success=True, data=jsonData)
 
 
-# modify a current lab
 @app.route('/admin_modify_lab/<lab_id>')
 def admin_modify_lab(lab_id):
     db_session = db.get_session()
@@ -234,7 +231,6 @@ def admin_modify_lab(lab_id):
     return render_template('admin_modify_lab.html', labinfo=labinfo)
 
 
-# Delete the old lab and add the new lab
 @app.route('/_admin_modify_lab', methods=['POST'])
 def _admin_modify_lab():
     jsonData = request.get_json()
@@ -343,7 +339,6 @@ def _admin_delete_lab():
     return jsonify(success=True, data=jsonData)
 
 
-# change the status of a lab
 @app.route('/_admin_change_status/<new_status>', methods=['POST'])
 def _admin_status_make_download_only(new_status):
     jsonData = request.get_json()
@@ -570,13 +565,11 @@ def _admin_download_data(lab_ids):
     return response
 
 
-# create/manage users
 @app.route('/admin_manage_users', methods=['GET', 'POST'])
 def admin_manage_users():
     return render_template('admin_manage_users.html')
 
 
-# log out
 @app.route('/admin_log_out', methods=['GET', 'POST'])
 def admin_log_out():
     return render_template('admin_log_out.html')
