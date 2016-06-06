@@ -6,7 +6,7 @@ try:
 except (ImportError):
     import json
 from utility import Generate_lab_id, Generate_row_id, Generate_data_id
-#Initialize an app
+# Initialize an app
 app = Flask(__name__)
 app.debug = True
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
@@ -18,6 +18,7 @@ app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
 def bootstrap():
     schema.Base.metadata.create_all(db.engine)
     return "Bootsrapped!"
+
 
 # Clean all the rows in Lab_rows and Lab_desc
 @app.route('/clean_database', methods=['GET'])
@@ -44,6 +45,7 @@ def main():
 def student_home():
     return render_template('student_home.html')
 
+
 # A student can select among all current available labs
 @app.route('/student_enter_data')
 def student_enter_data():
@@ -51,8 +53,12 @@ def student_enter_data():
     db_session = db.get_session()
     query_all_lab = db_session.query(schema.Lab_info).all()
     for lab in query_all_lab:
-        lab_list.append({'lab_name':lab.lab_name,'class_name':lab.class_name,'prof_name':lab.prof_name})   
-    return render_template('student_enter_data.html',lab_list=lab_list)    
+        lab_list.append({'lab_name': lab.lab_name,
+                         'class_name': lab.class_name,
+                         'prof_name': lab.prof_name})
+    return render_template('student_enter_data.html',
+                           lab_list=lab_list)
+
 
 # A student can input data here
 @app.route('/student_data_entry/<lab_id>')
@@ -60,15 +66,23 @@ def student_data_entry(lab_id):
     rows_info = []
     lab_info = []
     db_session = db.get_session()
-    query_lab_info = db_session.query(schema.Lab_info).filter(schema.Lab_info.lab_id==lab_id)
-    query_rows_info = db_session.query(schema.Lab_rows).filter(schema.Lab_rows.lab_id==lab_id).order_by(schema.Lab_rows.row_order)
+    query_lab_info = db_session.query(schema.Lab_info).filter(
+        schema.Lab_info.lab_id == lab_id)
+    query_rows_info = db_session.query(schema.Lab_rows).filter(
+        schema.Lab_rows.lab_id == lab_id).order_by(schema.Lab_rows.row_order)
 
-    #Convert the objects to dictionaries to make them JSON serializable
+    # Convert the objects to dictionaries to make them JSON serializable
     for row in query_rows_info:
-        rows_info.append({'row_name':row.row_name,'row_desc':row.row_desc,'value_type':row.value_type,'value_range':row.value_range,'value_candidates':row.value_candidates})
+        rows_info.append({'row_name': row.row_name, 'row_desc': row.row_desc,
+                          'value_type': row.value_type,
+                          'value_range': row.value_range,
+                          'value_candidates': row.value_candidates})
     for lab in query_lab_info:
-        lab_info.append({'lab_id':lab.lab_id,'lab_name':lab.lab_name,'lab_desc':lab.lab_desc})
-    return render_template('student_data_entry.html',rows_info=rows_info,lab_info=lab_info)    
+        lab_info.append({'lab_id': lab.lab_id,
+                         'lab_name': lab.lab_name,
+                         'lab_desc': lab.lab_desc})
+    return render_template('student_data_entry.html',
+                           rows_info=rows_info, lab_info=lab_info)
 
 
 # store incoming data into the database
@@ -78,19 +92,18 @@ def _student_receive_data():
     lab_data = jsonData['lab_data']
     db_session = db.get_session()
     for d in lab_data:
-        student_name = d['student_name']     
+        student_name = d['student_name']
         for r in d['rows_info']:
             lab_id = r['lab_id']
             row_name = r['row_name']
-            row_id = Generate_row_id(lab_id,row_name)
-            data_id = Generate_data_id(row_id,student_name)
-            db_session.add(schema.Lab_data(row_id=row_id,data_id=data_id,student_name=student_name,row_data=r['row_data']))
+            row_id = Generate_row_id(lab_id, row_name)
+            data_id = Generate_data_id(row_id, student_name)
+            db_session.add(schema.Lab_data(row_id=row_id, data_id=data_id,
+                                           student_name=student_name,
+                                           row_data=r['row_data']))
     db_session.commit()
-    # return success to the ajax call from flask 
+    # return success to the ajax call from flask
     return jsonify(success=True, data=jsonData)
-
-
-
 
 
 # 4.Admin Side
@@ -99,27 +112,39 @@ def _student_receive_data():
 def admin_home():
     return render_template('admin_home.html')
 
+
 # create a new lab/manage current labs
 @app.route('/admin_setup_labs_and_data_access', methods=['GET', 'POST'])
 def admin_setup_labs_and_data_access():
     # Collect Info of all the existing labs
-    current_labs = {'activated':[],'downloaded':[],'unactivated':[]}
+    current_labs = {'activated': [], 'downloaded': [], 'unactivated': []}
     current_labs['activated']
     current_labs['downloaded']
     current_labs['unactivated']
 
     db_session = db.get_session()
-    query_activated = db_session.query(schema.Lab_info).filter(schema.Lab_info.lab_status=='Activated')
-    query_downloaded = db_session.query(schema.Lab_info).filter(schema.Lab_info.lab_status=='Downloaded')
-    query_unactivated = db_session.query(schema.Lab_info).filter(schema.Lab_info.lab_status=='Unactivated')
-    
-     
+    query_activated = db_session.query(schema.Lab_info).filter(
+        schema.Lab_info.lab_status == 'Activated')
+    query_downloaded = db_session.query(schema.Lab_info).filter(
+        schema.Lab_info.lab_status == 'Downloaded')
+    query_unactivated = db_session.query(schema.Lab_info).filter(
+        schema.Lab_info.lab_status == 'Unactivated')
+
     for lab_a in query_activated:
-        current_labs['activated'].append({'lab_id':lab_a.lab_id,'lab_name':lab_a.lab_name,'class_name':lab_a.class_name,'prof_name':lab_a.prof_name})
+        current_labs['activated'].append({'lab_id': lab_a.lab_id,
+                                          'lab_name': lab_a.lab_name,
+                                          'class_name': lab_a.class_name,
+                                          'prof_name': lab_a.prof_name})
     for lab_d in query_downloaded:
-        current_labs['downloaded'].append({'lab_id':lab_d.lab_id,'lab_name':lab_d.lab_name,'class_name':lab_d.class_name,'prof_name':lab_d.prof_name})
+        current_labs['downloaded'].append({'lab_id': lab_d.lab_id,
+                                           'lab_name': lab_d.lab_name,
+                                           'class_name': lab_d.class_name,
+                                           'prof_name': lab_d.prof_name})
     for lab_u in query_unactivated:
-        current_labs['unactivated'].append({'lab_id':lab_u.lab_id,'lab_name':lab_u.lab_name,'class_name':lab_u.class_name,'prof_name':lab_u.prof_name})
+        current_labs['unactivated'].append({'lab_id': lab_u.lab_id,
+                                            'lab_name': lab_u.lab_name,
+                                            'class_name': lab_u.class_name,
+                                            'prof_name': lab_u.prof_name})
 
     if request.method == 'POST':
         labinfo = {'lab_name':request.form['lab_name'],'class_name':request.form['class_name'],'prof_name':request.form['prof_name'],'lab_desc':request.form['lab_desc'],
@@ -246,9 +271,9 @@ def _admin_duplicate_lab():
             new_lab.lab_rows = new_lab_rows
             db_session.add(new_lab)
             db_session.commit()
-            break   
+            break
         i+=1
-    # return success to the ajax call from flask 
+    # return success to the ajax call from flask
     return jsonify(success=True, data=jsonData)
 
 
@@ -442,11 +467,10 @@ def _admin_download_data(lab_ids):
         for data in student['row_data_list']:
             csv += (dt+data['row_data'])
         csv += nl
-
-    
-    lab_ids_str = '+'.join(lab_ids)  
-    response = make_response(csv)  # create a response out of the CSV string 
-    response.headers["Content-Disposition"] = 'attachment; filename='+lab_ids_str+'.txt'  # Set the right header for the response to be downloaded
+    lab_ids_str = '+'.join(lab_ids)
+    response = make_response(csv)  # create a response out of the CSV string
+    response.headers["Content-Disposition"] = 'attachment; filename='+lab_ids_str+'.txt'
+    # Set the right header for the response to be downloaded
     return response
 
 
@@ -455,20 +479,12 @@ def _admin_download_data(lab_ids):
 def admin_manage_users():
     return render_template('admin_manage_users.html')
 
+
 # log out
 @app.route('/admin_log_out', methods=['GET', 'POST'])
 def admin_log_out():
     return render_template('admin_log_out.html')
 
 
-
-
-
-
 if __name__ == '__main__':
-	app.run()
-
-
-
-
-
+    app.run()
