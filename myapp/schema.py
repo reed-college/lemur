@@ -1,8 +1,7 @@
 from datetime import datetime
-from sqlalchemy import (Column, Integer, String, DateTime, Text, ForeignKey, Enum)
+from sqlalchemy import (Column, Integer, String, DateTime, ForeignKey, Enum)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-import enum
 # Notes: if the schema is changed, you need to change __tablename__ to create a
 # new schema and clear the old one
 

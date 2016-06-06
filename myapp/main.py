@@ -1,6 +1,8 @@
-from flask import Flask, render_template, request, flash, redirect, url_for, jsonify, session, make_response
-from flask_sqlalchemy import SQLAlchemy
-import db, schema, time, ast
+from flask import (Flask, render_template, request, redirect, url_for,
+                   jsonify, make_response)
+import db
+import schema
+import ast
 try:
     import simplejson as json
 except (ImportError):
