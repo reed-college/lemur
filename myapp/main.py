@@ -7,7 +7,7 @@ try:
     import simplejson as json
 except (ImportError):
     import json
-from utility import Generate_lab_id, Generate_row_id, Generate_data_id
+from utility import Generate_lab_id, Generate_row_id, Generate_data_id, Check_existence
 # Initialize an app
 app = Flask(__name__)
 app.debug = True
@@ -22,17 +22,24 @@ def bootstrap():
     return "Bootsrapped!"
 
 
-# TBD: Fix it
 # Clean all the rows in Lab_rows and Lab_desc
-@app.route('/clean_database', methods=['GET'])
+@app.route('/clean_database')
 def clean_database():
     db_session = db.get_session()
-    for r in db_session.query(schema.Lab_rows):
-        db_session.delete(r)
-    for d in db_session.query(schema.Lab_desc):
-        db_session.delete(d)
-    db_session.commit()
-    return "Database has been cleaned"
+    try:
+        for r in db_session.query(schema.Lab_info):
+            db_session.delete(r)
+        for r in db_session.query(schema.Lab_rows):
+            db_session.delete(r)
+        for r in db_session.query(schema.Lab_data):
+            db_session.delete(r)
+        db_session.commit()
+        return "Database has been cleaned"
+
+    except Exception:
+        err_msg = 'Database fails to be cleaned for unknown reasons'
+        return render_template('400.html', err_msg=err_msg),400
+
 
 
 # Common Side
@@ -75,6 +82,10 @@ def student_data_entry(lab_id):
     query_rows_info = db_session.query(schema.Lab_rows).filter(
         schema.Lab_rows.lab_id == lab_id).order_by(schema.Lab_rows.row_order)
 
+    if query_rows_of_lab_to_be_modified.count()==0 or query_info_of_lab_to_be_modified.count()==0:
+        err_msg = 'The lab doesn\'t exist'
+        return render_template('400.html', err_msg=err_msg),400
+
     # Convert the objects to dictionaries to make them JSON serializable
     for row in query_rows_info:
         rows_info.append({'row_name': row.row_name, 
@@ -94,22 +105,45 @@ def student_data_entry(lab_id):
 @app.route('/_student_receive_data', methods=['POST'])
 def _student_receive_data():
     jsonData = request.get_json()
-    lab_data = jsonData['lab_data']
+    err_msg = Check_existence(jsonData,'lab_data')
+    
+    if err_msg != '':
+        return jsonify(success=False,data=err_msg)
+
+    lab_data = jsonData['lab_data'] 
+
+    if type(lab_data) != 'list':
+        err_msg = 'The value of the key lab_data should be a list'
+        return jsonify(success=False,data=err_msg)
+
     db_session = db.get_session()
-    for d in lab_data:
-        student_name = d['student_name']
-        for r in d['rows_info']:
-            lab_id = r['lab_id']
-            row_name = r['row_name']
-            row_id = Generate_row_id(lab_id, row_name)
-            data_id = Generate_data_id(row_id, student_name)
-            db_session.add(schema.Lab_data(row_id=row_id,
-                                           data_id=data_id,
-                                           student_name=student_name,
-                                           row_data=r['row_data']))
-    db_session.commit()
-    # return success to the ajax call from flask
-    return jsonify(success=True, data=jsonData)
+    try:             
+        for d in lab_data:
+            err_msg = Check_existence(d,'student_name','rows_info')
+            if err_msg != '':
+                return jsonify(success=False,data=err_msg)
+
+            student_name = d['student_name']
+            for r in d['rows_info']:
+                err_msg = Check_existence(r,'lab_id','row_name','row_data')
+                if err_msg != '':
+                    return jsonify(success=False,data=err_msg)
+
+                lab_id = r['lab_id']
+                row_name = r['row_name']
+                row_id = Generate_row_id(lab_id, row_name)
+                data_id = Generate_data_id(row_id, student_name)
+                db_session.add(schema.Lab_data(row_id=row_id,
+                                               data_id=data_id,
+                                               student_name=student_name,
+                                               row_data=r['row_data']))
+        db_session.commit()
+        return jsonify(success=True, data=jsonData)
+
+    except Exception:     
+        db_session.rollback()
+        return jsonify(success=False, data='The data format is not consistent with the database')
+
 
 
 # Admin Side
@@ -151,14 +185,21 @@ def admin_setup_labs_and_data_access():
                                             'prof_name': lab_u.prof_name})
 
     if request.method == 'POST':
+        err_msg = Check_existence(request.form,'lab_name','class_name','prof_name','lab_desc','lab_questions')        
+        if err_msg != '':
+            return jsonify(success=False,data=err_msg)
+
         labinfo = {'lab_name': request.form['lab_name'],
                    'class_name': request.form['class_name'],
                    'prof_name': request.form['prof_name'],
                    'lab_desc': request.form['lab_desc'],
                    'lab_questions': request.form['lab_questions']}
+
         return redirect(url_for('.admin_setup_labs', labinfo=labinfo))
+
     return render_template('admin_setup_labs_and_data_access.html',
                            current_labs=current_labs)
+    
 
 
 # fill in the row details of a lab
@@ -171,6 +212,11 @@ def admin_setup_labs():
 @app.route('/_admin_receive_setup_labs_data', methods=['POST'])
 def _admin_receive_setup_labs_data():
     jsonData = request.get_json()
+
+    err_msg = Check_existence(jsonData,'lab_name','class_name','prof_name','lab_desc','row_data')        
+    if err_msg != '':
+        return jsonify(success=False,data=err_msg)
+
     lab_name = jsonData['lab_name']
     class_name = jsonData['class_name']
     prof_name = jsonData['prof_name']
@@ -181,26 +227,31 @@ def _admin_receive_setup_labs_data():
 
     db_session = db.get_session()
 
-    lab_rows = []
-    lab = schema.Lab_info(lab_id=lab_id, lab_name=lab_name,
-                          class_name=class_name, prof_name=prof_name,
-                          lab_desc=lab_desc, lab_status='Activated')
-    for r in row_data:
-        row_name = r['row_name']
-        row_id = Generate_row_id(lab_id, row_name)
-        lab_rows.append(
-            schema.Lab_rows(lab_id=lab_id, row_id=row_id,
-                            row_name=row_name,
-                            row_desc=r['row_desc'],
-                            row_order=r['row_order'],
-                            value_type=r['value_type'],
-                            value_range=r['value_range'],
-                            value_candidates=r['value_candidates']))
-    lab.lab_rows = lab_rows
-    db_session.add(lab)
-    db_session.commit()
-    # return success to the ajax call from flask
-    return jsonify(success=True, data=jsonData)
+    try: 
+        lab_rows = []
+        lab = schema.Lab_info(lab_id=lab_id, lab_name=lab_name,
+                              class_name=class_name, prof_name=prof_name,
+                              lab_desc=lab_desc, lab_status='Activated')
+        for r in row_data:
+            row_name = r['row_name']
+            row_id = Generate_row_id(lab_id, row_name)
+            lab_rows.append(
+                schema.Lab_rows(lab_id=lab_id, row_id=row_id,
+                                row_name=row_name,
+                                row_desc=r['row_desc'],
+                                row_order=r['row_order'],
+                                value_type=r['value_type'],
+                                value_range=r['value_range'],
+                                value_candidates=r['value_candidates']))
+        lab.lab_rows = lab_rows
+        db_session.add(lab)
+        db_session.commit()
+        # return success to the ajax call from flask
+        return jsonify(success=True, data=jsonData)
+
+    except Exception:     
+        db_session.rollback()
+        return jsonify(success=False, data='The data format is not consistent with the database')
 
 
 @app.route('/admin_modify_lab/<lab_id>')
@@ -212,6 +263,11 @@ def admin_modify_lab(lab_id):
         schema.Lab_rows).filter(schema.Lab_rows.lab_id == lab_id)
     query_info_of_lab_to_be_modified = db_session.query(
         schema.Lab_info).filter(schema.Lab_info.lab_id == lab_id)
+
+    if query_rows_of_lab_to_be_modified.count()==0 or query_info_of_lab_to_be_modified.count()==0:
+        err_msg = 'The lab doesn\'t exist'
+        return render_template('400.html', err_msg=err_msg),400
+
     for r in query_rows_of_lab_to_be_modified:
         rows_info.append({'row_name': r.row_name,
                           'row_desc': r.row_desc,
@@ -219,6 +275,7 @@ def admin_modify_lab(lab_id):
                           'value_type': r.value_type,
                           'value_range': r.value_range,
                           'value_candidates': r.value_candidates})
+
     for r in query_info_of_lab_to_be_modified:
         lab_id = r.lab_id
         lab_name = r.lab_name
@@ -238,6 +295,11 @@ def admin_modify_lab(lab_id):
 @app.route('/_admin_modify_lab', methods=['POST'])
 def _admin_modify_lab():
     jsonData = request.get_json()
+
+    err_msg = Check_existence(request.form,'lab_name','class_name','prof_name','lab_desc','row_data','old_lab_id')        
+    if err_msg != '':
+        return jsonify(success=False,data=err_msg)
+
     lab_name = jsonData['lab_name']
     class_name = jsonData['class_name']
     prof_name = jsonData['prof_name']
@@ -248,117 +310,153 @@ def _admin_modify_lab():
     old_lab_id = jsonData['old_lab_id']
 
     db_session = db.get_session()
-    query_info_to_be_deleted = db_session.query(schema.Lab_info).filter(
-        schema.Lab_info.lab_id == old_lab_id)
-    query_rows_to_be_deleted = db_session.query(schema.Lab_rows).filter(
-        schema.Lab_rows.lab_id == old_lab_id)
 
-    for r in query_info_to_be_deleted:
-        db_session.delete(r)
-    for r in query_rows_to_be_deleted:
-        db_session.delete(r)
+    try:
+        query_info_to_be_deleted = db_session.query(schema.Lab_info).filter(
+            schema.Lab_info.lab_id == old_lab_id)
+        query_rows_to_be_deleted = db_session.query(schema.Lab_rows).filter(
+            schema.Lab_rows.lab_id == old_lab_id)
 
-    for r in row_data:
-        row_name = r['row_name']
-        row_id = Generate_row_id(new_lab_id, row_name)
-        db_session.add(schema.Lab_rows(lab_id=new_lab_id,
-                                       row_id=row_id, row_name=row_name,
-                                       row_desc=r['row_desc'],
-                                       row_order=r['row_order'],
-                                       value_type=r['value_type'],
-                                       value_range=r['value_range'],
-                                       value_candidates=r['value_candidates']))
-    db_session.add(schema.Lab_info(lab_id=new_lab_id, lab_name=lab_name,
-                                   class_name=class_name, prof_name=prof_name,
-                                   lab_desc=lab_desc, lab_status='Activated'))
+        for r in query_info_to_be_deleted:
+            db_session.delete(r)
+        for r in query_rows_to_be_deleted:
+            db_session.delete(r)
 
-    db_session.commit()
-    # return success to the ajax call from flask
-    return jsonify(success=True, data=jsonData)
+        for r in row_data:
+            err_msg = Check_existence(r,'row_name','row_desc','row_order','value_type','value_range','value_candidates')        
+            if err_msg != '':
+                return jsonify(success=False,data=err_msg)
+
+            row_name = r['row_name']
+            row_id = Generate_row_id(new_lab_id, row_name)
+            db_session.add(schema.Lab_rows(lab_id=new_lab_id,
+                                           row_id=row_id, row_name=row_name,
+                                           row_desc=r['row_desc'],
+                                           row_order=r['row_order'],
+                                           value_type=r['value_type'],
+                                           value_range=r['value_range'],
+                                           value_candidates=r['value_candidates']))
+        db_session.add(schema.Lab_info(lab_id=new_lab_id, lab_name=lab_name,
+                                       class_name=class_name, prof_name=prof_name,
+                                       lab_desc=lab_desc, lab_status='Activated'))
+
+        db_session.commit()
+        # return success to the ajax call from flask
+        return jsonify(success=True, data=jsonData)
+    except Exception:     
+        db_session.rollback()
+        return jsonify(success=False, data='The data format is not consistent with the database')
 
 
 @app.route('/_admin_duplicate_lab', methods=['POST'])
 def _admin_duplicate_lab():
     jsonData = request.get_json()
+    err_msg = Check_existence(request.form,'lab_id')        
+    if err_msg != '':
+        return jsonify(success=False,data=err_msg)
+
     old_lab_id = jsonData['lab_id']
     db_session = db.get_session()
 
-    # Test the existence of the copies of this lab
-    i = 1
-    while True:
-        copy_existence = db_session.query(schema.Lab_info).filter(
-            schema.Lab_info.lab_id == 'copy'+str(i)+'_'+old_lab_id).count()
-        if copy_existence == 0:
-            new_lab_id = 'copy'+str(i)+'_'+old_lab_id
+    try:
+        # Test the existence of the copies of this lab
+        i = 1
+        while True:
+            copy_existence = db_session.query(schema.Lab_info).filter(
+                schema.Lab_info.lab_id == 'copy'+str(i)+'_'+old_lab_id).count()
+            if copy_existence == 0:
+                new_lab_id = 'copy'+str(i)+'_'+old_lab_id
 
-            query_rows_to_be_duplicated = db_session.query(
-                schema.Lab_rows).filter(schema.Lab_rows.lab_id == old_lab_id)
+                query_rows_to_be_duplicated = db_session.query(
+                    schema.Lab_rows).filter(schema.Lab_rows.lab_id == old_lab_id)
 
 
-            old_lab = db_session.query(schema.Lab_info).filter(
-                schema.Lab_info.lab_id == old_lab_id).one()
+                old_lab = db_session.query(schema.Lab_info).filter(
+                    schema.Lab_info.lab_id == old_lab_id).one()
 
-            new_lab = schema.Lab_info(
-                lab_id=new_lab_id, lab_name='copy'+str(i)+'_'+old_lab.lab_name,
-                class_name=old_lab.class_name, prof_name=old_lab.prof_name,
-                lab_desc=old_lab.lab_desc, lab_status=old_lab.lab_status)
+                new_lab = schema.Lab_info(
+                    lab_id=new_lab_id, lab_name='copy'+str(i)+'_'+old_lab.lab_name,
+                    class_name=old_lab.class_name, prof_name=old_lab.prof_name,
+                    lab_desc=old_lab.lab_desc, lab_status=old_lab.lab_status)
 
-            new_lab_rows = []
-            for r in old_lab.lab_rows:
-                row_name = r.row_name
-                row_id = Generate_row_id(new_lab_id, row_name)
-                new_lab_rows.append(schema.Lab_rows(
-                    lab_id=new_lab_id, row_id=row_id, row_name=row_name,
-                    row_desc=r.row_desc, row_order=r.row_order,
-                    value_type=r.value_type, value_range=r.value_range,
-                    value_candidates=r.value_candidates))
+                new_lab_rows = []
+                for r in old_lab.lab_rows:
+                    row_name = r.row_name
+                    row_id = Generate_row_id(new_lab_id, row_name)
+                    new_lab_rows.append(schema.Lab_rows(
+                        lab_id=new_lab_id, row_id=row_id, row_name=row_name,
+                        row_desc=r.row_desc, row_order=r.row_order,
+                        value_type=r.value_type, value_range=r.value_range,
+                        value_candidates=r.value_candidates))
 
-            new_lab.lab_rows = new_lab_rows
-            db_session.add(new_lab)
-            db_session.commit()
-            break
-        i += 1
-    # return success to the ajax call from flask
-    return jsonify(success=True, data=jsonData)
+                new_lab.lab_rows = new_lab_rows
+                db_session.add(new_lab)
+                db_session.commit()
+                break
+            i += 1
+        # return success to the ajax call from flask
+        return jsonify(success=True, data=jsonData)
+
+    except Exception:     
+        db_session.rollback()
+        return jsonify(success=False, data='The data format is not consistent with the database')
 
 
 @app.route('/_admin_delete_lab', methods=['POST'])
 def _admin_delete_lab():
     jsonData = request.get_json()
+    err_msg = Check_existence(request.form,'lab_id')        
+    if err_msg != '':
+        return jsonify(success=False,data=err_msg)
+
     lab_id = jsonData['lab_id']
     db_session = db.get_session()
 
-    query_info_to_be_deleted = db_session.query(schema.Lab_info).filter(
-        schema.Lab_info.lab_id == lab_id)
-    query_rows_to_be_deleted = db_session.query(schema.Lab_rows).filter(
-        schema.Lab_rows.lab_id == lab_id)
+    try: 
+        query_info_to_be_deleted = db_session.query(schema.Lab_info).filter(
+            schema.Lab_info.lab_id == lab_id)
+        query_rows_to_be_deleted = db_session.query(schema.Lab_rows).filter(
+            schema.Lab_rows.lab_id == lab_id)
 
-    for r in query_info_to_be_deleted:
-        db_session.delete(r)
-    for r in query_rows_to_be_deleted:
-        db_session.delete(r)
-    db_session.commit()
+        for r in query_info_to_be_deleted:
+            db_session.delete(r)
+        for r in query_rows_to_be_deleted:
+            db_session.delete(r)
+        db_session.commit()
 
-    # return success to the ajax call from flask
-    return jsonify(success=True, data=jsonData)
+        # return success to the ajax call from flask
+        return jsonify(success=True, data=jsonData)
+
+    except Exception:     
+        db_session.rollback()
+        return jsonify(success=False, data='The data format is not consistent with the database')
 
 
 @app.route('/_admin_change_status/<new_status>', methods=['POST'])
 def _admin_status_make_download_only(new_status):
     jsonData = request.get_json()
+    err_msg = Check_existence(request.form,'lab_id')        
+    if err_msg != '':
+        return jsonify(success=False,data=err_msg)
+
     lab_id = jsonData['lab_id']
     db_session = db.get_session()
 
-    # Test the existence of the copies of this lab
-    query_status_to_be_changed = db_session.query(schema.Lab_info).filter(
-        schema.Lab_info.lab_id == lab_id)
+    try:
+        # Test the existence of the copies of this lab
+        query_status_to_be_changed = db_session.query(schema.Lab_info).filter(
+            schema.Lab_info.lab_id == lab_id)
 
-    for r in query_status_to_be_changed:
-        r.lab_status = new_status
-    db_session.commit()
+        for r in query_status_to_be_changed:
+            r.lab_status = new_status
+        db_session.commit()
 
-    # return success to the ajax call from flask
-    return jsonify(success=True, data=jsonData)
+        # return success to the ajax call from flask
+        return jsonify(success=True, data=jsonData)
+
+    except Exception:     
+        db_session.rollback()
+        return jsonify(success=False, data='The data format is not consistent with the database')
 
 
 # select labs to review/edit data
@@ -452,6 +550,7 @@ def admin_edit_data(lab_ids):
                 'row_id': data['row_id'],
                 'data_id': data['data_id'],
                 'row_data': data['row_data']})
+
     return render_template('admin_edit_data.html',
                            lab_data=lab_data,
                            student_data=lab_data_by_student,
@@ -463,45 +562,70 @@ def admin_edit_data(lab_ids):
 @app.route('/_admin_change_data', methods=['POST'])
 def _admin_change_data():
     jsonData = request.get_json()
+    err_msg = Check_existence(jsonData,'old_data_ids_list','new_data_list')        
+    if err_msg != '':
+        return jsonify(success=False,data=err_msg)
+
     old_data_ids_list = jsonData['old_data_ids_list']
     new_data_list = jsonData['new_data_list']
     db_session = db.get_session()
-    # delete all the old data by old data_id
-    for data_id in old_data_ids_list:
-        query_data = db_session.query(schema.Lab_data).filter(
-            schema.Lab_data.data_id == data_id)
-        for r in query_data:
-            db_session.delete(r)
 
-    # add all the new data
-    for d in new_data_list:
-        print(schema.Lab_data(data_id=d['data_id'],
-                              student_name=d['student_name'],
-                              row_data=d['row_data']))
-        db_session.add(schema.Lab_data(row_id=d['row_id'],
-                                       data_id=d['data_id'],
-                                       student_name=d['student_name'],
-                                       row_data=d['row_data']))
+    try:
+        # delete all the old data by old data_id
+        for data_id in old_data_ids_list:
+            query_data = db_session.query(schema.Lab_data).filter(
+                schema.Lab_data.data_id == data_id)
+            for r in query_data:
+                db_session.delete(r)
 
-    db_session.commit()
-    # return success to the ajax call from flask
-    return jsonify(success=True, data=jsonData)
+        # add all the new data
+        for d in new_data_list:
+            err_msg = Check_existence(d,'data_id','student_name','row_data','row_id','data_id')        
+            if err_msg != '':
+                return jsonify(success=False,data=err_msg)
 
+            db_session.add(schema.Lab_data(row_id=d['row_id'],
+                                           data_id=d['data_id'],
+                                           student_name=d['student_name'],
+                                           row_data=d['row_data']))
+
+        db_session.commit()
+        # return success to the ajax call from flask
+        return jsonify(success=True, data=jsonData)
+
+    except Exception:     
+        db_session.rollback()
+        return jsonify(success=False, data='The data format is not consistent with the database')
 
 # delete data(backend)
 @app.route('/_admin_delete_data', methods=['POST'])
 def _admin_delete_data():
     jsonData = request.get_json()
+    err_msg = Check_existence(jsonData,'data_ids_to_be_removed')        
+    if err_msg != '':
+        return jsonify(success=False,data=err_msg)
+
     data_ids_to_be_removed = jsonData['data_ids_to_be_removed']
-    db_session = db.get_session()
-    for data_id in data_ids_to_be_removed:
-        query_data = db_session.query(schema.Lab_data).filter(
-            schema.Lab_data.data_id == data_id)
-        for r in query_data:
-            db_session.delete(r)
-    db_session.commit()
-    # return success to the ajax call from flask
-    return jsonify(success=True, data=jsonData)
+
+    if not(type(data_ids_to_be_removed)=='list'):
+        err_msg = 'the value of the key data_ids_to_be_removed should be a list'
+        return jsonify(success=False,data=err_msg)
+
+    try:
+        db_session = db.get_session()
+        for data_id in data_ids_to_be_removed:
+            query_data = db_session.query(schema.Lab_data).filter(
+                schema.Lab_data.data_id == data_id)
+            for r in query_data:
+                db_session.delete(r)
+        db_session.commit()
+        # return success to the ajax call from flask
+        return jsonify(success=True, data=jsonData)
+
+    except Exception:     
+        db_session.rollback()
+        return jsonify(success=False, data='The data format is not consistent with the database')
+
 
 
 # format and download data

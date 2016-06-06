@@ -1,10 +1,12 @@
 # lemur
 Bio data collector
 ##Part-1 TBD
-1.Connect the current webpages with reed login webpage and add power to different accounts/Design a manage user page<br>
-2.Better UI design<br>
-3.Test the program<br> 
-4.Finish writeup and wrap up the app<br>
+1.Refactor code
+2.Network security
+3.Connect the current webpages with reed login webpage and add power to different accounts/Design a manage user page<br>
+4.Better UI design<br>
+5.Test the program<br> 
+6.Finish writeup and wrap up the app<br>
 
 ##Part0 Directory Structure
 ```

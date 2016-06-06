@@ -3,9 +3,20 @@
 def Generate_lab_id(lab_name,class_name,prof_name):
     return lab_name+'_'+class_name+'_'+prof_name
 
+
 # Generate a row's id according to lab_id, row_name
 def Generate_row_id(lab_id,row_name):
     return lab_id+':'+row_name
+
+
 # Generate a data's id according to row_id, student_name
 def Generate_data_id(row_id,student_name):
     return row_id+':'+student_name
+
+# Check the existence of args in a form
+def Check_existence(form, *args):
+	err_msg = ''
+	for a in args:
+		if not(args in form):
+			err_msg += 'You must send a JSON object '+a+'\n'
+	return err_msg  
