@@ -1,12 +1,10 @@
 # lemur
 Bio data collector
 ##Part-1 TBD
-1.Connect the current webpages with reed login webpage and add power to different accounts<br>
-2.enable the admin to sort data in review/edit data part<br> 
-3.Better UI design<br>
-4.Design a manage user page<br>
-5.Test the program<br> 
-6.Finish writeup and wrap up the app<br>
+1.Connect the current webpages with reed login webpage and add power to different accounts/Design a manage user page<br>
+2.Better UI design<br>
+3.Test the program<br> 
+4.Finish writeup and wrap up the app<br>
 
 ##Part0 Directory Structure
 ```
@@ -39,6 +37,7 @@ Bio data collector
                                 |--bootstrap.min.js
                                 |--jquery-2.1.3.js
                                 |--npm.js
+                                |--sortable.js
                         |__ /fonts
                         |__ /css
                                 |--bootstrap-select.css   

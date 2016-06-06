@@ -9,6 +9,7 @@
     <script src="/static/js/bootstrap.js"></script>
     <script src="/static/js/bootstrap-select.js"></script>
     <script src="/static/jquery-ui-1.11.4.custom/jquery-ui.min.js"></script>
+    <script src="/static/js/sorttable.js"></script>
     
     {% block head %}
         <meta charset="UTF-8">
@@ -22,6 +23,10 @@
         }
         .invisible, .temporary_message {
             display: none;
+        }
+        /*Show a symbol in a sortable table's column headers to indicate that the table is sortable */
+        table.sortable th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_nosort):after { 
+            content: " \25B4\25BE" 
         }
         .tg  {border-collapse:collapse;border-spacing:0;}
         .tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}

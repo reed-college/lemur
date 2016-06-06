@@ -7,11 +7,6 @@ from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
-
-class IdPrimaryKeyMixin(object):
-    id = Column(String(128), primary_key=True)
-
-
 class DateTimeMixin(object):
     created_on = Column(DateTime, default=datetime.now)
     updated_on = Column(DateTime, default=datetime.now, onupdate=datetime.now)

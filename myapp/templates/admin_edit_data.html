@@ -87,7 +87,7 @@
 {% else %}
 	<p> 1.Delete will be saved automatically.<br>
 		2.To download data, please click save all first.<br>
-	<table class="table" id="{{lab_ids}}" name={{lab_data|length}}>
+	<table class="table sortable" id="{{lab_ids}}" name={{lab_data|length}}>
 	    <thead>
 	    	<tr>
 		      <th>Index</th>
@@ -101,7 +101,7 @@
 	    <tbody>
 	    	{% for s in student_data %}
 		    	<tr id={{loop.index}}>
-		      		<th>{{loop.index}}</th>
+		      		<td>{{loop.index}}</th>
 		      		<td><input class="student_name" value={{s["student_name"]}}></td>
 		      		<td>{{s["lab_id"]}}</td>
 				    {%  for i in range(lab_data|length)  %}

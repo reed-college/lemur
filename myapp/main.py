@@ -22,6 +22,7 @@ def bootstrap():
     return "Bootsrapped!"
 
 
+# TBD: Fix it
 # Clean all the rows in Lab_rows and Lab_desc
 @app.route('/clean_database', methods=['GET'])
 def clean_database():
@@ -48,6 +49,7 @@ def student_home():
     return render_template('student_home.html')
 
 
+# TBD: make students only see available labs
 # A student can select among all current available labs
 @app.route('/student_enter_data')
 def student_enter_data():
@@ -75,7 +77,8 @@ def student_data_entry(lab_id):
 
     # Convert the objects to dictionaries to make them JSON serializable
     for row in query_rows_info:
-        rows_info.append({'row_name': row.row_name, 'row_desc': row.row_desc,
+        rows_info.append({'row_name': row.row_name, 
+                          'row_desc': row.row_desc,
                           'value_type': row.value_type,
                           'value_range': row.value_range,
                           'value_candidates': row.value_candidates})
@@ -100,7 +103,8 @@ def _student_receive_data():
             row_name = r['row_name']
             row_id = Generate_row_id(lab_id, row_name)
             data_id = Generate_data_id(row_id, student_name)
-            db_session.add(schema.Lab_data(row_id=row_id, data_id=data_id,
+            db_session.add(schema.Lab_data(row_id=row_id,
+                                           data_id=data_id,
                                            student_name=student_name,
                                            row_data=r['row_data']))
     db_session.commit()
