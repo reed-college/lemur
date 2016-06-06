@@ -92,15 +92,16 @@
             }
             else if (value_type=='Number' && value_range.length>0){
                 value_range_arr = value_range.split('-');
-                var min = value_range_arr[0];
-                var max = value_range_arr[1];
+                var min = parseInt(value_range_arr[0]);
+                var max = parseInt(value_range_arr[1]);
+                var row_data = parseInt(row_data);
                 if (!isNumeric(row_data)){
                     wrong_input = true;
                     err_msg = row_data+' is not a number.';
                 }
                 else if (row_data<min || row_data>max){
                     wrong_input = true;
-                    err_msg = row_data+' is not in the value value candidates: '+value_candidates;
+                    err_msg = row_data+' is not in the value range: '+value_range;
                 }
             }
             return {'wrong_input':wrong_input,'err_msg':err_msg};
