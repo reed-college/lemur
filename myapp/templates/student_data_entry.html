@@ -12,7 +12,11 @@
 		var num_of_entry = 1;
 
 		$(document).ready(function(){
+			//empty_entry checks whether there is any empty entry left
+			//wrong_input checks whether all the input are valid
+			var empty_entry = false;
 			var wrong_input = false;
+			var err_msgs = [];
 			//The number of rows besides student name
 			var remaining_rows = document.getElementsByClassName('Customized_Rows');
 		    
@@ -20,11 +24,17 @@
 		    $('button[name=submit]').click(function(){		
 				//Pack data into a 2D array
 				var student_name = document.getElementsByClassName('student_name');
-					    
+
 				for (var j=0; j<num_of_entry; j++){
 					var current_student_name = $(student_name[j]).val();
 					var data_arr = [];
 					var lab_response = document.getElementsByClassName('lab_response');
+
+					//Check if the student_name is empty
+					if (current_student_name==''){
+						var err_msg = 'Student Name in data entry'+num_of_entry.toString()+' should not be empty';
+				        err_msgs.push(err_msg);
+					}
 					
 					//Find all the customized rows of the current entry
 					for (var i = j; i < lab_response.length; i+=num_of_entry) {
@@ -37,20 +47,26 @@
 			                var value_type = $(lab_response[i]).closest('tr').data('valuetype');
 			                var value_range = $(lab_response[i]).closest('tr').data('valuerange');
 			                var value_candidates =$(lab_response[i]).closest('tr').data('valuecandidates');
-
+			                if (row_data==''){
+			                	empty_entry = true;
+			                	var err_msg = row_name+' in data entry'+num_of_entry.toString()+' should not be empty';
+			                	err_msgs.push(err_msg);
+			                }
 			                //validate the input data
 			                result = Check_input_student(row_data,value_type,value_range,value_candidates);
-			                wrong_input = result.wrong_input;
-			                err_msg = result.err_msg;
-			                if (wrong_input==true){ break;}
-
+			                if (result.wrong_input){
+			                	wrong_input = true;
+			                	err_msgs.push(result.err_msg);
+			                }
+			                
 							new_row_data = new Row_data(lab_id,row_name,row_data);
 	                        data_arr.push(new_row_data);
 					}
 					data_arr_2D.push({'student_name':current_student_name,'rows_info':data_arr});
 				}
-				if (wrong_input){
-					alert(err_msg);
+				if (wrong_input || empty_entry){
+
+					alert(err_msgs.join("\n"));
 				}
 				else {
 				    //Communicate the lab data with python via Ajax 
