@@ -1,0 +1,57 @@
+{% extends "student_home.html" %}
+{% block head %}
+	<meta charset="UTF-8">
+	<title>Choose a lab</title>
+	<script>
+		$(document).ready(function(){
+		    $('button[name=go_to_lab]').click(function(){
+		    	var lab_id = '';
+		    	var radios = document.getElementsByTagName('input')
+		    	for (var i = 0; i < radios.length; i++) {
+				    if (radios[i].type == 'radio' && radios[i].checked) {
+				        lab_name = $(radios[i]).data('labname');   
+				        class_name = $(radios[i]).data('classname');  
+				        prof_name = $(radios[i]).data('profname');
+				        lab_id = Generate_lab_id(lab_name,class_name,prof_name);
+				        break;
+				    }
+				}
+				if (lab_id==''){
+                    $('#error_message_no_lab_choose').show().delay(1000).fadeOut();
+				}
+				else{
+					window.location.replace('/student_data_entry/'+lab_id);
+				}
+		    });
+		});
+	</script>
+{% endblock %}
+
+{% block content %}
+	{% if (lab_list|length)==0 %}
+		No lab exists<br>
+	{% else %}
+		<table class="tg">
+			<tr>
+			    <th class="tg-yw4l">Index</th>
+			    <th class="tg-yw4l">Lab name</th>
+			    <th class="tg-yw4l">Class name</th>
+			    <th class="tg-yw4l">Professor name</th>
+			    <th class="tg-yw4l">Choose</th>
+			</tr>
+			{% for i in range(lab_list|length) %}
+			<tr>
+			    <th class="tg-yw4l">{{ loop.index }}</th>
+			    <th class="tg-yw4l">{{ lab_list[i].lab_name }}</th>
+			    <th class="tg-yw4l">{{ lab_list[i].class_name }}</th>
+			    <th class="tg-yw4l">{{ lab_list[i].prof_name }}</th>
+			    <th class="tg-yw4l"><input type="radio" name="lab_name" data-labname="{{lab_list[i].lab_name}}"  data-classname="{{lab_list[i].class_name }}" data-profname="{{lab_list[i].prof_name}}"> </th>
+			</tr>
+			{% endfor %}
+		</table>
+	{% endif %}
+	<br>
+	<button name="go_to_lab">Go to lab</button>
+	<div class="temporary_message" id="error_message_no_lab_choose">You need to select one lab</div>
+
+{% endblock %}

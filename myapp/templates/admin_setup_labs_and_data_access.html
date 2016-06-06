@@ -1,0 +1,181 @@
+{% extends "admin_home.html" %}
+{% block head %}
+<meta charset="UTF-8">
+<title>Set up labs and data access</title>
+<script>
+	$(document).ready(function(){
+		//Modify an existing lab
+		$('.modify_lab').click(function(){
+			var lab_name = $(this).data('labname');
+			var class_name = $(this).data('classname');
+			var prof_name = $(this).data('profname');
+			var lab_id = Generate_lab_id(lab_name,class_name,prof_name);
+			window.location.replace('/admin_modify_lab/'+lab_id);	    
+		});
+
+		//Duplicate a lab
+		$('.duplicate_lab').click(function(){
+			var lab_name = $(this).data('labname');
+			var class_name = $(this).data('classname');
+			var prof_name = $(this).data('profname');
+			var lab_id = Generate_lab_id(lab_name,class_name,prof_name);
+		    //Communicate the name of the lab to be duplicated with python via Ajax 
+			$.ajax({
+			  type: 'POST',
+			  contentType: 'application/json',
+			  dataType: 'json',
+			  url: 'http://127.0.0.1:5000/_admin_duplicate_lab',
+			  data: JSON.stringify({'lab_id':lab_id}),
+			  success: function(result){
+   					  alert('Duplicate successfully');
+   					},
+			  error : function(result){
+   					  alert('Fail to duplicate');
+					}
+		    });
+		    location.reload();
+		});
+
+		//Delete a lab
+		$('.delete_lab').click(function(){
+			var lab_name = $(this).data('labname');
+			var class_name = $(this).data('classname');
+			var prof_name = $(this).data('profname');
+			var lab_id = Generate_lab_id(lab_name,class_name,prof_name);
+		    //Communicate the name of the lab to be duplicated with python via Ajax 
+			$.ajax({
+			  type: 'POST',
+			  contentType: 'application/json',
+			  dataType: 'json',
+			  url: 'http://127.0.0.1:5000/_admin_delete_lab',
+			  data: JSON.stringify({'lab_id':lab_id}),
+			  success: function(result){
+   					  alert('Delete successfully');
+   					},
+			  error : function(result){
+   					  alert('Fail to delete');
+					}
+		    });
+		    $(this).closest('tr').remove();
+		    location.reload();
+		    
+		});
+
+		//Change a lab's status
+		$('.make_download_only').add($('.activate_lab')).add($('.deactivate_lab')).click(function(){
+			var lab_name = $(this).data('labname');
+			var class_name = $(this).data('classname');
+			var prof_name = $(this).data('profname');
+			var lab_id = Generate_lab_id(lab_name,class_name,prof_name);
+
+			var status_class_name = $(this).attr('class')
+			var new_status = 'Activated';
+			if (status_class_name=='make_download_only'){
+				new_status = 'Downloaded';
+			}
+			else if (status_class_name=='activate_lab'){
+				new_status = 'Activated';
+			}
+			else if (status_class_name=='deactivate_lab'){
+				new_status = 'Unactivated';
+			}
+
+		    //Communicate the name of the lab to be duplicated with python via Ajax 
+			$.ajax({
+			  type: 'POST',
+			  contentType: 'application/json',
+			  dataType: 'json',
+			  url: 'http://127.0.0.1:5000/_admin_change_status/'+new_status,
+			  data: JSON.stringify({'lab_id':lab_id}),
+			  success: function(result){
+   					  alert('Change status successfully');
+   					},
+			  error : function(result){
+   					  alert('Fail to change lab status');
+					}
+		    });
+		    location.reload();	 
+
+		});
+
+	});
+</script>
+{% endblock %}
+
+
+{% block content %}
+	<div> <h1> Lab Information </h> </div>
+	<br>Enter a new lab:<br>
+	<form method=post action="/admin_setup_labs_and_data_access">
+		<label>Lab Name*: </label>
+		<input type="text" name="lab_name" required/><br>
+		<label>Class Name*: </label>
+		<input type="text" name="class_name" required/><br>
+		<label>Prof Name*: </label>
+		<input type="text" name="prof_name" required/><br>
+		<label>Lab Instruction: </label> <br>
+		<textarea class="longInput" cols="30" rows="5" name="lab_desc" ></textarea>	<br>
+		<label>Number of Lab Questions*: </label>
+		<input type="number" name="lab_questions" min="1" step="1" required/> <br>
+		<input name="submit_labinfo" type="submit"></input>
+		<input name="reset_labinfo" type="reset"></input>
+
+	</form>
+
+{% if current_labs.activated|length > 0 %}
+<div class="title"> <h1> Labs for Data Collection Only </h1> </div>
+{% endif %}
+<table class="tg activated">
+{% for lab in current_labs.activated %}		
+		<tr>
+		    <th class="tg-yw4l">{{loop.index}}</th>
+		    <th class="tg-yw4l" name='lab_name' >{{lab.lab_name}}</th>
+		    <th class="tg-yw4l" name='class_name' >{{lab.class_name}}</th>
+		    <th class="tg-yw4l" name='prof_name' >{{lab.prof_name}}</th>
+		    <th class="tg-yw4l"><button class="modify_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}"> Modify Lab and Questions</button></th>
+		    <th class="tg-yw4l"><button class="duplicate_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}"> Duplicate Lab</button></th>
+		    <th class="tg-yw4l"><button class="delete_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}" >Delete Lab</button></th>
+		    <th class="tg-yw4l"><button class="make_download_only" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">Make Download Only</button></th>
+		</tr>	
+{% endfor %}
+</table>
+
+{% if current_labs.downloaded|length > 0 %}
+<div class="title"> <h1> Labs for Download Only </h1> </div>
+{% endif %}
+<table class="tg downloaded">
+{% for lab in current_labs.downloaded %}
+		<tr>
+		    <th class="tg-yw4l">{{loop.index}}</th>
+		    <th class="tg-yw4l" name='lab_name' >{{lab.lab_name}}</th>
+		    <th class="tg-yw4l" name='class_name' >{{lab.class_name}}</th>
+		    <th class="tg-yw4l" name='prof_name' >{{lab.prof_name}}</th>
+		    <th class="tg-yw4l"><button class="modify_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">Modify Lab and Questions</button></th>
+		    <th class="tg-yw4l"><button class="duplicate_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">Duplicate Lab</button></th>
+		    <th class="tg-yw4l"><button class="delete_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">Delete Lab</button></th>
+		    <th class="tg-yw4l"><button class="activate_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">Activate Data Collection</button></th>
+		    <th class="tg-yw4l"><button class="deactivate_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">Make Unavailable and Clear</button></th>
+		</tr>
+{% endfor %}
+</table>
+
+{% if current_labs.unactivated|length > 0 %}
+<div class="title"> <h1> Unavailable Labs </h1> </div>
+{% endif%}
+<table class="tg unactivated">
+{% for lab in current_labs.unactivated %}
+		<tr>
+		    <th class="tg-yw4l">{{loop.index}}</th>
+		    <th class="tg-yw4l" name='lab_name' >{{lab.lab_name}}</th>
+		    <th class="tg-yw4l" name='class_name' >{{lab.class_name}}</th>
+		    <th class="tg-yw4l" name='prof_name' >{{lab.prof_name}}</th>
+		    <th class="tg-yw4l"><button class="modify_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">Modify Lab and Questions</button></th>
+		    <th class="tg-yw4l"><button class="duplicate_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">Duplicate Lab</button></th>
+		    <th class="tg-yw4l"><button class="delete_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">Delete Lab</button></th>
+		    <th class="tg-yw4l"><button class="activate_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">Activate Lab</button></th>
+		</tr>
+{% endfor %}
+</table>
+
+
+{% endblock %}

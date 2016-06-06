@@ -1,0 +1,121 @@
+{% extends "admin_home.html" %}
+{% block head %}
+<meta charset="UTF-8">
+<title>Set up labs</title>
+
+<script>
+	//Create a class to store the info of each row
+	function Row_info(row_name,row_desc,row_order,value_type,value_range,value_candidates) {
+		this.row_name = row_name;
+	    this.row_desc = row_desc;
+	    this.row_order = row_order;
+	    this.value_type = value_type;
+	    this.value_range = value_range;
+	    this.value_candidates = value_candidates;
+	    
+	} 
+	var row_info_arr = [];
+	$(document).ready(function(){
+		//Add a new row
+		$('button[name=add_a_row]').click(function(){
+			var row_num = document.getElementsByClassName('row');
+		    var new_index_str = (row_num.length+1).toString();
+			$('div[name=form_body]').append('<span class="row" name='+new_index_str+'><h4>Question'+new_index_str+':</h4><label>Name*: </label><input type="text" name="row_name" required/><br><label>Info: </label> <br><textarea class="longInput" cols="30" rows="5" name="row_desc"></textarea><br><label>Value Type*: </label><input type="text" name="value_type" required/><br><label>Value Range: </label><input type="text" name="value_range"/><label>Value Candidates: </label><input type="text" name="value_candidates"/><br><label>Order Number: </label><input type="text" name="row_order" value='+new_index_str+' min="1" step="1"required> <br><br></span>');	
+		});
+		//Delete an existing row by specifying the question number
+		$('button[name=delete_a_row]').click(function(){
+			var row_name_deleted = $('input[name=question_num_deleted]').val();
+			$('.row[name='+row_name_deleted+']').remove();
+		});
+		//Submit labinfo
+		$('button[name=submit_labinfo]').click(function(){
+			// Flag used to check the correctness of the input
+			var wrong_input = false;
+
+			//Collect all the input
+			var lab_name = $('input[name=lab_name]').val();
+			var class_name = $('input[name=class_name]').val();
+			var prof_name = $('input[name=prof_name]').val();
+			var lab_desc = $('textarea[name=lab_desc]').val();
+			var row_num = document.getElementsByClassName('row');
+			for (var i=0;i<row_num.length;i++){
+				var row_name = $($(row_num[i]).find('input[name=row_name]')).val();
+				var row_desc = $($(row_num[i]).find('textarea[name=row_desc]')).val();
+				var row_order = $($(row_num[i]).find('input[name=row_order]')).val();
+				var value_type = $($(row_num[i]).find('input[name=value_type]')).val();
+				var value_range = $($(row_num[i]).find('input[name=value_range]')).val();
+				var value_candidates = $($(row_num[i]).find('input[name=value_candidates]')).val();	
+
+				//Check the correctness of the current input(Check_input is in layout.html) 
+				if (Check_input(value_type,value_range,value_candidates)){wrong_input=true; break;}
+
+				new_row_info = new Row_info(row_name,row_desc,row_order,value_type,value_range,value_candidates);
+				row_info_arr.push(new_row_info);
+			}
+			if (wrong_input==false){
+				//Communicate the lab data with python via Ajax 
+				$.ajax({
+				  type: 'POST',
+				  contentType: 'application/json',
+				  dataType: 'json',
+				  url: 'http://127.0.0.1:5000/_admin_receive_setup_labs_data',
+				  data: JSON.stringify({'lab_name':lab_name,'class_name':class_name,'prof_name':prof_name,'lab_desc':lab_desc,'row_data':row_info_arr}),
+				  success: function(result){
+	   					  alert('Submit successfully');
+	   					},
+				  error : function(result){
+	   					  alert('Fail to submit');
+						}
+			    });
+			    //Redirect to the main page of setup lab and data access
+			    window.location.replace('/admin_setup_labs_and_data_access');
+			}
+		});
+
+	});
+
+</script>
+
+{% endblock %}
+{% block content %}
+Guide:<br>
+value range format example: 1-15<br>
+value candidate format example: N,C<br>
+
+<form id=labinfo_form>
+	<div name="form_body">
+		<label>Lab Name*: </label>
+		<input type="text" name="lab_name" value="{{labinfo.lab_name}}"/><br>
+		<label>Class Name*: </label> <br>
+		<input type="text" name="class_name" value="{{labinfo.class_name}}"/><br>
+		<label>Professor Name*: </label> <br>
+		<input type="text" name="prof_name" value="{{labinfo.prof_name}}"/><br>
+		<label>Lab Instruction: </label> <br>
+		<textarea name="lab_desc" class="longInput" cols="30" rows="5" >{{labinfo.lab_desc}}</textarea>	<br>
+		{% for j in range(labinfo.lab_questions|int) %}
+	    <span class="row" name="{{j+1}}">
+			<h4>Question{{j+1}}:</h4>
+			<label>Name*: </label>
+			<input type="text" name="row_name" required/><br>
+			<label>Info: </label> <br>
+			<textarea class="longInput" cols="30" rows="5" name="row_desc"></textarea>	<br>
+			<label>Value Type*: </label>
+			<input type="text" name="value_type" required/><br>
+			<label>Value Range: </label>
+			<input type="text" name="value_range"/>
+			<label>Value Candidates: </label>
+			<input type="text" name="value_candidates"/><br>	
+			<label>Order Number: </label>
+			<input type="text" name="row_order" value={{j+1}} min="1" step="1"required> <br><br>
+		</span>
+		{% endfor %}
+	</div>
+	<br>	
+	<input name="reset_labinfo" type="reset"></input>
+</form>
+	<button name="submit_labinfo">Submit</button>
+	<button name="add_a_row">Add a row</button><br>
+	<button name="delete_a_row">Delete a row</button>(Question Num)<input type="number" min="1" step="1" name="question_num_deleted"><br>
+	<button><a href="/admin_setup_labs_and_data_access">Return</a></button>
+{% endblock %}
+

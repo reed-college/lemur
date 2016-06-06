@@ -1,0 +1,65 @@
+{% extends "admin_home.html" %}
+{% block head %}
+    <meta charset="UTF-8">
+    <title>Select lab for data</title>
+	<script>
+		$(document).ready(function(){
+		    $('button[name=go_to_lab]').click(function(){
+		    	var lab_ids = [];
+		    	var checkboxes = document.getElementsByTagName('input')
+		    	for (var i = 0; i < checkboxes.length; i++) {
+				    if (checkboxes[i].type == 'checkbox' && checkboxes[i].checked) {
+				        lab_ids.push($(checkboxes[i]).data('labid'));   
+				    }
+				}
+				if (lab_ids.length==0){
+                    $('#error_message_no_lab_choose').show().delay(1000).fadeOut();
+				}
+				else{
+					//Redirect to the page that shows the data of the selected labs
+					window.location.replace('/admin_edit_data/'+JSON.stringify(lab_ids));
+				}
+
+		    });
+		});
+	</script>
+{% endblock %}
+
+{% block content %}
+
+	{% if (lab_list|length)==0 %}
+		No lab exists<br>
+	{% else %}
+		<table class="table">
+			<thead>
+			    <tr>
+				    <th class="tg-yw4l">Lab Index</th>
+				    <th class="tg-yw4l">Lab Name</th>
+				    <th class="tg-yw4l">Class Name</th>
+				    <th class="tg-yw4l">Professor Name</th>
+				    <th class="tg-yw4l">Number of data available</th>	
+				    <th class="tg-yw4l">Choose</th>  
+	    		</tr>
+	  		</thead>
+	  		<tbody>
+			{% for lab in lab_list %}
+				<tr>
+				    <th class="tg-yw4l">{{loop.index}}</th>
+				    <td class="tg-yw4l">{{lab.lab_name}}</td>
+				    <td class="tg-yw4l">{{lab.class_name}}</td>
+				    <td class="tg-yw4l">{{lab.prof_name}}</td>
+				    <td class="tg-yw4l">{{lab.data_num}}</td>
+				    <td class="tg-yw4l"><input type="checkbox" data-labid="{{lab.lab_id}}"></td>
+				</tr>
+			{% endfor %}
+			</tbody>	
+		</table>
+		<br>
+		<button name="go_to_lab">Go to lab</button>
+		<div class="temporary_message" id="error_message_no_lab_choose">You need to select one lab</div>
+
+{% endif %}
+
+
+
+{% endblock %}
