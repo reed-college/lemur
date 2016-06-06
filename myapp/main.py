@@ -225,9 +225,12 @@ def admin_modify_lab(lab_id):
     # Sort the list of rows according to row_order
     sorted(rows_info, key=lambda row: row['row_order'])
 
-    labinfo = {'lab_id': lab_id, 'lab_name': lab_name,'class_name':class_name,'prof_name':prof_name,'lab_desc':lab_desc,
-    'rows_info':rows_info}
-    return render_template('admin_modify_lab.html',labinfo=labinfo)
+    labinfo = {'lab_id': lab_id, 'lab_name': lab_name,
+               'class_name': class_name,
+               'prof_name': prof_name, 'lab_desc': lab_desc,
+               'rows_info': rows_info}
+    return render_template('admin_modify_lab.html', labinfo=labinfo)
+
 
 # Delete the old lab and add the new lab
 @app.route('/_admin_modify_lab', methods=['POST'])
@@ -239,26 +242,36 @@ def _admin_modify_lab():
     lab_desc = jsonData['lab_desc']
     row_data = jsonData['row_data']
 
-    new_lab_id = Generate_lab_id(lab_name,class_name,prof_name)
+    new_lab_id = Generate_lab_id(lab_name, class_name, prof_name)
     old_lab_id = jsonData['old_lab_id']
 
     db_session = db.get_session()
-    query_info_to_be_deleted = db_session.query(schema.Lab_info).filter(schema.Lab_info.lab_id==old_lab_id)
-    query_rows_to_be_deleted = db_session.query(schema.Lab_rows).filter(schema.Lab_rows.lab_id==old_lab_id)
+    query_info_to_be_deleted = db_session.query(schema.Lab_info).filter(
+        schema.Lab_info.lab_id == old_lab_id)
+    query_rows_to_be_deleted = db_session.query(schema.Lab_rows).filter(
+        schema.Lab_rows.lab_id == old_lab_id)
 
     for r in query_info_to_be_deleted:
-        db_session.delete(r)   
+        db_session.delete(r)
     for r in query_rows_to_be_deleted:
         db_session.delete(r)
 
     for r in row_data:
         row_name = r['row_name']
-        row_id = Generate_row_id(new_lab_id,row_name)
-        db_session.add(schema.Lab_rows(lab_id=new_lab_id,row_id=row_id,row_name=row_name,row_desc=r['row_desc'],row_order=r['row_order'],value_type=r['value_type'],value_range=r['value_range'],value_candidates=r['value_candidates']))
-    db_session.add(schema.Lab_info(lab_id=new_lab_id,lab_name=lab_name,class_name=class_name,prof_name=prof_name,lab_desc=lab_desc,lab_status='Activated'))
-    
+        row_id = Generate_row_id(new_lab_id, row_name)
+        db_session.add(schema.Lab_rows(lab_id=new_lab_id,
+                                       row_id=row_id, row_name=row_name,
+                                       row_desc=r['row_desc'],
+                                       row_order=r['row_order'],
+                                       value_type=r['value_type'],
+                                       value_range=r['value_range'],
+                                       value_candidates=r['value_candidates']))
+    db_session.add(schema.Lab_info(lab_id=new_lab_id, lab_name=lab_name,
+                                   class_name=class_name, prof_name=prof_name,
+                                   lab_desc=lab_desc, lab_status='Activated'))
+
     db_session.commit()
-    # return success to the ajax call from flask 
+    # return success to the ajax call from flask
     return jsonify(success=True, data=jsonData)
 
 
@@ -267,32 +280,42 @@ def _admin_duplicate_lab():
     jsonData = request.get_json()
     old_lab_id = jsonData['lab_id']
     db_session = db.get_session()
-    
+
     # Test the existence of the copies of this lab
     i = 1
     while True:
-        copy_existence = db_session.query(schema.Lab_info).filter(schema.Lab_info.lab_id=='copy'+str(i)+'_'+old_lab_id).count()
-        if copy_existence==0:
+        copy_existence = db_session.query(schema.Lab_info).filter(
+            schema.Lab_info.lab_id == 'copy'+str(i)+'_'+old_lab_id).count()
+        if copy_existence == 0:
             new_lab_id = 'copy'+str(i)+'_'+old_lab_id
-            
-            query_rows_to_be_duplicated = db_session.query(schema.Lab_rows).filter(schema.Lab_rows.lab_id==old_lab_id)
-            
 
-            old_lab = db_session.query(schema.Lab_info).filter(schema.Lab_info.lab_id==old_lab_id).one()
+            query_rows_to_be_duplicated = db_session.query(
+                schema.Lab_rows).filter(schema.Lab_rows.lab_id == old_lab_id)
 
-            new_lab = schema.Lab_info(lab_id=new_lab_id,lab_name='copy'+str(i)+'_'+old_lab.lab_name,class_name=old_lab.class_name,prof_name=old_lab.prof_name,lab_desc=old_lab.lab_desc,lab_status=old_lab.lab_status)
-          
+
+            old_lab = db_session.query(schema.Lab_info).filter(
+                schema.Lab_info.lab_id == old_lab_id).one()
+
+            new_lab = schema.Lab_info(
+                lab_id=new_lab_id, lab_name='copy'+str(i)+'_'+old_lab.lab_name,
+                class_name=old_lab.class_name, prof_name=old_lab.prof_name,
+                lab_desc=old_lab.lab_desc, lab_status=old_lab.lab_status)
+
             new_lab_rows = []
             for r in old_lab.lab_rows:
                 row_name = r.row_name
-                row_id = Generate_row_id(new_lab_id,row_name)
-                new_lab_rows.append(schema.Lab_rows(lab_id=new_lab_id,row_id=row_id,row_name=row_name,row_desc=r.row_desc,row_order=r.row_order,value_type=r.value_type,value_range=r.value_range,value_candidates=r.value_candidates))
-            
+                row_id = Generate_row_id(new_lab_id, row_name)
+                new_lab_rows.append(schema.Lab_rows(
+                    lab_id=new_lab_id, row_id=row_id, row_name=row_name,
+                    row_desc=r.row_desc, row_order=r.row_order,
+                    value_type=r.value_type, value_range=r.value_range,
+                    value_candidates=r.value_candidates))
+
             new_lab.lab_rows = new_lab_rows
             db_session.add(new_lab)
             db_session.commit()
             break
-        i+=1
+        i += 1
     # return success to the ajax call from flask
     return jsonify(success=True, data=jsonData)
 
@@ -303,17 +326,20 @@ def _admin_delete_lab():
     lab_id = jsonData['lab_id']
     db_session = db.get_session()
 
-    query_info_to_be_deleted = db_session.query(schema.Lab_info).filter(schema.Lab_info.lab_id==lab_id)
-    query_rows_to_be_deleted = db_session.query(schema.Lab_rows).filter(schema.Lab_rows.lab_id==lab_id)
+    query_info_to_be_deleted = db_session.query(schema.Lab_info).filter(
+        schema.Lab_info.lab_id == lab_id)
+    query_rows_to_be_deleted = db_session.query(schema.Lab_rows).filter(
+        schema.Lab_rows.lab_id == lab_id)
 
     for r in query_info_to_be_deleted:
-        db_session.delete(r)   
+        db_session.delete(r)
     for r in query_rows_to_be_deleted:
         db_session.delete(r)
     db_session.commit()
-  
-    # return success to the ajax call from flask 
+
+    # return success to the ajax call from flask
     return jsonify(success=True, data=jsonData)
+
 
 # change the status of a lab
 @app.route('/_admin_change_status/<new_status>', methods=['POST'])
@@ -322,15 +348,17 @@ def _admin_status_make_download_only(new_status):
     lab_id = jsonData['lab_id']
     db_session = db.get_session()
     # Test the existence of the copies of this lab
-    query_status_to_be_changed = db_session.query(schema.Lab_info).filter(schema.Lab_rows.lab_id==lab_id)
+    query_status_to_be_changed = db_session.query(schema.Lab_info).filter(
+        schema.Lab_rows.lab_id == lab_id)
 
     for r in query_status_to_be_changed:
-        r.lab_status = new_status   
+        r.lab_status = new_status
     db_session.commit()
-  
-    # return success to the ajax call from flask 
-    return jsonify(success=True, data=jsonData)    
- 
+
+    # return success to the ajax call from flask
+    return jsonify(success=True, data=jsonData)
+
+
 # select labs to review/edit data
 @app.route('/admin_select_lab_for_data')
 def admin_select_lab_for_data():
@@ -338,11 +366,15 @@ def admin_select_lab_for_data():
     db_session = db.get_session()
     for lab in db_session.query(schema.Lab_info).all():
         data_num = 0
-        query_rows = db_session.query(schema.Lab_rows).filter(schema.Lab_rows.lab_id==lab.lab_id)
+        query_rows = db_session.query(schema.Lab_rows).filter(
+            schema.Lab_rows.lab_id == lab.lab_id)
         for r in query_rows:
-            data_num += db_session.query(schema.Lab_data).filter(schema.Lab_data.row_id==r.row_id).count()
-        lab_list.append({'lab_id':lab.lab_id,'lab_name':lab.lab_name,'class_name':lab.class_name,'prof_name':lab.prof_name,'data_num':data_num})
-    return render_template('admin_select_lab_for_data.html',lab_list=lab_list)
+            data_num += db_session.query(schema.Lab_data).filter(
+                schema.Lab_data.row_id == r.row_id).count()
+        lab_list.append({'lab_id': lab.lab_id, 'lab_name': lab.lab_name,
+                         'class_name': lab.class_name,
+                         'prof_name': lab.prof_name, 'data_num': data_num})
+    return render_template('admin_select_lab_for_data.html', lab_list=lab_list)
 
 
 # review/edit Data
@@ -502,16 +534,18 @@ def _admin_download_data(lab_ids):
                     'lab_id': lab_id, 'student_name': data.student_name,
                     'data_id': data.data_id, 'row_data': data.row_data})
             index += 1
-    
-    #Group row data according to student_name
+
+    # Group row data according to student_name
     for row in lab_data:
-        #sort row_data_list to make all the data across different lists 
-        sorted(row['row_data_list'],key=lambda element:element['data_id'])
+        # sort row_data_list to make all the data across different lists
+        sorted(row['row_data_list'], key=lambda element: element['data_id'])
         # if list is empty, add student names into it
         if not lab_data_by_student:
             for data in row['row_data_list']:
-                lab_data_by_student.append({'student_name':data['student_name'],'lab_id':data['lab_id'],'row_data_list':[]})
-        
+                lab_data_by_student.append({
+                    'student_name': data['student_name'],
+                    'lab_id': data['lab_id'], 'row_data_list': []})
+
         for i in range(len(row['row_data_list'])):
             data = row['row_data_list'][i]
             lab_data_by_student[i]['row_data_list'].append({
