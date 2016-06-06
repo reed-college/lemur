@@ -147,42 +147,55 @@ def admin_setup_labs_and_data_access():
                                             'prof_name': lab_u.prof_name})
 
     if request.method == 'POST':
-        labinfo = {'lab_name':request.form['lab_name'],'class_name':request.form['class_name'],'prof_name':request.form['prof_name'],'lab_desc':request.form['lab_desc'],
-        'lab_questions':request.form['lab_questions']}
-        return redirect(url_for('.admin_setup_labs',labinfo=labinfo))
-    return render_template('admin_setup_labs_and_data_access.html',current_labs=current_labs)
+        labinfo = {'lab_name': request.form['lab_name'],
+                   'class_name': request.form['class_name'],
+                   'prof_name': request.form['prof_name'],
+                   'lab_desc': request.form['lab_desc'],
+                   'lab_questions': request.form['lab_questions']}
+        return redirect(url_for('.admin_setup_labs', labinfo=labinfo))
+    return render_template('admin_setup_labs_and_data_access.html',
+                           current_labs=current_labs)
+
 
 # fill in the row details of a lab
 @app.route('/admin_setup_labs')
 def admin_setup_labs():
     labinfo = ast.literal_eval(request.args['labinfo'])
-    return render_template('admin_setup_labs.html',labinfo=labinfo)
+    return render_template('admin_setup_labs.html', labinfo=labinfo)
 
 
 @app.route('/_admin_receive_setup_labs_data', methods=['POST'])
 def _admin_receive_setup_labs_data():
-    jsonData = request.get_json() 
-    lab_name = jsonData['lab_name']   
+    jsonData = request.get_json()
+    lab_name = jsonData['lab_name']
     class_name = jsonData['class_name']
     prof_name = jsonData['prof_name']
     lab_desc = jsonData['lab_desc']
     row_data = jsonData['row_data']
 
-    lab_id = Generate_lab_id(lab_name,class_name,prof_name)
-    
+    lab_id = Generate_lab_id(lab_name, class_name, prof_name)
+
     db_session = db.get_session()
 
-    
     lab_rows = []
-    lab = schema.Lab_info(lab_id=lab_id,lab_name=lab_name,class_name=class_name,prof_name=prof_name,lab_desc=lab_desc,lab_status='Activated')  
+    lab = schema.Lab_info(lab_id=lab_id, lab_name=lab_name,
+                          class_name=class_name, prof_name=prof_name,
+                          lab_desc=lab_desc, lab_status='Activated')
     for r in row_data:
         row_name = r['row_name']
-        row_id = Generate_row_id(lab_id,row_name)
-        lab_rows.append(schema.Lab_rows(lab_id=lab_id,row_id=row_id,row_name=row_name,row_desc=r['row_desc'],row_order=r['row_order'],value_type=r['value_type'],value_range=r['value_range'],value_candidates=r['value_candidates']))
+        row_id = Generate_row_id(lab_id, row_name)
+        lab_rows.append(
+            schema.Lab_rows(lab_id=lab_id, row_id=row_id,
+                            row_name=row_name,
+                            row_desc=r['row_desc'],
+                            row_order=r['row_order'],
+                            value_type=r['value_type'],
+                            value_range=r['value_range'],
+                            value_candidates=r['value_candidates']))
     lab.lab_rows = lab_rows
     db_session.add(lab)
     db_session.commit()
-    # return success to the ajax call from flask 
+    # return success to the ajax call from flask
     return jsonify(success=True, data=jsonData)
 
 
@@ -192,10 +205,17 @@ def admin_modify_lab(lab_id):
     db_session = db.get_session()
     # Collect the info of the current lab and send them to the template
     rows_info = []
-    query_rows_of_lab_to_be_modified = db_session.query(schema.Lab_rows).filter(schema.Lab_rows.lab_id==lab_id)
-    query_info_of_lab_to_be_modified = db_session.query(schema.Lab_info).filter(schema.Lab_info.lab_id==lab_id)
+    query_rows_of_lab_to_be_modified = db_session.query(
+        schema.Lab_rows).filter(schema.Lab_rows.lab_id == lab_id)
+    query_info_of_lab_to_be_modified = db_session.query(
+        schema.Lab_info).filter(schema.Lab_info.lab_id == lab_id)
     for r in query_rows_of_lab_to_be_modified:
-        rows_info.append({'row_name':r.row_name,'row_desc':r.row_desc,'row_order':r.row_order,'value_type':r.value_type,'value_range':r.value_range,'value_candidates':r.value_candidates})
+        rows_info.append({'row_name': r.row_name,
+                          'row_desc': r.row_desc,
+                          'row_order': r.row_order,
+                          'value_type': r.value_type,
+                          'value_range': r.value_range,
+                          'value_candidates': r.value_candidates})
     for r in query_info_of_lab_to_be_modified:
         lab_id = r.lab_id
         lab_name = r.lab_name
@@ -203,9 +223,9 @@ def admin_modify_lab(lab_id):
         prof_name = r.prof_name
         lab_desc = r.lab_desc
     # Sort the list of rows according to row_order
-    sorted(rows_info, key=lambda row:row['row_order'])
+    sorted(rows_info, key=lambda row: row['row_order'])
 
-    labinfo = {'lab_id':lab_id,'lab_name':lab_name,'class_name':class_name,'prof_name':prof_name,'lab_desc':lab_desc,
+    labinfo = {'lab_id': lab_id, 'lab_name': lab_name,'class_name':class_name,'prof_name':prof_name,'lab_desc':lab_desc,
     'rows_info':rows_info}
     return render_template('admin_modify_lab.html',labinfo=labinfo)
 
@@ -337,49 +357,73 @@ def admin_edit_data(lab_ids):
     err_msg = ''
 
     db_session = db.get_session()
-    
-    #Group row data according to row_name
-    query_rows = db_session.query(schema.Lab_rows).filter(schema.Lab_rows.lab_id==lab_ids[0]).order_by(schema.Lab_rows.row_order)
+
+    # Group row data according to row_name
+    query_rows = db_session.query(schema.Lab_rows).filter(
+        schema.Lab_rows.lab_id == lab_ids[0]).order_by(
+        schema.Lab_rows.row_order)
     for r in query_rows:
-        lab_data.append({'row_name':r.row_name,'row_data_list':[]})
+        lab_data.append({'row_name': r.row_name, 'row_data_list': []})
         row_names_list.append(r.row_name)
 
-    
     for lab_id in lab_ids:
-        query_rows = db_session.query(schema.Lab_rows).filter(schema.Lab_rows.lab_id==lab_id).order_by(schema.Lab_rows.row_order)
+        query_rows = db_session.query(schema.Lab_rows).filter(
+            schema.Lab_rows.lab_id == lab_id).order_by(
+            schema.Lab_rows.row_order)
         index = 0
 
-        #Check whether these labs are compatitble with each other(the number of rows and the names of rows must be the same)
-        if query_rows.count()!=len(row_names_list):
+        # Check whether these labs are compatitble with each other(the number
+        # of rows and the names of rows must be the same)
+        if query_rows.count() != len(row_names_list):
             err_msg = lab_ids[0]+' and '+lab_id+' are incompatible: the number of rows is different-'+str(query_rows.count())+' and '+str(len(row_names_list))
         else:
             for r in query_rows:
-                if (row_names_list[index]!=r.row_name):
-                    err_msg = lab_ids[0]+' and '+lab_id+' are incompatible:'+row_names_list[index]+' and '+r.row_name+' are different row names' 
+                if (row_names_list[index] != r.row_name):
+                    err_msg = lab_ids[0]+' and '+lab_id+' are incompatible:'+row_names_list[index]+' and '+r.row_name+' are different row names'
                     break
                 else:
-                    query_datas = db_session.query(schema.Lab_data).filter(schema.Lab_data.row_id==r.row_id).order_by(schema.Lab_data.data_id)
+                    query_datas = db_session.query(schema.Lab_data).filter(
+                        schema.Lab_data.row_id == r.row_id).order_by(
+                        schema.Lab_data.data_id)
                     for data in query_datas:
-                        lab_data[index]['row_data_list'].append({'lab_id':lab_id,'student_name':data.student_name,'row_id':data.row_id,'data_id':data.data_id,'row_data':data.row_data})
+                        lab_data[index]['row_data_list'].append({
+                            'lab_id': lab_id,
+                            'student_name': data.student_name,
+                            'row_id': data.row_id,
+                            'data_id': data.data_id,
+                            'row_data': data.row_data})
 
-                index+=1
-        if err_msg!='':
-            return render_template('admin_edit_data.html',lab_data=lab_data,student_data=lab_data_by_student,lab_ids=lab_ids,err_msg=err_msg)
+                index += 1
+        if err_msg != '':
+            return render_template('admin_edit_data.html',
+                                   lab_data=lab_data,
+                                   student_data=lab_data_by_student,
+                                   b_ids=lab_ids, err_msg=err_msg)
 
-
-    #Group row data according to student_name
+    # Group row data according to student_name
     for row in lab_data:
-        #sort row_data_list to make all the data across different lists 
-        sorted(row['row_data_list'],key=lambda element:element['data_id'])
+        # sort row_data_list to make all the data across different lists
+        sorted(row['row_data_list'], key=lambda element: element['data_id'])
         # if list is empty, add student names into it
         if not lab_data_by_student:
             for data in row['row_data_list']:
-                lab_data_by_student.append({'student_name':data['student_name'],'lab_id':data['lab_id'],'row_data_list':[]})
-        
+                lab_data_by_student.append({
+                    'student_name': data['student_name'],
+                    'lab_id': data['lab_id'], 'row_data_list': []})
+
         for i in range(len(row['row_data_list'])):
             data = row['row_data_list'][i]
-            lab_data_by_student[i]['row_data_list'].append({'row_name':row['row_name'],'row_id':data['row_id'],'data_id':data['data_id'],'row_data':data['row_data']})
-    return render_template('admin_edit_data.html',lab_data=lab_data,student_data=lab_data_by_student,lab_ids=lab_ids,err_msg=err_msg)
+            lab_data_by_student[i]['row_data_list'].append({
+                'row_name': row['row_name'],
+                'row_id': data['row_id'],
+                'data_id': data['data_id'],
+                'row_data': data['row_data']})
+    return render_template('admin_edit_data.html',
+                           lab_data=lab_data,
+                           student_data=lab_data_by_student,
+                           lab_ids=lab_ids,
+                           err_msg=err_msg)
+
 
 # change data(backend)
 @app.route('/_admin_change_data', methods=['POST'])
@@ -387,35 +431,43 @@ def _admin_change_data():
     jsonData = request.get_json()
     old_data_ids_list = jsonData['old_data_ids_list']
     new_data_list = jsonData['new_data_list']
-    db_session = db.get_session()  
+    db_session = db.get_session()
     # delete all the old data by old data_id
     for data_id in old_data_ids_list:
-        query_data = db_session.query(schema.Lab_data).filter(schema.Lab_data.data_id==data_id)
+        query_data = db_session.query(schema.Lab_data).filter(
+            schema.Lab_data.data_id == data_id)
         for r in query_data:
             db_session.delete(r)
 
     # add all the new data
     for d in new_data_list:
-        print(schema.Lab_data(data_id=d['data_id'],student_name=d['student_name'],row_data=d['row_data']))
-        db_session.add(schema.Lab_data(row_id=d['row_id'],data_id=d['data_id'],student_name=d['student_name'],row_data=d['row_data']))
+        print(schema.Lab_data(data_id=d['data_id'],
+                              student_name=d['student_name'],
+                              row_data=d['row_data']))
+        db_session.add(schema.Lab_data(row_id=d['row_id'],
+                                       data_id=d['data_id'],
+                                       student_name=d['student_name'],
+                                       row_data=d['row_data']))
 
     db_session.commit()
-    # return success to the ajax call from flask 
-    return jsonify(success=True, data=jsonData)   
+    # return success to the ajax call from flask
+    return jsonify(success=True, data=jsonData)
+
 
 # delete data(backend)
 @app.route('/_admin_delete_data', methods=['POST'])
 def _admin_delete_data():
     jsonData = request.get_json()
     data_ids_to_be_removed = jsonData['data_ids_to_be_removed']
-    db_session = db.get_session()  
+    db_session = db.get_session()
     for data_id in data_ids_to_be_removed:
-        query_data = db_session.query(schema.Lab_data).filter(schema.Lab_data.data_id==data_id)
+        query_data = db_session.query(schema.Lab_data).filter(
+            schema.Lab_data.data_id == data_id)
         for r in query_data:
             db_session.delete(r)
     db_session.commit()
-    # return success to the ajax call from flask 
-    return jsonify(success=True, data=jsonData)   
+    # return success to the ajax call from flask
+    return jsonify(success=True, data=jsonData)
 
 
 # format and download data
@@ -424,25 +476,32 @@ def _admin_download_data(lab_ids):
     lab_ids = ast.literal_eval(lab_ids)
     lab_data = []
     lab_data_by_student = []
-    row_names_list = ['Student Name','Lab ID']
+    row_names_list = ['Student Name', 'Lab ID']
 
     db_session = db.get_session()
-    
-    #Group row data according to row_name
-    query_rows = db_session.query(schema.Lab_rows).filter(schema.Lab_rows.lab_id==lab_ids[0]).order_by(schema.Lab_rows.row_order)
+
+    # Group row data according to row_name
+    query_rows = db_session.query(schema.Lab_rows).filter(
+        schema.Lab_rows.lab_id == lab_ids[0]).order_by(
+        schema.Lab_rows.row_order)
     for r in query_rows:
-        lab_data.append({'row_name':r.row_name,'row_data_list':[]})
+        lab_data.append({'row_name': r.row_name, 'row_data_list': []})
         row_names_list.append(r.row_name)
 
-    
     for lab_id in lab_ids:
-        query_rows = db_session.query(schema.Lab_rows).filter(schema.Lab_rows.lab_id==lab_id).order_by(schema.Lab_rows.row_order)
-        index = 0  
+        query_rows = db_session.query(schema.Lab_rows).filter(
+            schema.Lab_rows.lab_id == lab_id).order_by(
+            schema.Lab_rows.row_order)
+        index = 0
         for r in query_rows:
-            query_datas = db_session.query(schema.Lab_data).filter(schema.Lab_data.row_id==r.row_id).order_by(schema.Lab_data.data_id)
+            query_datas = db_session.query(schema.Lab_data).filter(
+                schema.Lab_data.row_id == r.row_id).order_by(
+                schema.Lab_data.data_id)
             for data in query_datas:
-                lab_data[index]['row_data_list'].append({'lab_id':lab_id,'student_name':data.student_name,'data_id':data.data_id,'row_data':data.row_data})
-            index+=1
+                lab_data[index]['row_data_list'].append({
+                    'lab_id': lab_id, 'student_name': data.student_name,
+                    'data_id': data.data_id, 'row_data': data.row_data})
+            index += 1
     
     #Group row data according to student_name
     for row in lab_data:
@@ -455,8 +514,9 @@ def _admin_download_data(lab_ids):
         
         for i in range(len(row['row_data_list'])):
             data = row['row_data_list'][i]
-            lab_data_by_student[i]['row_data_list'].append({'row_name':row['row_name'],'data_id':data['data_id'],'row_data':data['row_data']})
-
+            lab_data_by_student[i]['row_data_list'].append({
+                'row_name': row['row_name'], 'data_id': data['data_id'],
+                'row_data': data['row_data']})
 
     # Format the string csv to be downloaded
     dt = '\t\t'
