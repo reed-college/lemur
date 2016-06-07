@@ -17,6 +17,6 @@ def Generate_data_id(row_id,student_name):
 def Check_existence(form, *args):
 	err_msg = ''
 	for a in args:
-		if not(args in form):
+		if not(a in form):
 			err_msg += 'You must send a JSON object '+a+'\n'
 	return err_msg  

@@ -82,7 +82,7 @@ def student_data_entry(lab_id):
     query_rows_info = db_session.query(schema.Lab_rows).filter(
         schema.Lab_rows.lab_id == lab_id).order_by(schema.Lab_rows.row_order)
 
-    if query_rows_of_lab_to_be_modified.count()==0 or query_info_of_lab_to_be_modified.count()==0:
+    if query_lab_info.count()==0 or query_rows_info.count()==0:
         err_msg = 'The lab doesn\'t exist'
         return render_template('400.html', err_msg=err_msg),400
 
@@ -296,7 +296,7 @@ def admin_modify_lab(lab_id):
 def _admin_modify_lab():
     jsonData = request.get_json()
 
-    err_msg = Check_existence(request.form,'lab_name','class_name','prof_name','lab_desc','row_data','old_lab_id')        
+    err_msg = Check_existence(jsonData,'lab_name','class_name','prof_name','lab_desc','row_data','old_lab_id')        
     if err_msg != '':
         return jsonify(success=False,data=err_msg)
 
@@ -351,13 +351,12 @@ def _admin_modify_lab():
 @app.route('/_admin_duplicate_lab', methods=['POST'])
 def _admin_duplicate_lab():
     jsonData = request.get_json()
-    err_msg = Check_existence(request.form,'lab_id')        
+    err_msg = Check_existence(jsonData,'lab_id')        
     if err_msg != '':
         return jsonify(success=False,data=err_msg)
 
     old_lab_id = jsonData['lab_id']
     db_session = db.get_session()
-
     try:
         # Test the existence of the copies of this lab
         i = 1
@@ -405,7 +404,7 @@ def _admin_duplicate_lab():
 @app.route('/_admin_delete_lab', methods=['POST'])
 def _admin_delete_lab():
     jsonData = request.get_json()
-    err_msg = Check_existence(request.form,'lab_id')        
+    err_msg = Check_existence(jsonData,'lab_id')        
     if err_msg != '':
         return jsonify(success=False,data=err_msg)
 
@@ -435,7 +434,7 @@ def _admin_delete_lab():
 @app.route('/_admin_change_status/<new_status>', methods=['POST'])
 def _admin_status_make_download_only(new_status):
     jsonData = request.get_json()
-    err_msg = Check_existence(request.form,'lab_id')        
+    err_msg = Check_existence(jsonData,'lab_id')        
     if err_msg != '':
         return jsonify(success=False,data=err_msg)
 
@@ -607,7 +606,7 @@ def _admin_delete_data():
 
     data_ids_to_be_removed = jsonData['data_ids_to_be_removed']
 
-    if not(type(data_ids_to_be_removed)=='list'):
+    if not(type(data_ids_to_be_removed) is list):
         err_msg = 'the value of the key data_ids_to_be_removed should be a list'
         return jsonify(success=False,data=err_msg)
 
