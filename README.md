@@ -1,7 +1,8 @@
 # lemur
 Bio data collector
 ##Part-1 TBD
-1.Refactor code<br>
+0.design zone of each prof 
+1.Refactor code(decorate each function with error checking)<br>
 2.Network security<br>
 3.Connect the current webpages with reed login webpage and add power to different accounts/Design a manage user page<br>
 4.Better UI design<br>
