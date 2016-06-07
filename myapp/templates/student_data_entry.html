@@ -12,16 +12,15 @@
 		var num_of_entry = 1;
 
 		$(document).ready(function(){
-			//empty_entry checks whether there is any empty entry left
-			//wrong_input checks whether all the input are valid
-			var empty_entry = false;
-			var wrong_input = false;
-			var err_msgs = [];
-			//The number of rows besides student name
-			var remaining_rows = document.getElementsByClassName('Customized_Rows');
-		    
+		    $('button[name=submit]').click(function(){	
+				//empty_entry checks whether there is any empty entry left
+				//wrong_input checks whether all the input are valid
+				var empty_entry = false;
+				var wrong_input = false;
+				var err_msgs = [];
+				//The number of rows besides student name
+				var remaining_rows = document.getElementsByClassName('Customized_Rows');
 
-		    $('button[name=submit]').click(function(){		
 				//Pack data into a 2D array
 				var student_name = document.getElementsByClassName('student_name');
 
@@ -80,6 +79,7 @@
 					  		  alert('submit successfully!');
 					  		},
 					  error : function(result){
+					  	      console.log(result);
 	       					  alert('fail to submit');
 	    					}
 				    });

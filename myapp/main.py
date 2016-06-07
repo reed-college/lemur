@@ -1,7 +1,7 @@
 from flask import (Flask, render_template, request, redirect, url_for,
                    jsonify)
 import db
-import schema
+import schema, ast
 try:
     import simplejson as json
 except (ImportError):
@@ -98,6 +98,7 @@ def student_data_entry(lab_id):
         lab_info.append({'lab_id': lab.lab_id,
                          'lab_name': lab.lab_name,
                          'lab_desc': lab.lab_desc})
+
     return render_template('student_data_entry.html',
                            rows_info=rows_info, lab_info=lab_info)
 
@@ -113,7 +114,7 @@ def _student_receive_data():
 
     lab_data = jsonData['lab_data'] 
 
-    if not(isinstance(lab_ids, list)):
+    if not(isinstance(lab_data, list)):
         err_msg = 'The value of the key lab_data should be a list'
         return jsonify(success=False,data=err_msg)
 
@@ -121,13 +122,13 @@ def _student_receive_data():
     try:             
         for d in lab_data:
             err_msg = Check_existence(d,'student_name','rows_info')
-            if err_msg != '':
+            if err_msg != '': 
                 return jsonify(success=False,data=err_msg)
 
             student_name = d['student_name']
             for r in d['rows_info']:
                 err_msg = Check_existence(r,'lab_id','row_name','row_data')
-                if err_msg != '':
+                if err_msg != '':       
                     return jsonify(success=False,data=err_msg)
 
                 lab_id = r['lab_id']
@@ -549,7 +550,7 @@ def _admin_delete_data():
 
     data_ids_to_be_removed = jsonData['data_ids_to_be_removed']
 
-    if not(isinstance(lab_ids, list)):
+    if not(isinstance(data_ids_to_be_removed, list)):
         err_msg = 'the value of the key data_ids_to_be_removed should be a list'
         return jsonify(success=False,data=err_msg)
 
