@@ -474,7 +474,7 @@ def admin_select_lab_for_data():
                     schema.Lab_data.row_id == r.row_id).count()
             lab_list.append({'lab_id': lab.lab_id, 'lab_name': lab.lab_name,
                              'class_name': lab.class_name,
-                             'prof_name': lab.prof_name, 'data_num': data_num})
+                             'prof_name': lab.prof_name,'lab_status':lab.lab_status, 'data_num': data_num})
         return render_template('admin_select_lab_for_data.html', lab_list=lab_list)
     except Exception:     
         db_session.rollback()
