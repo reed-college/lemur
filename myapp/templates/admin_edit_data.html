@@ -14,7 +14,6 @@
 					old_data_ids_list.push($(all_data[i]).data('dataid'));
 					var row_id = $(all_data[i]).data('rowid');
 					var student_name = $(all_data[i]).closest('tr').find(".student_name").val();
-					console.log(student_name);
 					var data_id = Generate_data_id(row_id,student_name);
 					new_data_list.push({'row_id':row_id,'data_id':data_id,'student_name':student_name,'row_data':$(all_data[i]).val()})
 
@@ -65,8 +64,15 @@
 			location.reload();
 		});		
 		$('button[name=download]').click(function(){
-			var lab_ids = $('table').attr('id');
-			window.location.replace('/_admin_download_data/'+lab_ids);
+			var undownloadable_labs = $('table').data('undownloadable');
+			if (undownloadable_labs==''){
+				var lab_ids = $('table').attr('id');
+			    window.location.replace('/_admin_download_data/'+JSON.stringify(lab_ids));
+			}
+			else{
+				alert(undownloadable_labs+' are not downloadable');
+			}
+			
 		});
 
 	});
@@ -87,7 +93,7 @@
 {% else %}
 	<p> 1.Delete will be saved automatically.<br>
 		2.To download data, please click save all first.<br>
-	<table class="table sortable" id="{{lab_ids}}" name={{lab_data|length}}>
+	<table class="table sortable" id="{{lab_ids}}" data-undownloadable="{{undownloadable_labs}}" name={{lab_data|length}}>
 	    <thead>
 	    	<tr>
 		      <th>Index</th>

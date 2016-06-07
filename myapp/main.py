@@ -2,12 +2,13 @@ from flask import (Flask, render_template, request, redirect, url_for,
                    jsonify, make_response)
 import db
 import schema
-import ast
 try:
     import simplejson as json
 except (ImportError):
     import json
 from utility import Generate_lab_id, Generate_row_id, Generate_data_id, Check_existence
+
+
 # Initialize an app
 app = Flask(__name__)
 app.debug = True
@@ -112,7 +113,7 @@ def _student_receive_data():
 
     lab_data = jsonData['lab_data'] 
 
-    if type(lab_data) != 'list':
+    if not(isinstance(lab_ids, list)):
         err_msg = 'The value of the key lab_data should be a list'
         return jsonify(success=False,data=err_msg)
 
@@ -480,12 +481,13 @@ def admin_select_lab_for_data():
 @app.route('/admin_edit_data/<lab_ids>')
 def admin_edit_data(lab_ids):
     # Get a list of lab_ids that are needed to be retrieved
-    lab_ids = ast.literal_eval(lab_ids)
+    lab_ids = json.loads(lab_ids)
 
     lab_data = []
     lab_data_by_student = []
     row_names_list = []
     err_msg = ''
+    undownloadable_labs = ''
 
     db_session = db.get_session()
 
@@ -498,6 +500,10 @@ def admin_edit_data(lab_ids):
         row_names_list.append(r.row_name)
 
     for lab_id in lab_ids:
+        lab_status = db_session.query(schema.Lab_info).filter(schema.Lab_info.lab_id == lab_id).one().lab_status 
+        if lab_status != 'Downloaded':
+            undownloadable_labs += (str(lab_id)+'\t')
+
         query_rows = db_session.query(schema.Lab_rows).filter(
             schema.Lab_rows.lab_id == lab_id).order_by(
             schema.Lab_rows.row_order)
@@ -529,7 +535,7 @@ def admin_edit_data(lab_ids):
             return render_template('admin_edit_data.html',
                                    lab_data=lab_data,
                                    student_data=lab_data_by_student,
-                                   b_ids=lab_ids, err_msg=err_msg)
+                                   b_ids=lab_ids, err_msg=err_msg, undownloadable_labs=undownloadable_labs)
 
     # Group row data according to student_name
     for row in lab_data:
@@ -554,7 +560,7 @@ def admin_edit_data(lab_ids):
                            lab_data=lab_data,
                            student_data=lab_data_by_student,
                            lab_ids=lab_ids,
-                           err_msg=err_msg)
+                           err_msg=err_msg,undownloadable_labs=undownloadable_labs)
 
 
 # change data(backend)
@@ -606,7 +612,7 @@ def _admin_delete_data():
 
     data_ids_to_be_removed = jsonData['data_ids_to_be_removed']
 
-    if not(type(data_ids_to_be_removed) is list):
+    if not(isinstance(lab_ids, list)):
         err_msg = 'the value of the key data_ids_to_be_removed should be a list'
         return jsonify(success=False,data=err_msg)
 
@@ -630,7 +636,13 @@ def _admin_delete_data():
 # format and download data
 @app.route('/_admin_download_data/<lab_ids>')
 def _admin_download_data(lab_ids):
-    lab_ids = ast.literal_eval(lab_ids)
+    lab_ids = json.loads(lab_ids)
+    lab_ids = lab_ids.lstrip('[\'').rstrip(']\'').split(',')
+    if not(isinstance(lab_ids, list)):
+        err_msg = 'The <lab_ids> does not have the right format. '+'lab_ids has the type '+str(type(lab_ids))
+        return render_template('400.html', err_msg=err_msg),400
+
+
     lab_data = []
     lab_data_by_student = []
     row_names_list = ['Student Name', 'Lab ID']
