@@ -6,66 +6,46 @@
 	$(document).ready(function(){
 		//Modify an existing lab
 		$('.modify_lab').click(function(){
-			var lab_name = $(this).data('labname');
-			var class_name = $(this).data('classname');
-			var prof_name = $(this).data('profname');
+			var lab_name = $(this).closest('tr').data('labname');
+			var class_name = $(this).closest('tr').data('classname');
+			var prof_name = $(this).closest('tr').data('profname');
 			var lab_id = Generate_lab_id(lab_name,class_name,prof_name);
 			window.location.replace('/admin_modify_lab/'+lab_id);	    
 		});
 
-		//Duplicate a lab
-		$('.duplicate_lab').click(function(){
-			var lab_name = $(this).data('labname');
-			var class_name = $(this).data('classname');
-			var prof_name = $(this).data('profname');
+		//Duplicate/Delete a lab
+		$('.duplicate_lab').add($('.delete_lab')).click(function(){
+			var operation = $(this).attr('class');
+			var lab_name = $(this).closest('tr').data('labname');
+			var class_name = $(this).closest('tr').data('classname');
+			var prof_name = $(this).closest('tr').data('profname');
 			var lab_id = Generate_lab_id(lab_name,class_name,prof_name);
+			console.log($(this).attr('class'));
 		    //Communicate the name of the lab to be duplicated with python via Ajax 
 			$.ajax({
 			  type: 'POST',
 			  contentType: 'application/json',
 			  dataType: 'json',
-			  url: 'http://127.0.0.1:5000/_admin_duplicate_lab',
+			  url: 'http://127.0.0.1:5000/_admin_'+operation,
 			  data: JSON.stringify({'lab_id':lab_id}),
 			  success: function(result){
    					  alert('Duplicate successfully');
    					},
 			  error : function(result){
-   					  alert('Fail to duplicate');
+   					  alert('Fail to '+operation);
 					}
 		    });
-		    location.reload();
-		});
+		    if (operation=='delete_lab'){
+		    	$(this).closest('tr').remove();
+		    }
 
-		//Delete a lab
-		$('.delete_lab').click(function(){
-			var lab_name = $(this).data('labname');
-			var class_name = $(this).data('classname');
-			var prof_name = $(this).data('profname');
-			var lab_id = Generate_lab_id(lab_name,class_name,prof_name);
-		    //Communicate the name of the lab to be duplicated with python via Ajax 
-			$.ajax({
-			  type: 'POST',
-			  contentType: 'application/json',
-			  dataType: 'json',
-			  url: 'http://127.0.0.1:5000/_admin_delete_lab',
-			  data: JSON.stringify({'lab_id':lab_id}),
-			  success: function(result){
-   					  alert('Delete successfully');
-   					},
-			  error : function(result){
-   					  alert('Fail to delete');
-					}
-		    });
-		    $(this).closest('tr').remove();
-		    location.reload();
-		    
 		});
 
 		//Change a lab's status
 		$('.make_download_only').add($('.activate_lab')).add($('.deactivate_lab')).click(function(){
-			var lab_name = $(this).data('labname');
-			var class_name = $(this).data('classname');
-			var prof_name = $(this).data('profname');
+			var lab_name = $(this).closest('tr').data('labname');
+			var class_name = $(this).closest('tr').data('classname');
+			var prof_name = $(this).closest('tr').data('profname');
 			var lab_id = Generate_lab_id(lab_name,class_name,prof_name);
 
 			var status_class_name = $(this).attr('class')
@@ -95,7 +75,6 @@
 					}
 		    });
 		    location.reload();	 
-
 		});
 
 	});
@@ -127,15 +106,15 @@
 {% endif %}
 <table class="tg activated">
 {% for lab in current_labs.activated %}		
-		<tr>
+		<tr data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">
 		    <th class="tg-yw4l">{{loop.index}}</th>
 		    <th class="tg-yw4l" name='lab_name' >{{lab.lab_name}}</th>
 		    <th class="tg-yw4l" name='class_name' >{{lab.class_name}}</th>
 		    <th class="tg-yw4l" name='prof_name' >{{lab.prof_name}}</th>
-		    <th class="tg-yw4l"><button class="modify_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}"> Modify Lab and Questions</button></th>
-		    <th class="tg-yw4l"><button class="duplicate_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}"> Duplicate Lab</button></th>
-		    <th class="tg-yw4l"><button class="delete_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}" >Delete Lab</button></th>
-		    <th class="tg-yw4l"><button class="make_download_only" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">Make Download Only</button></th>
+		    <th class="tg-yw4l"><button class="modify_lab" > Modify Lab and Questions</button></th>
+		    <th class="tg-yw4l"><button class="duplicate_lab" > Duplicate Lab</button></th>
+		    <th class="tg-yw4l"><button class="delete_lab"  >Delete Lab</button></th>
+		    <th class="tg-yw4l"><button class="make_download_only" >Make Download Only</button></th>
 		</tr>	
 {% endfor %}
 </table>
@@ -145,16 +124,16 @@
 {% endif %}
 <table class="tg downloaded">
 {% for lab in current_labs.downloaded %}
-		<tr>
+		<tr data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">
 		    <th class="tg-yw4l">{{loop.index}}</th>
 		    <th class="tg-yw4l" name='lab_name' >{{lab.lab_name}}</th>
 		    <th class="tg-yw4l" name='class_name' >{{lab.class_name}}</th>
 		    <th class="tg-yw4l" name='prof_name' >{{lab.prof_name}}</th>
-		    <th class="tg-yw4l"><button class="modify_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">Modify Lab and Questions</button></th>
-		    <th class="tg-yw4l"><button class="duplicate_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">Duplicate Lab</button></th>
-		    <th class="tg-yw4l"><button class="delete_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">Delete Lab</button></th>
-		    <th class="tg-yw4l"><button class="activate_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">Activate Data Collection</button></th>
-		    <th class="tg-yw4l"><button class="deactivate_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">Make Unavailable and Clear</button></th>
+		    <th class="tg-yw4l"><button class="modify_lab" >Modify Lab and Questions</button></th>
+		    <th class="tg-yw4l"><button class="duplicate_lab" >Duplicate Lab</button></th>
+		    <th class="tg-yw4l"><button class="delete_lab" >Delete Lab</button></th>
+		    <th class="tg-yw4l"><button class="activate_lab" >Activate Data Collection</button></th>
+		    <th class="tg-yw4l"><button class="deactivate_lab" >Make Unavailable and Clear</button></th>
 		</tr>
 {% endfor %}
 </table>
@@ -164,15 +143,15 @@
 {% endif%}
 <table class="tg unactivated">
 {% for lab in current_labs.unactivated %}
-		<tr>
+		<tr data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">
 		    <th class="tg-yw4l">{{loop.index}}</th>
 		    <th class="tg-yw4l" name='lab_name' >{{lab.lab_name}}</th>
 		    <th class="tg-yw4l" name='class_name' >{{lab.class_name}}</th>
 		    <th class="tg-yw4l" name='prof_name' >{{lab.prof_name}}</th>
-		    <th class="tg-yw4l"><button class="modify_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">Modify Lab and Questions</button></th>
-		    <th class="tg-yw4l"><button class="duplicate_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">Duplicate Lab</button></th>
-		    <th class="tg-yw4l"><button class="delete_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">Delete Lab</button></th>
-		    <th class="tg-yw4l"><button class="activate_lab" data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">Activate Lab</button></th>
+		    <th class="tg-yw4l"><button class="modify_lab" >Modify Lab and Questions</button></th>
+		    <th class="tg-yw4l"><button class="duplicate_lab" >Duplicate Lab</button></th>
+		    <th class="tg-yw4l"><button class="delete_lab" >Delete Lab</button></th>
+		    <th class="tg-yw4l"><button class="activate_lab" >Activate Lab</button></th>
 		</tr>
 {% endfor %}
 </table>
