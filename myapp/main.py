@@ -1,12 +1,12 @@
 from flask import (Flask, render_template, request, redirect, url_for,
-                   jsonify, make_response)
+                   jsonify)
 import db
 import schema
 try:
     import simplejson as json
 except (ImportError):
     import json
-from utility import Generate_lab_id, Generate_row_id, Generate_data_id, Check_existence
+from utility import Generate_lab_id, Generate_row_id, Generate_data_id, Check_existence, Query_data, Format_download
 
 
 # Initialize an app
@@ -464,17 +464,22 @@ def _admin_status_make_download_only(new_status):
 def admin_select_lab_for_data():
     lab_list = []
     db_session = db.get_session()
-    for lab in db_session.query(schema.Lab_info).all():
-        data_num = 0
-        query_rows = db_session.query(schema.Lab_rows).filter(
-            schema.Lab_rows.lab_id == lab.lab_id)
-        for r in query_rows:
-            data_num += db_session.query(schema.Lab_data).filter(
-                schema.Lab_data.row_id == r.row_id).count()
-        lab_list.append({'lab_id': lab.lab_id, 'lab_name': lab.lab_name,
-                         'class_name': lab.class_name,
-                         'prof_name': lab.prof_name, 'data_num': data_num})
-    return render_template('admin_select_lab_for_data.html', lab_list=lab_list)
+    try:
+        for lab in db_session.query(schema.Lab_info).all():
+            data_num = 0
+            query_rows = db_session.query(schema.Lab_rows).filter(
+                schema.Lab_rows.lab_id == lab.lab_id)
+            for r in query_rows:
+                data_num += db_session.query(schema.Lab_data).filter(
+                    schema.Lab_data.row_id == r.row_id).count()
+            lab_list.append({'lab_id': lab.lab_id, 'lab_name': lab.lab_name,
+                             'class_name': lab.class_name,
+                             'prof_name': lab.prof_name, 'data_num': data_num})
+        return render_template('admin_select_lab_for_data.html', lab_list=lab_list)
+    except Exception:     
+        db_session.rollback()
+        err_msg = 'Unknown bug raised in database'
+        return render_template('400.html', err_msg=err_msg),400
 
 
 # review/edit Data
@@ -482,85 +487,17 @@ def admin_select_lab_for_data():
 def admin_edit_data(lab_ids):
     # Get a list of lab_ids that are needed to be retrieved
     lab_ids = json.loads(lab_ids)
+    lab_data, lab_data_by_student, row_names_list, err_msg, undownloadable_labs = Query_data(lab_ids)  
+    
+    if err_msg=='':
+        return render_template('admin_edit_data.html',
+                               lab_data=lab_data,
+                               student_data=lab_data_by_student,
+                               lab_ids=lab_ids,
+                               err_msg=err_msg,undownloadable_labs=undownloadable_labs)
+    else:
+        return render_template('400.html', err_msg=err_msg),400
 
-    lab_data = []
-    lab_data_by_student = []
-    row_names_list = []
-    err_msg = ''
-    undownloadable_labs = ''
-
-    db_session = db.get_session()
-
-    # Group row data according to row_name
-    query_rows = db_session.query(schema.Lab_rows).filter(
-        schema.Lab_rows.lab_id == lab_ids[0]).order_by(
-        schema.Lab_rows.row_order)
-    for r in query_rows:
-        lab_data.append({'row_name': r.row_name, 'row_data_list': []})
-        row_names_list.append(r.row_name)
-
-    for lab_id in lab_ids:
-        lab_status = db_session.query(schema.Lab_info).filter(schema.Lab_info.lab_id == lab_id).one().lab_status 
-        if lab_status != 'Downloaded':
-            undownloadable_labs += (str(lab_id)+'\t')
-
-        query_rows = db_session.query(schema.Lab_rows).filter(
-            schema.Lab_rows.lab_id == lab_id).order_by(
-            schema.Lab_rows.row_order)
-        index = 0
-
-        # Check whether these labs are compatitble with each other(the number
-        # of rows and the names of rows must be the same)
-        if query_rows.count() != len(row_names_list):
-            err_msg = lab_ids[0]+' and '+lab_id+' are incompatible: the number of rows is different-'+str(query_rows.count())+' and '+str(len(row_names_list))
-        else:
-            for r in query_rows:
-                if (row_names_list[index] != r.row_name):
-                    err_msg = lab_ids[0]+' and '+lab_id+' are incompatible:'+row_names_list[index]+' and '+r.row_name+' are different row names'
-                    break
-                else:
-                    query_datas = db_session.query(schema.Lab_data).filter(
-                        schema.Lab_data.row_id == r.row_id).order_by(
-                        schema.Lab_data.data_id)
-                    for data in query_datas:
-                        lab_data[index]['row_data_list'].append({
-                            'lab_id': lab_id,
-                            'student_name': data.student_name,
-                            'row_id': data.row_id,
-                            'data_id': data.data_id,
-                            'row_data': data.row_data})
-
-                index += 1
-        if err_msg != '':
-            return render_template('admin_edit_data.html',
-                                   lab_data=lab_data,
-                                   student_data=lab_data_by_student,
-                                   b_ids=lab_ids, err_msg=err_msg, undownloadable_labs=undownloadable_labs)
-
-    # Group row data according to student_name
-    for row in lab_data:
-        # sort row_data_list to make all the data across different lists
-        sorted(row['row_data_list'], key=lambda element: element['data_id'])
-        # if list is empty, add student names into it
-        if not lab_data_by_student:
-            for data in row['row_data_list']:
-                lab_data_by_student.append({
-                    'student_name': data['student_name'],
-                    'lab_id': data['lab_id'], 'row_data_list': []})
-
-        for i in range(len(row['row_data_list'])):
-            data = row['row_data_list'][i]
-            lab_data_by_student[i]['row_data_list'].append({
-                'row_name': row['row_name'],
-                'row_id': data['row_id'],
-                'data_id': data['data_id'],
-                'row_data': data['row_data']})
-
-    return render_template('admin_edit_data.html',
-                           lab_data=lab_data,
-                           student_data=lab_data_by_student,
-                           lab_ids=lab_ids,
-                           err_msg=err_msg,undownloadable_labs=undownloadable_labs)
 
 
 # change data(backend)
@@ -642,67 +579,17 @@ def _admin_download_data(lab_ids):
         err_msg = 'The <lab_ids> does not have the right format. '+'lab_ids has the type '+str(type(lab_ids))
         return render_template('400.html', err_msg=err_msg),400
 
+    (_, lab_data_by_student, row_names_list, err_msg, _) = Query_data(lab_ids)
 
-    lab_data = []
-    lab_data_by_student = []
-    row_names_list = ['Student Name', 'Lab ID']
+    row_names_list = ['Student Name', 'Lab ID'] + row_names_list
 
-    db_session = db.get_session()
 
-    # Group row data according to row_name
-    query_rows = db_session.query(schema.Lab_rows).filter(
-        schema.Lab_rows.lab_id == lab_ids[0]).order_by(
-        schema.Lab_rows.row_order)
-    for r in query_rows:
-        lab_data.append({'row_name': r.row_name, 'row_data_list': []})
-        row_names_list.append(r.row_name)
-
-    for lab_id in lab_ids:
-        query_rows = db_session.query(schema.Lab_rows).filter(
-            schema.Lab_rows.lab_id == lab_id).order_by(
-            schema.Lab_rows.row_order)
-        index = 0
-        for r in query_rows:
-            query_datas = db_session.query(schema.Lab_data).filter(
-                schema.Lab_data.row_id == r.row_id).order_by(
-                schema.Lab_data.data_id)
-            for data in query_datas:
-                lab_data[index]['row_data_list'].append({
-                    'lab_id': lab_id, 'student_name': data.student_name,
-                    'data_id': data.data_id, 'row_data': data.row_data})
-            index += 1
-
-    # Group row data according to student_name
-    for row in lab_data:
-        # sort row_data_list to make all the data across different lists
-        sorted(row['row_data_list'], key=lambda element: element['data_id'])
-        # if list is empty, add student names into it
-        if not lab_data_by_student:
-            for data in row['row_data_list']:
-                lab_data_by_student.append({
-                    'student_name': data['student_name'],
-                    'lab_id': data['lab_id'], 'row_data_list': []})
-
-        for i in range(len(row['row_data_list'])):
-            data = row['row_data_list'][i]
-            lab_data_by_student[i]['row_data_list'].append({
-                'row_name': row['row_name'], 'data_id': data['data_id'],
-                'row_data': data['row_data']})
-
-    # Format the string csv to be downloaded
-    dt = '\t\t'
-    nl = '\n'
-    csv = dt.join(row_names_list)+nl
-    for student in lab_data_by_student:
-        csv += (student['student_name']+dt+student['lab_id'])
-        for data in student['row_data_list']:
-            csv += (dt+data['row_data'])
-        csv += nl
-    lab_ids_str = '+'.join(lab_ids)
-    response = make_response(csv)  # create a response out of the CSV string
-    response.headers["Content-Disposition"] = 'attachment; filename='+lab_ids_str+'.txt'
-    # Set the right header for the response to be downloaded
-    return response
+    if err_msg != '':
+        err_msg = 'Database fails to be cleaned for unknown reasons'
+        return render_template('400.html', err_msg=err_msg),400
+    else:
+        response = Format_download(lab_data_by_student,row_names_list,lab_ids)
+        return response
 
 
 @app.route('/admin_manage_users', methods=['GET', 'POST'])
