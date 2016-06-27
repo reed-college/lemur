@@ -17,32 +17,29 @@
     {% endblock %}
 
     <style>
-        #welcome_msg{
+        #welcomeMsg{
             font-size: 60px;
             text-align: center;
         }
-        .invisible, .temporary_message {
+        .invisible, .temporaryMessage {
             display: none;
         }
         /*Show a symbol in a sortable table's column headers to indicate that the table is sortable */
         table.sortable th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_nosort):after { 
             content: " \25B4\25BE" 
         }
-        .tg  {border-collapse:collapse;border-spacing:0;}
-        .tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
-        .tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
-        .tg .tg-yw4l{vertical-align:top}
         #dLabel{color: grey;}
+         
     </style>
     <script>
-        function Generate_lab_id(lab_name,class_name,prof_name){
-            return lab_name+'_'+class_name+'_'+prof_name;
+        function generateLabId(labName,className,professorName){
+            return labName+'_'+className+'_'+professorName;
         }
-        function Generate_row_id(lab_id,row_name){
-            return lab_id+':'+row_name;
+        function generateExperimentId(labId,experimentName){
+            return labId+':'+experimentName;
         }
-        function Generate_data_id(row_id,student_name){
-            return row_id+':'+student_name;
+        function generateObservationId(observationId,studentName){
+            return observationId+':'+studentName;
         }
         // Check whether value is in array
         function isInArray(value, array) {
@@ -52,65 +49,33 @@
         function isNumeric(n) {
             return !isNaN(parseFloat(n)) && isFinite(n);
         }
-        // Validate the input when the admin sets up a lab
-        function Check_input(value_type,value_range,value_candidates){
-            var wrong_input = false;
-            var value_range_format = /([\d]+)-([\d]+)/;
-            var value_candidates_format = /([\w]+)((,([\w]+))+)/;
-            if (value_type!='Number' && value_type!='Text'){
-                alert('value_type must be either Number or Text!');
-                wrong_input = true;
-            }
-            if (value_range.length>0){
-                if (value_range.search(value_range_format)==-1){
-                    alert('value_range must be in the format 1-15');
-                    wrong_input = true;
-                }
-                if (value_type!='Number'){
-                    alert('value_range should only be filled when the value type is Number');
-                    wrong_input = true;
-                }
-            }
-            if (value_candidates.length>0){
-                if (value_candidates.search(value_candidates_format)==-1){
-                    alert('value_candidates must be in the format N,C');
-                    wrong_input = true;
-                }
-                if (value_type!='Text'){
-                    alert('value_candidates should only be filled when the value type is Text');
-                    wrong_input = true;
-                }
-            }
-            return wrong_input;
-        }
         // Validate the input when the student enters data
-        function Check_input_student(row_data,value_type,value_range,value_candidates){
-            var wrong_input = false;
-            var err_msg = '';
-            value_candidates
-            if (value_type=='Text' && value_candidates.length>0){
-                value_candidates_arr = value_candidates.split(',');
-                if (isInArray(row_data,value_candidates_arr)==false){
-                    wrong_input = true;
-                    err_msg = row_data+' is not in the value value candidates: '+value_candidates; 
+        function checkInputStudent(observation,valueType,valueRange,valueCandidates){
+            var wrongInput = false;
+            var errMsg = '';
+            valueCandidates
+            if (valueType=='Text' && valueCandidates.length>0){
+                valueCandidates_arr = valueCandidates.split(',');
+                if (isInArray(observation,valueCandidates_arr)==false){
+                    wrongInput = true;
+                    errMsg = observation+' is not in the value value candidates: '+valueCandidates; 
                 }        
             }
-            else if (value_type=='Number' && value_range.length>0){
-                value_range_arr = value_range.split('-');
-                var min = parseInt(value_range_arr[0]);
-                var max = parseInt(value_range_arr[1]);
-                var row_data = parseInt(row_data);
-                if (!isNumeric(row_data)){
-                    wrong_input = true;
-                    err_msg = row_data+' is not a number.';
+            else if (valueType=='Number' && valueRange.length>0){
+                valueRange_arr = valueRange.split('-');
+                var min = parseFloat(valueRange_arr[0]);
+                var max = parseFloat(valueRange_arr[1]);
+                var observation = parseFloat(observation);
+                if (!isNumeric(observation)){
+                    wrongInput = true;
+                    errMsg = observation+' is not a number.';
                 }
-                else if (row_data<min || row_data>max){
-                    wrong_input = true;
-                    err_msg = row_data+' is not in the value range: '+value_range;
+                else if (observation<min || observation>max){
+                    wrongInput = true;
+                    errMsg = observation+' is not in the value range: '+valueRange;
                 }
             }
-            return {'wrong_input':wrong_input,'err_msg':err_msg};
-
+            return {'wrongInput':wrongInput,'errMsg':errMsg};
         }
     </script>
 
@@ -120,13 +85,25 @@
 
 <nav class="navbar navbar-inverse">
     <div class="container-fluid">
-        <div id="nav_bar_list">
-        {% block nav_bar_list %}{% endblock %}
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/common_home">Home</a>
+        </div>
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav" id="nav_bar_list">
+            {% block nav_bar_list %}{% endblock %}
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                    {% if current_user.is_authenticated %}
+                    <li><a href="{{url_for('logout')}}">Sign Out</a></li>
+                    {% else %}
+                    <li><a href="{{url_for('login')}}">Sign In</a></li>
+                    {% endif %}
+            </ul>
         </div>
     </div>
 </nav>
 <div id="content">{% block content %}
-<div id="welcome_msg" class="col-md-12"> Welcome! </div>
+<div id="welcomeMsg" class="col-md-12"> Welcome! </div>
 {% endblock %}
 </div>
 
