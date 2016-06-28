@@ -19,8 +19,7 @@ CONFIG_FILE = 'config.cfg'
 # Instantiate the application and initializes the login manager.
 def create_app(config):
     app = Flask(__name__)
-    app.config.update(CSRF_ENABLED=config['app']['CSRF_ENABLED'],
-                      SECRET_KEY=config['app']['SECRET_KEY'],
+    app.config.update(SECRET_KEY=config['app']['SECRET_KEY'],
                       SQLALCHEMY_DATABASE_URI=config['app']['SQLALCHEMY_DATABASE_URI'],
                       DEBUG=config['app']['DEBUG'])
 
