@@ -1,13 +1,18 @@
+# Libraries
+# Standard library
 import json
 import ast
+
+# Third-party libraries
 from flask import (render_template, request, redirect, url_for,
                    flash)
 from flask.ext.login import (login_user, logout_user, current_user,
                              login_required)
-from myapp import (app, db, csrf, class_time, current_time)
-from myapp import models as m
-from myapp.utility import *
-from myapp.dataforms import LoginForm
+
+# Other modules
+from lemur import (app, db, class_time, current_time)
+from lemur import models as m
+from lemur.utility import *
 # Abbreviation for convenience
 ds = db.session
 
@@ -17,36 +22,35 @@ ds = db.session
 # allowed pages
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    form = LoginForm()
-    # check existence of the user and the user's password
-    if form.validate_on_submit():
-        user_id = generate_user_id(form.username.data)
-        user = query_user(user_id)
-        # When both the username and password are valid then redirect to the
-        # common home
-        if user is not None and user.verify_password(form.password.data):
-            login_user(user, form.remember_me.data)
-            return redirect(url_for('common_home'))
-        flash('Invalid username or password')
-    return render_template('login.html', form=form)
+    if request.method == 'POST':
+        err_msg = check_existence(request.form, 'username')
+        if err_msg != '':
+            return render_template('login.html')
+        user_id = generate_user_id(request.form['username'])
+        user = get_user(user_id)
+        # check existence of the user and the user's password
+        if user is not None and user.verify_password(request.form['password']):
+            # When both the username and password are valid then redirect to
+            # the corresponding home page
+            login_user(user, True)
+            user_home = {'SuperAdmin': 'superadmin_home',
+                         'Admin': 'admin_home',
+                         'Student': 'student_home'}
+            return redirect(url_for(user_home[user.role_name]))
+            flash('Invalid username or password')
+    return render_template('login.html')
 
 
-# Logout page
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    flash('You have been logged out')
     return redirect(url_for('login'))
 
 
-# common homepage(temporary)
-@app.route('/common_home')
-def common_home():
-    return render_template('common_home.html')
-
-
+# homepages
 @app.route('/student_home')
+@login_required
 def student_home():
     return render_template('student_home.html')
 
@@ -71,7 +75,7 @@ def superadmin_home():
 @app.route('/student_enter_data')
 @permission_required(m.Permission.DATA_ENTRY)
 def student_enter_data():
-    labs_query = query_labs_for_user(current_user)
+    labs_query = get_labs_for_user(current_user)
     lab_list = serialize_lab_list(labs_query)
     return render_template('student_enter_data.html',
                            lab_list=lab_list)
@@ -88,8 +92,8 @@ def student_data_entry(lab_id):
     if (lab_id not in lab_ids) and current_user.role_name != 'SuperAdmin':
         return redirect(url_for('login',
                                 err_msg='no power to access this page'))
-    lab_query = query_lab(lab_id)
-    experiments_query = query_experiments_for_lab(lab_id)
+    lab_query = get_lab(lab_id)
+    experiments_query = get_experiments_for_lab(lab_id)
 
     # check if the lab exists
     if not lab_exists(lab_id):
@@ -162,26 +166,21 @@ def admin_setup_labs():
 def _admin_receive_setup_labs_data():
     # receive the data, check the format and deserialize it
     jsonData = request.get_json()
-    lab_info, err_msg = deserialize_lab(jsonData)
+    err_msg = check_existence(jsonData, 'labName', 'className', 'classTime',
+                                        'professorName', 'labDescription',
+                                        'experiments', 'oldLabId')
     if err_msg != '':
-        return err_json(err_msg)
-    class_id = generate_class_id(lab_info['class_name'],
-                                 lab_info['class_time'])
-
-    # checks that the class the lab belongs to exists
-    if not (class_exists(class_id)):
-        err_msg = 'The class doesn\'t exist.'
-        return err_json(err_msg)
-
+        return (None, err_msg)
+    class_id = generate_class_id(jsonData['className'], jsonData['classTime'])
     # Admin can only edit labs in his/her own zone
+    # SuperAdmin can edit labs for anyone
     # This check has a problem: If two Admins have the same names now, they can
     # edit each other's labs
-    err_msg = check_power_to_add_lab(current_user, lab_info['prof_name'], class_id)
+    err_msg = check_power_to_add_lab(current_user, jsonData['professorName'],
+                                     class_id)
     if err_msg != '':
         return err_json(err_msg)
-    # SuperAdmin can edit labs for anyone
-    # Build connection between the current lab and the existing users/classes
-    err_msg = add_lab(lab_info)
+    err_msg = modify_lab(jsonData)
     if err_msg != '':
         return err_json(err_msg)
     return normal_json(jsonData)
@@ -192,8 +191,8 @@ def _admin_receive_setup_labs_data():
 @permission_required(m.Permission.LAB_SETUP)
 def admin_modify_lab(lab_id):
     # Collect the info of the current lab and send them to the template
-    experiments_query = query_experiments_for_lab(lab_id)
-    lab_query = query_lab(lab_id)
+    experiments_query = get_experiments_for_lab(lab_id)
+    lab_query = get_lab(lab_id)
     # check the existence of the lab before modifying it
     if not lab_exists(lab_id):
         err_msg = ('The lab doesn\'t exist.'
@@ -218,13 +217,11 @@ def admin_modify_lab(lab_id):
 def _admin_modify_lab():
     # receive the data, check the format and deserialize it
     lab_json = request.get_json()
-    labinfo, err_msg = deserialize_lab(lab_json)
+    # Delete a lab's basic info, experiments info and observations info
+    # Add a lab with basic info and experiments info
+    err_msg = modify_lab(lab_json)
     if err_msg != '':
         return err_json(err_msg)
-    # Delete a lab's basic info, experiments info and observations info
-    delete_lab(labinfo['old_lab_id'])
-    # Add a lab with basic info and experiments info
-    add_lab(labinfo)
     return normal_json(lab_json)
 
 
@@ -368,11 +365,10 @@ def superadmin_manage_admins():
     err_msg = ''
     if request.method == 'POST':
         err_msg = add_admin(request.form)
-        cprint(err_msg)
     if err_msg != '':
         return err_json(err_msg)
     # Get existing admins to send to the template
-    admins_query = query_all_admin()
+    admins_query = get_all_admin()
     current_admins = serialize_admin_list(admins_query)
     return render_template('superadmin_manage_admins.html',
                            current_admins=current_admins)
@@ -411,7 +407,7 @@ def superadmin_manage_classes():
             return err_json(err_msg)
     # query professors' names and current classes from the database and
     # convert them into JSON format
-    classes_query = query_all_class()
+    classes_query = get_all_class()
     prof_names = serialize_prof_name_list()
     current_classes = serialize_class_list(classes_query)
 
@@ -467,9 +463,9 @@ def internal_error(error):
 
 
 # Whenever a CSRF validation fails, it will return a 400 response.
-@csrf.error_handler
-def csrf_error(reason):
-    return render_template('csrf_error.html', reason=reason), 400
+# @csrf.error_handler
+# def csrf_error(reason):
+#     return render_template('csrf_error.html', reason=reason), 400
 
 
 # --- Utility ---

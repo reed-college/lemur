@@ -1,7 +1,12 @@
-
+# Libraries
+# Standard library
 from datetime import datetime
+
+# Third-party libraries
 from flask.ext.login import UserMixin, AnonymousUserMixin
-from myapp import db, login_manager
+
+# Other modules
+from lemur import db, login_manager
 
 # Association tables for Many-To-Many relationships between various tables
 association_table_class_user = db.Table('association_class_user',
@@ -121,7 +126,7 @@ class Observation(db.Model, DateTimeInfo):
     id = db.Column(db.String(128), nullable=False, unique=True,
                    primary_key=True)
     student_name = db.Column(db.String(256), nullable=False)
-    data = db.Column(db.String(512), nullable=False)
+    datum = db.Column(db.String(512), nullable=False)
 
     # Many-to-One: an experiment can have mulitple datasets inputted by
     # different students
@@ -130,9 +135,9 @@ class Observation(db.Model, DateTimeInfo):
 
     def __repr__(self):
         tpl = ('Observation<experiment_id: {experiment_id}, id: {id},'
-               'data: {data}>')
+               'datum: {datum}>')
         formatted = tpl.format(experiment_id=self.experiment_id, id=self.id,
-                               data=self.data)
+                               datum=self.datum)
         return formatted
 
 
@@ -215,8 +220,7 @@ class Role(db.Model):
     __tablename__ = 'Role'
     name = db.Column(db.String(64), nullable=False, unique=True,
                      primary_key=True)
-    # Whether current role object is default of user
-    default = db.Column(db.Boolean, default=False)
+
     # A number representing the power the role has using bit operation
     permissions = db.Column(db.Integer, nullable=False)
 
@@ -227,33 +231,31 @@ class Role(db.Model):
     @staticmethod
     def insert_roles():
         roles = {
-            'Student': (Permission.DATA_ENTRY, True),
+            'Student': (Permission.DATA_ENTRY),
             'Admin': (Permission.DATA_ENTRY |
                       Permission.DATA_EDIT |
                       Permission.LAB_SETUP |
-                      Permission.ADMIN, False),
+                      Permission.ADMIN),
             'SuperAdmin': (Permission.DATA_ENTRY |
                            Permission.DATA_EDIT |
                            Permission.LAB_SETUP |
                            Permission.ADMIN |
                            Permission.LAB_MANAGE |
                            Permission.USER_MANAGE |
-                           Permission.SUPERADMIN, False)
+                           Permission.SUPERADMIN)
         }
         for r in roles:
             role = Role.query.filter_by(name=r).first()
             if role is None:
                 role = Role(name=r)
-            role.permissions = roles[r][0]
-            role.default = roles[r][1]
+            role.permissions = roles[r]
             db.session.add(role)
         db.session.commit()
 
     def __repr__(self):
-        tpl = ('Role<name: {name}, default: {default},'
+        tpl = ('Role<name: {name},'
                ' permissions: {permissions}>')
         formatted = tpl.format(name=self.name,
-                               default=self.default,
                                permissions=self.permissions)
         return formatted
 

@@ -1,28 +1,79 @@
+# Libraries
+# Standard library
 from functools import wraps
-from flask import make_response, render_template, jsonify, redirect, url_for
-from flask.ext.login import current_user
-from myapp import models as m
-from myapp import (app, db)
 import linecache
 import sys
 import re
+
+# Third-party libraries
+from flask import make_response, render_template, jsonify, redirect, url_for
+from flask.ext.login import current_user
+
+# Other modules
+from lemur import models as m
+from lemur import (app, db)
 ds = db.session
 
 
-# --- Debug/Logging functions ---
-# make things easier to spot in terminal by printing them out
-def cprint(*args):
-    for s in args:
-        print('\n\n\n')
-        print(s)
-        print('\n\n\n')
+# --- Decorators ---
+# This decorator is not used right now because the app is in debug mode
+# which can generate detailed error info
+# A decorator used to handle exceptions
+def db_exception_handler(request_type, msg="Unknown bug. "):
+    def decorator(f):
+        @wraps(f)
+        def wrapped(*args, **kwargs):
+            try:
+                ret = f(*args, **kwargs)
+                return ret
+            except Exception:
+                db.session.rollback()
+                exc_type, exc_obj, tb = sys.exc_info()
+                frame = tb.tb_frame
+                lineno = tb.tb_lineno
+                filename = frame.f_code.co_filename
+                linecache.checkcache(filename)
+                line = linecache.getline(filename, lineno, frame.f_globals)
+                err_msg = 'EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno,
+                                                                       line.strip(), exc_obj)
+                if request_type == 'POST':
+                    return jsonify(success=False, data=err_msg)
+                else:
+                    return render_template('error_400.html',
+                                           err_msg=err_msg), 400
+        return wrapped
+    return decorator
+
+
+# A decorator used to check the user's permission to access the current page
+# If the user doesn't have access, redirect to the login page
+def permission_required(permission):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.can(permission):
+                return redirect(url_for('login'))
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+
+# A decorator that avoids the function to raise an exception but return
+# a None instead
+def failure_handler(f):
+    def f_try(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except:
+            return None
+    return f_try
 
 
 # Check the existence of args in a form
 # and generate an error message accordingly
-def check_existence(form, *args):
+def check_existence(form, *expectedArgs):
     err_msg = ''
-    for a in args:
+    for a in expectedArgs:
         if not(a in form):
             err_msg += (a+' is not defined'+'\n')
     if err_msg != '':
@@ -88,54 +139,60 @@ def user_exists(user_id):
 
 # --- Query data ---
 # Get the Lab object from the database by lab_id
-def query_lab(lab_id):
-    return ds.query(m.Lab).filter(m.Lab.id == lab_id).first()
+@failure_handler
+def get_lab(lab_id):
+    return ds.query(m.Lab).filter(m.Lab.id == lab_id).one()
 
 
-def query_experiment(experiment_id):
-    return ds.query(m.Experiment).filter(m.Experiment.id == experiment_id).first()
+@failure_handler
+def get_experiment(experiment_id):
+    return ds.query(m.Experiment).filter(m.Experiment.id == experiment_id).one()
 
 
 # Get the Observation object from the database by observation_id
-def query_observation(observation_id):
-    return ds.query(m.Observation).filter(m.Observation.id == observation_id).first()
+@failure_handler
+def get_observation(observation_id):
+    return ds.query(m.Observation).filter(m.Observation.id == observation_id).one()
 
 
-def query_user(user_id):
+@failure_handler
+def get_user(user_id):
     return ds.query(m.User).filter(
-        m.User.id == user_id).first()
+        m.User.id == user_id).one()
 
 
-def query_class(class_id):
-    return ds.query(m.Class).filter(m.Class.id == class_id).first()
+@failure_handler
+def get_class(class_id):
+    return ds.query(m.Class).filter(m.Class.id == class_id).one()
 
 
-def query_role(role_name):
+@failure_handler
+def get_role(role_name):
     return ds.query(m.Role).filter(
-        m.Role.name == role_name).first()
+        m.Role.name == role_name).one()
 
 
-def query_all_lab():
+def get_all_lab():
     return ds.query(m.Lab).all()
 
 
-def query_all_experiment():
+def get_all_experiment():
     return ds.query(m.Experiment).all()
 
 
 # return the query for all the classes in the database
-def query_all_class():
+def get_all_class():
     return ds.query(m.Class).all()
 
 
 # return the query for all the admins in the database
-def query_all_admin():
+def get_all_admin():
     return ds.query(m.User).filter(
            m.User.role_name == 'Admin').all()
 
 
 # return the query for all the admins in the database
-def query_all_superadmin():
+def get_all_superadmin():
     return ds.query(m.User).filter(
            m.User.role_name == 'SuperAdmin').all()
 
@@ -143,7 +200,7 @@ def query_all_superadmin():
 # Get lab query for the user according to user's role
 # A SuperAdmin can select among all the labs
     # A student/Admin can only select his/her own labs
-def query_labs_for_user(user):
+def get_labs_for_user(user):
     if user.role_name == 'SuperAdmin':
         return ds.query(m.Lab).all()
     else:
@@ -151,13 +208,13 @@ def query_labs_for_user(user):
 
 
 # Get all the experiments for a lab
-def query_experiments_for_lab(lab_id):
+def get_experiments_for_lab(lab_id):
     return ds.query(m.Experiment).filter(
         m.Experiment.lab_id == lab_id).order_by(m.Experiment.order).all()
 
 
 # Get all the observations for an experiment
-def query_observations_for_experiment(experiment_id):
+def get_observations_for_experiment(experiment_id):
     return ds.query(m.Observation).filter(
         m.Observation.experiment_id == experiment_id).order_by(
         m.Observation.id).all()
@@ -170,7 +227,7 @@ def observation_number_for_experiment(experiment_id):
 
 
 # ---serialization/deserialization---
-# convert a query for labs into a list of JSON objects
+# convert a query for labs into a python list of dictionaries
 def serialize_lab_list(lab_list_query):
     labs = []
     for lab in lab_list_query:
@@ -199,12 +256,12 @@ def serialize_experiment_list(experiment_list_query):
 
 # return a list of class names
 def serialize_class_name_list():
-    return [c.name for c in query_all_class()]
+    return [c.name for c in get_all_class()]
 
 
 # return a list of professors' names
 def serialize_prof_name_list():
-    return [u.name for u in query_all_admin()] + [u.name for u in query_all_superadmin()]
+    return [u.name for u in get_all_admin()] + [u.name for u in get_all_superadmin()]
 
 
 # convert a query for admins into a list of JSON objects
@@ -237,35 +294,7 @@ def serialize_class_list(classes_query):
     return current_classes
 
 
-# check the data sent by client and
-# deserialize the information of a lab from jsonData sent by client
-# and serialize it into JSON format dictionary that is consistent with
-# python side naming convention
-def deserialize_lab(lab_json):
-    err_msg = check_existence(lab_json, 'labName', 'className', 'classTime',
-                                        'professorName', 'labDescription',
-                                        'experiments')
-    if err_msg != '':
-        return (dict(), err_msg)
-
-    lab_info = {'name': lab_json['labName'],
-                'class_name': lab_json['className'],
-                'class_time': lab_json['classTime'],
-                'prof_name': lab_json['professorName'],
-                'description': lab_json['labDescription'],
-                'experiments': lab_json['experiments'],
-                'old_lab_id': lab_json['oldLabId']}
-
-    for e in lab_json['experiments']:
-        err_msg = check_existence(e, 'name', 'description', 'order',
-                                     'valueType', 'valueRange',
-                                     'valueCandidates')
-        if err_msg != '':
-            return (lab_info, err_msg)
-    return (lab_info, '')
-
-
-# Covert a string in the format '[a,b,c]' into a python list
+# Cnovert a string in the format '[a,b,c]' into a python list
 def deserialize_lab_id(lab_ids):
     lab_ids = lab_ids.lstrip('\"[').rstrip('\"]').split(',')
     lab_ids = [lab.lstrip('\'').rstrip('\'') for lab in lab_ids if
@@ -283,14 +312,14 @@ def deserialize_lab_id(lab_ids):
 def find_lab_list_for_user(user):
     lab_list = []
     # query labs according to the user's role
-    labs_query = query_labs_for_user(user)
+    labs_query = get_labs_for_user(user)
     if user.role_name == 'Admin':
         labs_query = user.labs
 
     # get all the info of the labs
     for lab in labs_query:
         data_num = 0
-        experiments_query = query_experiments_for_lab(lab.id)
+        experiments_query = get_experiments_for_lab(lab.id)
         for e in experiments_query:
             data_num += observation_number_for_experiment(e.id)
         lab_list.append({'lab_id': lab.id, 'lab_name': lab.name,
@@ -303,25 +332,29 @@ def find_lab_list_for_user(user):
 
 # Return all the current labs with basic info in JSON Format
 def find_all_labs(user):
-    query_activated = ds.query(m.Lab).filter(m.Lab.status == 'Activated').all()
-    query_downloadable = ds.query(m.Lab).filter(m.Lab.status == 'Downloadable').all()
-    query_unactivated = ds.query(m.Lab).filter(m.Lab.status == 'Unactivated').all()
+    get_activated = None
+    get_downloadable = None
+    get_unactivated = None
     # check if user is admin to limit their access to their own labs
     if user.role_name == 'Admin':
-        query_activated = [lab for lab in current_user.labs if lab.status == 'Activated']
-        query_downloadable = [lab for lab in current_user.labs if lab.status == 'Downloadable']
-        query_unactivated = [lab for lab in current_user.labs if lab.status == 'Unactivated']
+        get_activated = [lab for lab in user.labs if lab.status == 'Activated']
+        get_downloadable = [lab for lab in user.labs if lab.status == 'Downloadable']
+        get_unactivated = [lab for lab in user.labs if lab.status == 'Unactivated']
+    else:
+        get_activated = ds.query(m.Lab).filter(m.Lab.status == 'Activated').all()
+        get_downloadable = ds.query(m.Lab).filter(m.Lab.status == 'Downloadable').all()
+        get_unactivated = ds.query(m.Lab).filter(m.Lab.status == 'Unactivated').all()
 
     # convert lab info, class names and professor names into json format
-    return {'activated': serialize_lab_list(query_activated),
-            'downloadable': serialize_lab_list(query_downloadable),
-            'unactivated': serialize_lab_list(query_unactivated)}
+    return {'activated': serialize_lab_list(get_activated),
+            'downloadable': serialize_lab_list(get_downloadable),
+            'unactivated': serialize_lab_list(get_unactivated)}
 
 
 # Admin can only edit labs in his/her own zone
 def check_power_to_add_lab(user, prof_name, class_id):
     if user.role_name == 'Admin':
-        if prof_name != user:
+        if prof_name != user.name:
             err_msg = 'You cannot edit labs for other Admins'
             return err_json(err_msg)
         elif not (class_id in [c.id for c in user.classes]):
@@ -333,55 +366,63 @@ def check_power_to_add_lab(user, prof_name, class_id):
 # --- Manage labs ---
 # Delete a lab's basic info, experiments info and observations info
 def delete_lab(lab_id):
-    ds.delete(query_lab(lab_id))
-    experiments_query = query_experiments_for_lab(lab_id)
+    ds.delete(get_lab(lab_id))
+    experiments_query = get_experiments_for_lab(lab_id)
     for e in experiments_query:
         ds.delete(e)
     ds.commit()
 
 
-# Add a lab with basic info and experiments info
-def add_lab(lab_info):
-    warning_msg = ''
-    new_lab_id = generate_lab_id(lab_info['name'], lab_info['class_name'],
-                                 lab_info['prof_name'])
-    if lab_exists(new_lab_id):
-        return 'lab already exists'
-    class_id = generate_class_id(lab_info['class_name'], lab_info['class_time'])
-    experiments_for_new_lab = []
-
+# Modify a lab
+def modify_lab(lab_json):
+    err_msg = check_existence(lab_json, 'labName', 'className', 'classTime',
+                                        'professorName', 'labDescription',
+                                        'experiments', 'oldLabId')
+    if lab_exists(lab_json['oldLabId']):
+        delete_lab(lab_json['oldLabId'])
+    class_id = generate_class_id(lab_json['className'], lab_json['classTime'])
+    if not class_exists(class_id):
+        err_msg += 'class id: {0} doesn\' exist in the database'.format(class_id)
+    if err_msg != '':
+        return err_msg
+    the_class = get_class(class_id)
     # Build connection between the current lab and the existing users/classes
-    the_class = query_class(class_id)
-    classes = []
     class_users = []
     if the_class is not None:
-        classes = [the_class]
         class_users = the_class.users
+    lab_id = generate_lab_id(lab_json['labName'],
+                             lab_json['className'],
+                             lab_json['professorName'])
+    if lab_exists(lab_id):
+        return 'lab id:{0} already exists'.format(lab_id)
+    experiments_for_lab = []
 
-    # add new data sent by client
-    for e in lab_info['experiments']:
+    for e in lab_json['experiments']:
         err_msg = check_existence(e, 'name', 'description', 'order',
                                      'valueType', 'valueRange',
                                      'valueCandidates')
+
         if err_msg != '':
             return err_msg
-    for e in lab_info['experiments']:
-        experiment_name = e['name']
-        # Check if the experiment name already repetes among all the
-        # experiments to be added into the current lab
-        for i in range(len(lab_info['experiments'])):
-            if [exp['name'] for exp in lab_info['experiments']].count(experiment_name) > 1:
-                lab_info['experiments'] = (lab_info['experiments'][0:i] +
-                                           lab_info['experiments'][i+1:len(lab_info['experiments'])])
-                warning_msg = 'repeted experiment name:{} in this lab'.format(experiment_name)
-                continue
-        experiment_id = generate_experiment_id(new_lab_id, experiment_name)
+    for e in lab_json['experiments']:
+            experiment_name = e['name']
+            # Check if the experiment name already repetes among all the
+            # experiments to be added into the current lab
+            for i in range(len(lab_json['experiments'])):
+                if [exp['name'] for exp in lab_json['experiments']].count(experiment_name) > 1:
+                    lab_json['experiments'] = (lab_json['experiments'][0:i] +
+                                               lab_json['experiments'][i+1:len(lab_json['experiments'])])
+                    warning_msg = 'repeted experiment name:{} in this lab'.format(experiment_name)
+                    app.logger.warning(warning_msg)
+                    continue
+            experiment_id = generate_experiment_id(lab_id, experiment_name)
 
-        if experiment_exists(experiment_id):
-            warning_msg = 'The same experiment name has already exist in the same lab'
-            continue
-        else:
-            experiments_for_new_lab.append(m.Experiment(lab_id=new_lab_id,
+            if experiment_exists(experiment_id):
+                warning_msg = 'The same experiment name has already exist in the same lab'
+                app.logger.warning(warning_msg)
+                continue
+            else:
+                experiments_for_lab.append(m.Experiment(lab_id=lab_id,
                                                         id=experiment_id,
                                                         name=experiment_name,
                                                         description=e['description'],
@@ -390,26 +431,26 @@ def add_lab(lab_info):
                                                         value_range=e['valueRange'],
                                                         value_candidates=e['valueCandidates']))
 
-    ds.add(m.Lab(id=new_lab_id, name=lab_info['name'],
-                 class_name=lab_info['class_name'],
-                 prof_name=lab_info['prof_name'],
-                 description=lab_info['description'],
-                 status='Activated', classes=classes,
-                 users=class_users,
-                 experiments=experiments_for_new_lab))
+    the_lab = m.Lab(id=lab_id, name=lab_json['labName'],
+                    class_name=lab_json['className'],
+                    prof_name=lab_json['professorName'],
+                    description=lab_json['labDescription'],
+                    status='Activated',
+                    classes=[the_class],
+                    experiments=experiments_for_lab,
+                    users=class_users)
+    ds.add(the_lab)
     ds.commit()
-    return warning_msg
+    return ''
 
 
 # Find a new lab id for the lab to copied from the old lab
 def find_lab_copy_id(old_lab_id):
-    i = 1
-    while True:
+    for index in range(1, 10000):
         # Name new lab based on old lab and check if name is repeat
-        if not lab_exists('copy'+str(i)+'-'+old_lab_id):
+        if not lab_exists('copy'+str(index)+'-'+old_lab_id):
             break
-        i += 1
-    return 'copy'+str(i)+'-'+old_lab_id
+    return 'copy'+str(index)+'-'+old_lab_id
 
 
 # copy a old lab and rename the new lab with 'copy'+index+'-'+old_lab_name
@@ -417,12 +458,14 @@ def duplicate_lab(old_lab_id):
     # Find a new lab id according to the old lab id
     new_lab_id = find_lab_copy_id(old_lab_id)
     # Copy info from old lab and add to new lab
-    old_lab = query_lab(old_lab_id)
+    old_lab = get_lab(old_lab_id)
+    # A lab can only belong to one class at this point
+    old_class = get_class(old_lab.classes[0].id)
     new_lab = m.Lab(
         id=new_lab_id, name=decompose_lab_id(new_lab_id)['lab_name'],
         class_name=old_lab.class_name, prof_name=old_lab.prof_name,
         description=old_lab.description, status=old_lab.status,
-        classes=old_lab.classes)
+        classes=[old_class], users=old_class.users)
 
     new_experiments = []
     for e in old_lab.experiments:
@@ -445,7 +488,7 @@ def duplicate_lab(old_lab_id):
 
 # Change a lab's status
 def change_lab_status(lab_id, new_status):
-    lab_query = query_lab(lab_id)
+    lab_query = get_lab(lab_id)
     lab_query.status = new_status
     ds.commit()
 
@@ -488,16 +531,16 @@ def find_all_observations_for_labs(lab_ids):
     undownloadable_labs = ''
     try:
         # Group observations according to experiment_name
-        experiments_query = query_experiments_for_lab(lab_ids[0])
+        experiments_query = get_experiments_for_lab(lab_ids[0])
         for e in experiments_query:
             observations_group_by_experiment_name.append({'experiment_name': e.name, 'observations': []})
             experiment_names.append(e.name)
         for lab_id in lab_ids:
-            lab_status = query_lab(lab_id).status
+            lab_status = get_lab(lab_id).status
             if lab_status != 'Downloadable':
                 undownloadable_labs += (str(lab_id)+'\t')
 
-            experiments_query = query_experiments_for_lab(lab_id)
+            experiments_query = get_experiments_for_lab(lab_id)
             index = 0
             # Check whether these labs are compatible with each other
             # (the number of experiments and the names of experiments must
@@ -516,14 +559,14 @@ def find_all_observations_for_labs(lab_ids):
                                    e.name+' are different row names')
                         break
                     else:
-                        observations_query = query_observations_for_experiment(e.id)
+                        observations_query = get_observations_for_experiment(e.id)
                         for observation in observations_query:
                             observations_group_by_experiment_name[index]['observations'].append({
                                 'lab_id': lab_id,
                                 'student_name': observation.student_name,
                                 'experiment_id': observation.experiment_id,
                                 'observation_id': observation.id,
-                                'observation_data': observation.data})
+                                'observation_data': observation.datum})
                     index += 1
         observations_group_by_student = change_observation_organization(observations_group_by_experiment_name)
 
@@ -568,7 +611,7 @@ def change_observation_organization(observations_group_by_experiment_name):
 def delete_observation(old_observation_ids_list):
     # delete all the old data by old observation_id
     for observation_id in old_observation_ids_list:
-        observations_query = query_observation(observation_id)
+        observations_query = get_observation(observation_id)
         ds.delete(observations_query)
     ds.commit()
 
@@ -595,7 +638,7 @@ def add_observation(new_observations_list):
         ds.add(m.Observation(experiment_id=d['experimentId'],
                              id=d['observationId'],
                              student_name=d['studentName'],
-                             data=d['observationData']))
+                             datum=d['observationData']))
 
     ds.commit()
     return warning_msg
@@ -631,7 +674,7 @@ def add_observations_sent_by_students(observations_group_by_student):
             ds.add(m.Observation(experiment_id=experiment_id,
                                  id=observation_id,
                                  student_name=student_name,
-                                 data=ob['observation']))
+                                 datum=ob['observation']))
     ds.commit()
     return ''
 
@@ -640,7 +683,7 @@ def add_observations_sent_by_students(observations_group_by_student):
 # add an admin into the database according to admin_info
 def add_admin(admin_info):
     # Get role object from table
-    role_admin = query_role('Admin')
+    role_admin = get_role('Admin')
     # id of the Admin must be unique before user can be created
     err_msg = check_existence(admin_info, 'username')
     if err_msg != '':
@@ -661,22 +704,22 @@ def add_admin(admin_info):
 
 # delete an admin from the database
 def delete_admin(admin_id):
-    admin_to_be_removed = query_user(admin_id)
+    admin_to_be_removed = get_user(admin_id)
     ds.delete(admin_to_be_removed)
     ds.commit()
 
 
 # change admin's password
 def change_admin_password(admin_id, new_password):
-    query_user(admin_id).password = new_password
+    get_user(admin_id).password = new_password
     ds.commit()
 
 
 # add a class into the database according to class_info
 def add_class(class_info):
     # get role objects from the Role table
-    role_student = query_role('Student')
-    role_admin = query_role('Admin')
+    role_student = get_role('Student')
+    role_admin = get_role('Admin')
 
     # Check the correctness of data format
     err_msg = check_existence(class_info, 'professors', 'students',
@@ -715,7 +758,7 @@ def add_class(class_info):
             if not user_exists(s_id):
                 ds.add(m.User(id=s_id, username=s,
                               password='data', role=role_student))
-            elif query_user(s_id).role_name != 'Student':
+            elif get_user(s_id).role_name != 'Student':
                 err_msg = s+(' already exists and is not a student.'
                              'You should not put their name into student name')
                 ds.rollback()
@@ -723,7 +766,7 @@ def add_class(class_info):
             user_ids.append(s_id)
 
         for user_id in user_ids:
-            users.append(query_user(user_id))
+            users.append(get_user(user_id))
         new_class = m.Class(id=new_class_id,
                             name=class_info['className'],
                             time=class_info['classTime'],
@@ -731,14 +774,14 @@ def add_class(class_info):
         ds.add(new_class)
         ds.commit()
     else:
-        err_msg = "The class id already exists: {}".format(query_class(new_class_id))
+        err_msg = "The class id already exists: {}".format(get_class(new_class_id))
     return err_msg
 
 
 # ---Manage classes---
 # remove a class from the database according to class_id
 def delete_class(class_id):
-    class_to_be_removed = query_class(class_id)
+    class_to_be_removed = get_class(class_id)
     # discard users not enrolled in any other class with labs
     # discard labs associated with the class to be deleted
     for s in class_to_be_removed.users:
@@ -746,7 +789,7 @@ def delete_class(class_id):
             ds.delete(s)
     for l in class_to_be_removed.labs:
         if lab_exists(l.id):
-            ds.delete(query_lab(l.id))
+            ds.delete(get_lab(l.id))
     ds.delete(class_to_be_removed)
     ds.commit()
 
@@ -756,7 +799,7 @@ def change_class_students(class_id, student_names):
     # clean up all the white space in the string
     student_names_str = ''.join(student_names.split())
     # get role objects from the Role table
-    role_student = query_role('Student')
+    role_student = get_role('Student')
     # Process the string to strip all the white space;
     # then split it over commas and join with commas
     student_names = student_names_str.split(',')
@@ -766,7 +809,7 @@ def change_class_students(class_id, student_names):
         err_msg = 'The pattern for student names is not correct'
         return err_msg
     student_ids = [generate_user_id(s) for s in student_names]
-    the_class = query_class(class_id)
+    the_class = get_class(class_id)
 
     # Delete the students that you chose to be removed from the class
     # if they are not in any other class
@@ -786,9 +829,9 @@ def change_class_students(class_id, student_names):
             ds.add(m.User(id=s_id, username=s, password='data',
                           role=role_student, classes=[the_class]))
         else:
-            the_classes = query_user(s_id).classes
+            the_classes = get_user(s_id).classes
             if not (class_id in [c.id for c in the_classes]):
-                query_user(s_id)
+                get_user(s_id)
     ds.commit()
     return ''
 
@@ -837,44 +880,4 @@ def err_html(err_msg='Client Error', template='error_400.html', code=400):
             code, {'Content-Type': 'text/html'})
 
 
-# --- Decorators ---
-# This decorator is not used right now because the app is in debug mode
-# which can generate detailed error info
-# A decorator used to handle exceptions
-def db_exception_handler(request_type, msg="Unknown bug. "):
-    def decorator(f):
-        @wraps(f)
-        def wrapped(*args, **kwargs):
-            try:
-                ret = f(*args, **kwargs)
-                return ret
-            except Exception:
-                db.session.rollback()
-                exc_type, exc_obj, tb = sys.exc_info()
-                frame = tb.tb_frame
-                lineno = tb.tb_lineno
-                filename = frame.f_code.co_filename
-                linecache.checkcache(filename)
-                line = linecache.getline(filename, lineno, frame.f_globals)
-                err_msg = 'EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno,
-                                                                       line.strip(), exc_obj)
-                if request_type == 'POST':
-                    return jsonify(success=False, data=err_msg)
-                else:
-                    return render_template('error_400.html',
-                                           err_msg=err_msg), 400
-        return wrapped
-    return decorator
 
-
-# A decorator used to check the user's permission to access the current page
-# If the user doesn't have access, redirect to the login page
-def permission_required(permission):
-    def decorator(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            if not current_user.can(permission):
-                return redirect(url_for('login'))
-            return f(*args, **kwargs)
-        return decorated_function
-    return decorator
