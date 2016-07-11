@@ -16,31 +16,36 @@ ds = db.session
 
 
 # --- Decorators ---
-# This decorator is not used right now because the app is in debug mode
-# which can generate detailed error info
-# A decorator used to handle exceptions
+# This is a decorator used to handle exceptions
+# It will not be activated if the app is in debug mode
+# since debug mode can generate more detailed error feedback
+# already
 def db_exception_handler(request_type, msg="Unknown bug. "):
     def decorator(f):
         @wraps(f)
         def wrapped(*args, **kwargs):
-            try:
+            if app.debug is True:
                 ret = f(*args, **kwargs)
                 return ret
-            except Exception:
-                db.session.rollback()
-                exc_type, exc_obj, tb = sys.exc_info()
-                frame = tb.tb_frame
-                lineno = tb.tb_lineno
-                filename = frame.f_code.co_filename
-                linecache.checkcache(filename)
-                line = linecache.getline(filename, lineno, frame.f_globals)
-                err_msg = 'EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno,
-                                                                       line.strip(), exc_obj)
-                if request_type == 'POST':
-                    return jsonify(success=False, data=err_msg)
-                else:
-                    return render_template('error_400.html',
-                                           err_msg=err_msg), 400
+            else:
+                try:
+                    ret = f(*args, **kwargs)
+                    return ret
+                except Exception:
+                    db.session.rollback()
+                    exc_type, exc_obj, tb = sys.exc_info()
+                    frame = tb.tb_frame
+                    lineno = tb.tb_lineno
+                    filename = frame.f_code.co_filename
+                    linecache.checkcache(filename)
+                    line = linecache.getline(filename, lineno, frame.f_globals)
+                    err_msg = 'EXCEPTION IN ({}, LINE {} "{}"): {}'.format(filename, lineno,
+                                                                           line.strip(), exc_obj)
+                    if request_type == 'POST':
+                        return jsonify(success=False, data=err_msg)
+                    else:
+                        return render_template('error_400.html',
+                                               err_msg=err_msg), 400
         return wrapped
     return decorator
 
@@ -231,12 +236,14 @@ def observation_number_for_experiment(experiment_id):
 def serialize_lab_list(lab_list_query):
     labs = []
     for lab in lab_list_query:
-        labs.append({'lab_id': lab.id,
+        labs.append({'lab_list':
+                    {'lab_id': lab.id,
                      'lab_name': lab.name,
                      'description': lab.description,
                      'class_name': lab.class_name,
                      'prof_name': lab.prof_name,
-                     'status': lab.status})
+                     'status': lab.status,
+                     'experiments': len(lab.experiments)}})
     return labs
 
 
@@ -827,7 +834,8 @@ def change_class_students(class_id, student_names):
         s_id = generate_user_id(s)
         if not user_exists(s_id):
             ds.add(m.User(id=s_id, username=s, password='data',
-                          role=role_student, classes=[the_class]))
+                          role=role_student, classes=[the_class],
+                          labs=the_class.labs))
         else:
             the_classes = get_user(s_id).classes
             if not (class_id in [c.id for c in the_classes]):
@@ -878,6 +886,3 @@ def err_html(err_msg='Client Error', template='error_400.html', code=400):
     app.logger.error(err_msg)
     return (render_template(template, err_msg=err_msg),
             code, {'Content-Type': 'text/html'})
-
-
-

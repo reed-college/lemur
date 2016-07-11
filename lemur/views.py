@@ -76,7 +76,7 @@ def superadmin_home():
 @permission_required(m.Permission.DATA_ENTRY)
 def student_enter_data():
     labs_query = get_labs_for_user(current_user)
-    lab_list = serialize_lab_list(labs_query)
+    lab_list = serialize_lab_list(labs_query)['lab_list']
     return render_template('student_enter_data.html',
                            lab_list=lab_list)
 
@@ -489,4 +489,8 @@ def inject_patterns():
                 pattern_for_name_hint=('must be a combination of number(s),'
                                        'letter(s), hyphen(s) and white'
                                        'space(s) with length between 1 and 60'
-                                       ))
+                                       ),
+                pattern_for_value_candidates='[0-9a-zA-Z\-]*(,[0-9a-zA-Z\-]*)*',
+                pattern_for_value_candidates_hint='valueCandidates should be in the format:N,C',
+                pattern_for_value_range='[0-9]{1,10}[.]?[0-9]{0,10}-[0-9]{1,10}[.]?[0-9]{0,10}',
+                pattern_for_value_range_hint='valueRange should be in the format:0.3-6.5')
