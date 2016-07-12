@@ -10,7 +10,7 @@ from flask.ext.login import (login_user, logout_user, current_user,
                              login_required)
 
 # Other modules
-from lemur import (app, db, class_time, current_time)
+from lemur import (app, db)
 from lemur import models as m
 from lemur.utility import *
 # Abbreviation for convenience
@@ -102,7 +102,7 @@ def student_data_entry(lab_id):
 
     # Convert queries into JSON format
     experiments = serialize_experiment_list(experiments_query)
-    lab_info = serialize_lab_list([lab_query])
+    lab_info = serialize_lab_list([lab_query])['lab_list']
 
     return render_template('student_data_entry.html',
                            experiments=experiments, lab_info=lab_info)
@@ -132,7 +132,7 @@ def _student_receive_data():
 @permission_required(m.Permission.LAB_SETUP)
 def admin_setup_labs_and_data_access():
     current_labs = find_all_labs(current_user)
-    class_names = serialize_class_name_list()
+    class_ids = serialize_class_ids_list()
     prof_names = serialize_prof_name_list()
     # If data sent by client is in correct format redirect to lab setup page
     # with user's entered data
@@ -142,7 +142,7 @@ def admin_setup_labs_and_data_access():
             return err_json(err_msg)
         return redirect(url_for('.admin_setup_labs', labinfo=lab_info))
     return render_template('admin_setup_labs_and_data_access.html',
-                           current_labs=current_labs, class_names=class_names,
+                           current_labs=current_labs, class_ids=class_ids,
                            prof_names=prof_names)
 
 
@@ -154,10 +154,10 @@ def admin_setup_labs():
     # Assume labinfo to be a python3 list(the security is guranteed
     # by the permission checking)
     labinfo = ast.literal_eval(request.args['labinfo'])
-    class_names = serialize_class_name_list()
+    class_ids = serialize_class_ids_list()
     prof_names = serialize_prof_name_list()
     return render_template('admin_modify_lab.html', labinfo=labinfo,
-                           class_names=class_names, prof_names=prof_names,
+                           class_ids=class_ids, prof_names=prof_names,
                            post_address='_admin_receive_setup_labs_data')
 
 
@@ -166,18 +166,18 @@ def admin_setup_labs():
 def _admin_receive_setup_labs_data():
     # receive the data, check the format and deserialize it
     jsonData = request.get_json()
-    err_msg = check_existence(jsonData, 'labName', 'className', 'classTime',
+    print(jsonData)
+    err_msg = check_existence(jsonData, 'labName', 'classId',
                                         'professorName', 'labDescription',
                                         'experiments', 'oldLabId')
     if err_msg != '':
-        return (None, err_msg)
-    class_id = generate_class_id(jsonData['className'], jsonData['classTime'])
+        return err_json(err_msg)
     # Admin can only edit labs in his/her own zone
     # SuperAdmin can edit labs for anyone
     # This check has a problem: If two Admins have the same names now, they can
     # edit each other's labs
     err_msg = check_power_to_add_lab(current_user, jsonData['professorName'],
-                                     class_id)
+                                     jsonData['classId'])
     if err_msg != '':
         return err_json(err_msg)
     err_msg = modify_lab(jsonData)
@@ -199,15 +199,15 @@ def admin_modify_lab(lab_id):
                    'All the existing labs are:{}'.format(find_all_labs(current_user)))
         return err_html(err_msg)
     # get info to send to template
-    class_names = serialize_class_name_list()
+    class_ids = serialize_class_ids_list()
     prof_names = serialize_prof_name_list()
     experiments = serialize_experiment_list(experiments_query)
-    lab_info = serialize_lab_list([lab_query])[0]
+    lab_info = serialize_lab_list([lab_query])['lab_list'][0]
     # Sort the list of experiments according to order and add them into labinfo
     sorted(experiments, key=lambda experiment: experiment['order'])
     lab_info['experiments'] = experiments
     return render_template('admin_modify_lab.html', labinfo=lab_info,
-                           class_names=class_names, prof_names=prof_names,
+                           class_ids=class_ids, prof_names=prof_names,
                            post_address='_admin_modify_lab')
 
 
@@ -475,13 +475,6 @@ def inject_permissions():
     return dict(Permission=m.Permission)
 
 
-# Manually set all the candidates of class_time and current_time since
-# in most case only the data in one semester will be used at one time
-@app.context_processor
-def inject_class_time():
-    return dict(class_time=class_time, current_time=current_time)
-
-
 # Add the demand to the format of the inputs
 @app.context_processor
 def inject_patterns():
@@ -489,8 +482,4 @@ def inject_patterns():
                 pattern_for_name_hint=('must be a combination of number(s),'
                                        'letter(s), hyphen(s) and white'
                                        'space(s) with length between 1 and 60'
-                                       ),
-                pattern_for_value_candidates='[0-9a-zA-Z\-]*(,[0-9a-zA-Z\-]*)*',
-                pattern_for_value_candidates_hint='valueCandidates should be in the format:N,C',
-                pattern_for_value_range='[0-9]{1,10}[.]?[0-9]{0,10}-[0-9]{1,10}[.]?[0-9]{0,10}',
-                pattern_for_value_range_hint='valueRange should be in the format:0.3-6.5')
+                                       ))

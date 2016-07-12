@@ -121,6 +121,11 @@ def decompose_lab_id(lab_id):
             'class_name': lab_id.split('_')[2]}
 
 
+def decompose_class_id(class_id):
+    return {'class_name': class_id.split('_')[0],
+            'class_time': class_id.split('_')[1]}
+
+
 # --- Check existence ---
 def lab_exists(lab_id):
     return ds.query(m.Lab).filter(m.Lab.id == lab_id).count() > 0
@@ -236,15 +241,14 @@ def observation_number_for_experiment(experiment_id):
 def serialize_lab_list(lab_list_query):
     labs = []
     for lab in lab_list_query:
-        labs.append({'lab_list':
-                    {'lab_id': lab.id,
+        labs.append({'lab_id': lab.id,
                      'lab_name': lab.name,
                      'description': lab.description,
                      'class_name': lab.class_name,
                      'prof_name': lab.prof_name,
                      'status': lab.status,
-                     'experiments': len(lab.experiments)}})
-    return labs
+                     'experiments': len(lab.experiments)})
+    return {'lab_list': labs}
 
 
 # convert a query for experiments into a list of JSON objects
@@ -264,6 +268,11 @@ def serialize_experiment_list(experiment_list_query):
 # return a list of class names
 def serialize_class_name_list():
     return [c.name for c in get_all_class()]
+
+
+# return a list of class ids
+def serialize_class_ids_list():
+    return [c.id for c in get_all_class()]
 
 
 # return a list of professors' names
@@ -353,9 +362,9 @@ def find_all_labs(user):
         get_unactivated = ds.query(m.Lab).filter(m.Lab.status == 'Unactivated').all()
 
     # convert lab info, class names and professor names into json format
-    return {'activated': serialize_lab_list(get_activated),
-            'downloadable': serialize_lab_list(get_downloadable),
-            'unactivated': serialize_lab_list(get_unactivated)}
+    return {'activated': serialize_lab_list(get_activated)['lab_list'],
+            'downloadable': serialize_lab_list(get_downloadable)['lab_list'],
+            'unactivated': serialize_lab_list(get_unactivated)['lab_list']}
 
 
 # Admin can only edit labs in his/her own zone
@@ -382,23 +391,23 @@ def delete_lab(lab_id):
 
 # Modify a lab
 def modify_lab(lab_json):
-    err_msg = check_existence(lab_json, 'labName', 'className', 'classTime',
+    err_msg = check_existence(lab_json, 'labName', 'classId',
                                         'professorName', 'labDescription',
                                         'experiments', 'oldLabId')
     if lab_exists(lab_json['oldLabId']):
         delete_lab(lab_json['oldLabId'])
-    class_id = generate_class_id(lab_json['className'], lab_json['classTime'])
-    if not class_exists(class_id):
-        err_msg += 'class id: {0} doesn\' exist in the database'.format(class_id)
+    if not class_exists(lab_json['classId']):
+        err_msg += 'class id: {0} doesn\' exist in the database'.format(lab_json['classId'])
     if err_msg != '':
         return err_msg
-    the_class = get_class(class_id)
+    the_class = get_class(lab_json['classId'])
     # Build connection between the current lab and the existing users/classes
     class_users = []
     if the_class is not None:
         class_users = the_class.users
+    class_name = decompose_class_id(lab_json['classId'])['class_name']
     lab_id = generate_lab_id(lab_json['labName'],
-                             lab_json['className'],
+                             class_name,
                              lab_json['professorName'])
     if lab_exists(lab_id):
         return 'lab id:{0} already exists'.format(lab_id)
@@ -439,7 +448,7 @@ def modify_lab(lab_json):
                                                         value_candidates=e['valueCandidates']))
 
     the_lab = m.Lab(id=lab_id, name=lab_json['labName'],
-                    class_name=lab_json['className'],
+                    class_name=class_name,
                     prof_name=lab_json['professorName'],
                     description=lab_json['labDescription'],
                     status='Activated',
@@ -502,17 +511,17 @@ def change_lab_status(lab_id, new_status):
 
 # Check and return lab information sent from the client
 def pack_labinfo_sent_from_client(client_form):
-    err_msg = check_existence(client_form, 'labName', 'className',
-                                           'classTime', 'professorName',
+    err_msg = check_existence(client_form, 'labName', 'classId',
+                                           'professorName',
                                            'labDescription',
                                            'labQuestions')
     if err_msg != '':
         return dict(), err_msg
     # to keep the interface consistent, assign empty string to lab_id
+    class_info = decompose_class_id(client_form['classId'])
     lab_info = {'lab_id': '',
                 'lab_name': client_form['labName'],
-                'class_name': client_form['className'],
-                'class_time': client_form['classTime'],
+                'class_id': client_form['classId'],
                 'prof_name': client_form['professorName'],
                 'description': client_form['labDescription']}
     # Add empty experiments to be consistent with the variables used in the
