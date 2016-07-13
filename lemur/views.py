@@ -28,16 +28,16 @@ def login():
             return render_template('login.html')
         user_id = generate_user_id(request.form['username'])
         user = get_user(user_id)
-        # check existence of the user and the user's password
-        if user is not None and user.verify_password(request.form['password']):
-            # When both the username and password are valid then redirect to
+        # check existence of the use
+        if user is not None:
+            # When both the username is valid then redirect to
             # the corresponding home page
             login_user(user, True)
             user_home = {'SuperAdmin': 'superadmin_home',
                          'Admin': 'admin_home',
                          'Student': 'student_home'}
             return redirect(url_for(user_home[user.role_name]))
-            flash('Invalid username or password')
+            flash('Invalid username')
     return render_template('login.html')
 
 
@@ -166,7 +166,6 @@ def admin_setup_labs():
 def _admin_receive_setup_labs_data():
     # receive the data, check the format and deserialize it
     jsonData = request.get_json()
-    print(jsonData)
     err_msg = check_existence(jsonData, 'labName', 'classId',
                                         'professorName', 'labDescription',
                                         'experiments', 'oldLabId')
@@ -283,6 +282,7 @@ def admin_edit_data(lab_ids):
     # Get a list of lab_ids with which the observations are
     # to be retrieved
     lab_ids = json.loads(lab_ids)
+    lab_ids_str = (',').join(lab_ids)
     # Get all the observations of the labs with lab_ids
     (observations, observations_by_student, _,
         err_msg, undownloadable_labs) = find_all_observations_for_labs(lab_ids)
@@ -290,7 +290,7 @@ def admin_edit_data(lab_ids):
         return render_template('admin_edit_data.html',
                                observations=observations,
                                student_data=observations_by_student,
-                               lab_ids=lab_ids,
+                               lab_ids=lab_ids_str,
                                err_msg=err_msg,
                                undownloadable_labs=undownloadable_labs)
     else:
@@ -341,9 +341,7 @@ def _admin_delete_data():
 @app.route('/_admin_download_data/<lab_ids>')
 @permission_required(m.Permission.DATA_EDIT)
 def _admin_download_data(lab_ids):
-    lab_ids, err_msg = deserialize_lab_id(lab_ids)
-    if err_msg != '':
-        return err_html(err_msg)
+    lab_ids = json.loads(lab_ids)
     # Query data to download
     # underscores are placeholders for data not currently needed
     (_, observations_by_student, experiment_names, err_msg, _) = find_all_observations_for_labs(lab_ids)
@@ -383,18 +381,6 @@ def _superadmin_delete_admin():
     if err_msg != '':
         return err_json(err_msg)
     delete_admin(jsonData['adminIdToBeRemoved'])
-    return normal_json(jsonData)
-
-
-@app.route('/_superadmin_modify_admin', methods=['POST'])
-@permission_required(m.Permission.USER_MANAGE)
-def _superadmin_modify_admin():
-    jsonData = request.get_json()
-    # Check the correctness of data format
-    err_msg = check_existence(jsonData, 'adminId', 'password')
-    if err_msg != '':
-        return err_json(err_msg)
-    change_admin_password(jsonData['adminId'], jsonData['password'])
     return normal_json(jsonData)
 
 

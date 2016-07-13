@@ -26,6 +26,12 @@ association_table_user_lab = db.Table('association_user_lab',
                                       db.Column('lab_id', db.String(64),
                                                 db.ForeignKey(
                                                     'Lab.id')))
+association_table_role_power = db.Table('association_role_power',
+                                        db.Column('role_name', db.String(64),
+                                                  db.ForeignKey('Role.name')),
+                                        db.Column('power_id', db.String(64),
+                                                  db.ForeignKey(
+                                                    'Power.id')))
 
 
 # set up class to track the date and time information for an object
@@ -170,12 +176,10 @@ class User(UserMixin, db.Model):
     id = db.Column(db.String(64), nullable=False, unique=True,
                    primary_key=True)
     username = db.Column(db.String(64), nullable=False, unique=True)
-    password = db.Column(db.String(128), nullable=False)
     name = db.Column(db.String(128))
     # Many-to-One: A role can have multiple users
     role_name = db.Column(db.String(64), db.ForeignKey('Role.name'))
     role = db.relationship("Role", back_populates="users")
-
     # Many-to-Many: A User can have multiple classes
     classes = db.relationship("Class", secondary=association_table_class_user,
                               back_populates="users")
@@ -183,13 +187,13 @@ class User(UserMixin, db.Model):
     labs = db.relationship("Lab", secondary=association_table_user_lab,
                            back_populates="users")
 
-    def verify_password(self, password):
-        return self.password == password
+    # Return the ids of all the powers a user has
+    def get_power(self):
+        return [p.id for p in self.role.powers]
 
     # can function checks if user is allowed to peform an operation
-    def can(self, permissions):
-        return self.role is not None and (
-            self.role.permissions & permissions) == permissions
+    def can(self, power):
+        return self.role is not None and power in self.get_power()
 
     def __repr__(self):
         tpl = ('User<id: {id}, username: {username}, password: {password},'
@@ -221,34 +225,42 @@ class Role(db.Model):
     name = db.Column(db.String(64), nullable=False, unique=True,
                      primary_key=True)
 
-    # A number representing the power the role has using bit operation
-    permissions = db.Column(db.Integer, nullable=False)
+    # Many-to-Many: A Role can have multiple power; a power can belong to
+    # roles
+    powers = db.relationship("Power", secondary=association_table_role_power,
+                             back_populates="roles")
 
-    # one-to-many: A Role can have multiple users
+    # One-to-Many: A Role can have multiple users
     users = db.relationship('User', back_populates='role', lazy='dynamic')
 
     # For database initialization, no object needed to use this method
+    # Load all the Powers and Roles into the database
     @staticmethod
     def insert_roles():
+        for p in Permission.all_permissions():
+            if db.session.query(Power).filter(Power.id==p).count() == 0:
+                db.session.add(Power(id=p))
         roles = {
-            'Student': (Permission.DATA_ENTRY),
-            'Admin': (Permission.DATA_ENTRY |
-                      Permission.DATA_EDIT |
-                      Permission.LAB_SETUP |
-                      Permission.ADMIN),
-            'SuperAdmin': (Permission.DATA_ENTRY |
-                           Permission.DATA_EDIT |
-                           Permission.LAB_SETUP |
-                           Permission.ADMIN |
-                           Permission.LAB_MANAGE |
-                           Permission.USER_MANAGE |
-                           Permission.SUPERADMIN)
+            'Student': [Permission.DATA_ENTRY],
+            'Admin': [Permission.DATA_ENTRY,
+                      Permission.DATA_EDIT,
+                      Permission.LAB_SETUP,
+                      Permission.ADMIN],
+            'SuperAdmin': [Permission.DATA_ENTRY,
+                           Permission.DATA_EDIT,
+                           Permission.LAB_SETUP,
+                           Permission.ADMIN,
+                           Permission.LAB_MANAGE,
+                           Permission.USER_MANAGE,
+                           Permission.SUPERADMIN]
         }
         for r in roles:
             role = Role.query.filter_by(name=r).first()
             if role is None:
                 role = Role(name=r)
-            role.permissions = roles[r]
+            for p in roles[r]:
+                role.powers.append(db.session.query(Power).filter(
+                     Power.id == p).one())
             db.session.add(role)
         db.session.commit()
 
@@ -260,13 +272,41 @@ class Role(db.Model):
         return formatted
 
 
-# Bits associated with the role power they represent using hexadecimal format
+class Power(db.Model):
+    __tablename__ = 'Power'
+    id = db.Column(db.String(64), nullable=False, unique=True,
+                   primary_key=True)
+    # Many-to-Many: A Role can have multiple power; a power can belong to
+    # roles
+    roles = db.relationship("Role", secondary=association_table_role_power,
+                            back_populates="powers")
+
+    def __repr__(self):
+        tpl = ('Power<id: {id}')
+        formatted = tpl.format(id=self.id)
+        return formatted
+
+
+# A class which consists of all the ids of Power
 class Permission:
-    DATA_ENTRY = 0x01
-    DATA_EDIT = 0x02
-    LAB_SETUP = 0x04
-    ADMIN = 0x08
-    LAB_ACCESS = 0x10
-    LAB_MANAGE = 0x20
-    USER_MANAGE = 0x40
-    SUPERADMIN = 0x200
+    DATA_ENTRY = 'DATA_ENTRY'
+    DATA_EDIT = 'DATA_EDIT'
+    LAB_SETUP = 'LAB_SETUP'
+    ADMIN = 'ADMIN'
+    LAB_ACCESS = 'LAB_ACCESS'
+    LAB_MANAGE = 'LAB_MANAGE'
+    USER_MANAGE = 'USER_MANAGE'
+    SUPERADMIN = 'SUPERADMIN'
+
+    # Return all the permissions as a list
+    @staticmethod
+    def all_permissions():
+        permissions_list = [Permission.DATA_ENTRY,
+                            Permission.DATA_EDIT,
+                            Permission.LAB_SETUP,
+                            Permission.ADMIN,
+                            Permission.LAB_ACCESS,
+                            Permission.LAB_MANAGE,
+                            Permission.USER_MANAGE,
+                            Permission.SUPERADMIN]
+        return permissions_list

@@ -182,6 +182,12 @@ def get_role(role_name):
         m.Role.name == role_name).one()
 
 
+@failure_handler
+def get_power(power_id):
+    return ds.query(m.Power).filter(
+        m.Power.id == power_id).one()
+
+
 def get_all_lab():
     return ds.query(m.Lab).all()
 
@@ -288,7 +294,6 @@ def serialize_admin_list(admins_query):
         labs = [lab.id for lab in admin.labs]
         current_admins.append({'id': admin.id,
                                'username': admin.username,
-                               'password': admin.password,
                                'name': admin.name, 'classes': classes,
                                'labs': labs})
     return current_admins
@@ -308,18 +313,6 @@ def serialize_class_list(classes_query):
                                 'students': students,
                                 'labs': labs})
     return current_classes
-
-
-# Cnovert a string in the format '[a,b,c]' into a python list
-def deserialize_lab_id(lab_ids):
-    lab_ids = lab_ids.lstrip('\"[').rstrip('\"]').split(',')
-    lab_ids = [lab.lstrip('\'').rstrip('\'') for lab in lab_ids if
-               lab.lstrip('\'').rstrip('\'') != '']
-    if not(isinstance(lab_ids, list)):
-        err_msg = 'The <lab_ids> does not have the right format. '
-        +'lab_ids has the type '+str(type(lab_ids))
-        return lab_ids, err_msg
-    return lab_ids, ''
 
 
 # --- Find the information of labs ---
@@ -518,7 +511,6 @@ def pack_labinfo_sent_from_client(client_form):
     if err_msg != '':
         return dict(), err_msg
     # to keep the interface consistent, assign empty string to lab_id
-    class_info = decompose_class_id(client_form['classId'])
     lab_info = {'lab_id': '',
                 'lab_name': client_form['labName'],
                 'class_id': client_form['classId'],
@@ -708,7 +700,6 @@ def add_admin(admin_info):
     if not user_exists(new_admin_id):
         new_admin = m.User(id=new_admin_id,
                            username=admin_info['username'],
-                           password=admin_info['password'],
                            name=admin_info['name'],
                            role=role_admin)
         ds.add(new_admin)
@@ -722,12 +713,6 @@ def add_admin(admin_info):
 def delete_admin(admin_id):
     admin_to_be_removed = get_user(admin_id)
     ds.delete(admin_to_be_removed)
-    ds.commit()
-
-
-# change admin's password
-def change_admin_password(admin_id, new_password):
-    get_user(admin_id).password = new_password
     ds.commit()
 
 
@@ -765,15 +750,13 @@ def add_class(class_info):
         for p in professor_names:
             p_id = generate_user_id(p)
             if not user_exists(p_id):
-                ds.add(m.User(id=p_id, username=p,
-                              password='data', role=role_admin))
+                ds.add(m.User(id=p_id, username=p, role=role_admin))
             user_ids.append(p_id)
 
         for s in student_names:
             s_id = generate_user_id(s)
             if not user_exists(s_id):
-                ds.add(m.User(id=s_id, username=s,
-                              password='data', role=role_student))
+                ds.add(m.User(id=s_id, username=s, role=role_student))
             elif get_user(s_id).role_name != 'Student':
                 err_msg = s+(' already exists and is not a student.'
                              'You should not put their name into student name')
@@ -842,7 +825,7 @@ def change_class_students(class_id, student_names):
     for s in student_names:
         s_id = generate_user_id(s)
         if not user_exists(s_id):
-            ds.add(m.User(id=s_id, username=s, password='data',
+            ds.add(m.User(id=s_id, username=s,
                           role=role_student, classes=[the_class],
                           labs=the_class.labs))
         else:
