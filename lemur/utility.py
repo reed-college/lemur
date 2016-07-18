@@ -1,3 +1,9 @@
+# This is file contains all the utility functions used by view
+# functions in view.py
+# The reasons of using these functions instead of directly writing the code
+# into view functions are: code readability of view functions;
+# easier unit testing for different features a view function supports
+
 # Libraries
 # Standard library
 from functools import wraps
@@ -16,6 +22,8 @@ ds = db.session
 
 
 # --- Decorators ---
+
+# This handler has not been added to view functions.
 # This is a decorator used to handle exceptions
 # It will not be activated if the app is in debug mode
 # since debug mode can generate more detailed error feedback
@@ -74,6 +82,8 @@ def failure_handler(f):
     return f_try
 
 
+# --- Message/ID generator/decomposer ---
+
 # Check the existence of args in a form
 # and generate an error message accordingly
 def check_existence(form, *expectedArgs):
@@ -127,6 +137,9 @@ def decompose_class_id(class_id):
 
 
 # --- Check existence ---
+# This group of functions check the existence of an object and
+# return True/False accordingly
+
 def lab_exists(lab_id):
     return ds.query(m.Lab).filter(m.Lab.id == lab_id).count() > 0
 
@@ -147,8 +160,11 @@ def user_exists(user_id):
     return ds.query(m.User).filter(m.User.id == user_id).count() > 0
 
 
-# --- Query data ---
-# Get the Lab object from the database by lab_id
+# --- Get an object from database ---
+# This group of functions gets an object from the database by the unique
+# key associated with that object. It will return the object found and None if
+# such a object doesn't exist.
+
 @failure_handler
 def get_lab(lab_id):
     return ds.query(m.Lab).filter(m.Lab.id == lab_id).one()
@@ -159,7 +175,6 @@ def get_experiment(experiment_id):
     return ds.query(m.Experiment).filter(m.Experiment.id == experiment_id).one()
 
 
-# Get the Observation object from the database by observation_id
 @failure_handler
 def get_observation(observation_id):
     return ds.query(m.Observation).filter(m.Observation.id == observation_id).one()
@@ -188,6 +203,10 @@ def get_power(power_id):
         m.Power.id == power_id).one()
 
 
+# --- Get a list of objects from database ---
+# This group of functions returns a list of objects of a certain class
+# that reaches a certain criteria
+
 def get_all_lab():
     return ds.query(m.Lab).all()
 
@@ -196,57 +215,63 @@ def get_all_experiment():
     return ds.query(m.Experiment).all()
 
 
-# return the query for all the classes in the database
 def get_all_class():
     return ds.query(m.Class).all()
 
 
-# return the query for all the admins in the database
 def get_all_admin():
     return ds.query(m.User).filter(
            m.User.role_name == 'Admin').all()
 
 
-# return the query for all the admins in the database
 def get_all_superadmin():
     return ds.query(m.User).filter(
            m.User.role_name == 'SuperAdmin').all()
 
 
+# --- Get a list of objects for an object of another class from database ---
+# This group of functions returns a list of objects of a class for
+# an entered object of a related class(i.e. a relationship exists between the
+# two classes)
+
 # Get lab query for the user according to user's role
 # A SuperAdmin can select among all the labs
-    # A student/Admin can only select his/her own labs
-def get_labs_for_user(user):
+# A student/Admin can only select his/her own labs
+def get_available_labs_for_user(user):
+    available_labs = [lab for lab in user.labs if lab.status == 'Activated']
     if user.role_name == 'SuperAdmin':
-        return ds.query(m.Lab).all()
-    else:
-        return [lab for lab in user.labs]
+        lab_query = get_all_lab()
+        available_labs = [lab for lab in lab_query if lab.status == 'Activated']
+    return available_labs
 
 
-# Get all the experiments for a lab
 def get_experiments_for_lab(lab_id):
     return ds.query(m.Experiment).filter(
         m.Experiment.lab_id == lab_id).order_by(m.Experiment.order).all()
 
 
-# Get all the observations for an experiment
 def get_observations_for_experiment(experiment_id):
     return ds.query(m.Observation).filter(
         m.Observation.experiment_id == experiment_id).order_by(
         m.Observation.id).all()
 
 
-# --- Check number ---
+# This one is a bit different:
+# It returns the number of observations for a certain experiment
 def observation_number_for_experiment(experiment_id):
     return db.session.query(m.Observation).filter(
         m.Observation.experiment_id == experiment_id).count()
 
 
-# ---serialization/deserialization---
-# convert a query for labs into a python list of dictionaries
-def serialize_lab_list(lab_list_query):
+# --- Serialization/Deserialization ---
+# These the types of parameters/return values of these functions
+# are relatively flexible. This group of functions receives a list
+# of objects and convert it into a python list of dictionaries
+# (close to JSON format) with the info contained by these objects
+
+def serialize_lab_list(lab_list):
     labs = []
-    for lab in lab_list_query:
+    for lab in lab_list:
         labs.append({'lab_id': lab.id,
                      'lab_name': lab.name,
                      'description': lab.description,
@@ -254,13 +279,12 @@ def serialize_lab_list(lab_list_query):
                      'prof_name': lab.prof_name,
                      'status': lab.status,
                      'experiments': len(lab.experiments)})
-    return {'lab_list': labs}
+    return labs
 
 
-# convert a query for experiments into a list of JSON objects
-def serialize_experiment_list(experiment_list_query):
+def serialize_experiment_list(experiment_list):
     experiments = []
-    for experiment in experiment_list_query:
+    for experiment in experiment_list:
         experiments.append({'experiment_id': experiment.id,
                             'experiment_name': experiment.name,
                             'description': experiment.description,
@@ -271,25 +295,9 @@ def serialize_experiment_list(experiment_list_query):
     return experiments
 
 
-# return a list of class names
-def serialize_class_name_list():
-    return [c.name for c in get_all_class()]
-
-
-# return a list of class ids
-def serialize_class_ids_list():
-    return [c.id for c in get_all_class()]
-
-
-# return a list of professors' names
-def serialize_prof_name_list():
-    return [u.name for u in get_all_admin()] + [u.name for u in get_all_superadmin()]
-
-
-# convert a query for admins into a list of JSON objects
-def serialize_admin_list(admins_query):
+def serialize_admin_list(admin_list):
     current_admins = []
-    for admin in admins_query:
+    for admin in admin_list:
         classes = [c.id for c in admin.classes]
         labs = [lab.id for lab in admin.labs]
         current_admins.append({'id': admin.id,
@@ -299,10 +307,9 @@ def serialize_admin_list(admins_query):
     return current_admins
 
 
-# convert a query for classes into a list of JSON objects
-def serialize_class_list(classes_query):
+def serialize_class_list(class_list):
     current_classes = []
-    for c in classes_query:
+    for c in class_list:
         professors = [p.username for p in c.users if (p.role_name == 'Admin' or p.role_name == 'SuperAdmin')]
         students = [s.username for s in c.users if s.role_name == 'Student']
         labs = [lab.id for lab in c.labs]
@@ -315,22 +322,40 @@ def serialize_class_list(classes_query):
     return current_classes
 
 
+# --- This group of functions returns a list of a certain attribute
+# of all the objects in this class ----
+
+# return the list of all class ids
+def get_class_id_list():
+    return [c.id for c in get_all_class()]
+
+
+# return the list of all professors' names
+def get_prof_name_list():
+    return [u.name for u in get_all_admin()] + [u.name for u in get_all_superadmin()]
+
+
 # --- Find the information of labs ---
+
 # return all the list of labs with basic information according to
-# the current user's role
+# the current user's role(SupderAdmin/Admin)
 def find_lab_list_for_user(user):
     lab_list = []
+    labs_query = []
     # query labs according to the user's role
-    labs_query = get_labs_for_user(user)
-    if user.role_name == 'Admin':
+    if user.role_name == 'SuperAdmin':
+        labs_query = ds.query(m.Lab).all()
+    elif user.role_name == 'Admin':
         labs_query = user.labs
-
     # get all the info of the labs
     for lab in labs_query:
         data_num = 0
         experiments_query = get_experiments_for_lab(lab.id)
-        for e in experiments_query:
-            data_num += observation_number_for_experiment(e.id)
+        # We assume every group enters the same number of data for each lab
+        # data_num represents the number of groups that have submitted data for
+        # a lab
+        if len(experiments_query) > 0:
+            data_num += observation_number_for_experiment(experiments_query[0].id)
         lab_list.append({'lab_id': lab.id, 'lab_name': lab.name,
                          'class_name': lab.class_name,
                          'prof_name': lab.prof_name,
@@ -355,9 +380,9 @@ def find_all_labs(user):
         get_unactivated = ds.query(m.Lab).filter(m.Lab.status == 'Unactivated').all()
 
     # convert lab info, class names and professor names into json format
-    return {'activated': serialize_lab_list(get_activated)['lab_list'],
-            'downloadable': serialize_lab_list(get_downloadable)['lab_list'],
-            'unactivated': serialize_lab_list(get_unactivated)['lab_list']}
+    return {'activated': serialize_lab_list(get_activated),
+            'downloadable': serialize_lab_list(get_downloadable),
+            'unactivated': serialize_lab_list(get_unactivated)}
 
 
 # Admin can only edit labs in his/her own zone
@@ -373,6 +398,7 @@ def check_power_to_add_lab(user, prof_name, class_id):
 
 
 # --- Manage labs ---
+
 # Delete a lab's basic info, experiments info and observations info
 def delete_lab(lab_id):
     ds.delete(get_lab(lab_id))
@@ -528,8 +554,7 @@ def pack_labinfo_sent_from_client(client_form):
 
 
 # --- Manage observations ---
-# This function is redundant and needs to be fixed at
-# some point
+
 # Query data entered by students for lab with lab_ids
 def find_all_observations_for_labs(lab_ids):
     observations_group_by_experiment_name = []
@@ -546,7 +571,7 @@ def find_all_observations_for_labs(lab_ids):
         for lab_id in lab_ids:
             lab_status = get_lab(lab_id).status
             if lab_status != 'Downloadable':
-                undownloadable_labs += (str(lab_id)+'\t')
+                undownloadable_labs += (str(lab_id)+',')
 
             experiments_query = get_experiments_for_lab(lab_id)
             index = 0
@@ -675,19 +700,21 @@ def add_observations_sent_by_students(observations_group_by_student):
             # If everything is correct add the data to the database
             lab_id = ob['labId']
             experiment_name = ob['experimentName']
+
             experiment_id = generate_experiment_id(lab_id, experiment_name)
             observation_id = generate_observation_id(experiment_id,
                                                      student_name)
-
-            ds.add(m.Observation(experiment_id=experiment_id,
-                                 id=observation_id,
-                                 student_name=student_name,
-                                 datum=ob['observation']))
+            if not observation_exists(observation_id):
+                ds.add(m.Observation(experiment_id=experiment_id,
+                                     id=observation_id,
+                                     student_name=student_name,
+                                     datum=ob['observation']))
     ds.commit()
     return ''
 
 
 # --- Manage admins ---
+
 # add an admin into the database according to admin_info
 def add_admin(admin_info):
     # Get role object from table
@@ -778,6 +805,7 @@ def add_class(class_info):
 
 
 # ---Manage classes---
+
 # remove a class from the database according to class_id
 def delete_class(class_id):
     class_to_be_removed = get_class(class_id)
@@ -837,6 +865,7 @@ def change_class_students(class_id, student_names):
 
 
 # --- Response object generators ---
+
 # Format the string csv to be downloaded
 def format_download(observations_by_student, experiment_names, lab_ids):
     # Add two additional columns besides experiment names

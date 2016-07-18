@@ -1,3 +1,5 @@
+# This file contains all the sqlalchemy tables and their relationship
+# in the database
 # Libraries
 # Standard library
 from datetime import datetime
@@ -10,20 +12,20 @@ from lemur import db, login_manager
 
 # Association tables for Many-To-Many relationships between various tables
 association_table_class_user = db.Table('association_class_user',
-                                        db.Column('class_id', db.String(64),
+                                        db.Column('class_id', db.String(128),
                                                   db.ForeignKey('Class.id')),
                                         db.Column('user_id', db.String(64),
                                                   db.ForeignKey('User.id')))
 association_table_class_lab = db.Table('association_class_lab',
-                                       db.Column('class_id', db.String(64),
+                                       db.Column('class_id', db.String(128),
                                                  db.ForeignKey('Class.id')),
-                                       db.Column('lab_id', db.String(64),
+                                       db.Column('lab_id', db.String(128),
                                                  db.ForeignKey(
                                                     'Lab.id')))
 association_table_user_lab = db.Table('association_user_lab',
                                       db.Column('user_id', db.String(64),
                                                 db.ForeignKey('User.id')),
-                                      db.Column('lab_id', db.String(64),
+                                      db.Column('lab_id', db.String(128),
                                                 db.ForeignKey(
                                                     'Lab.id')))
 association_table_role_power = db.Table('association_role_power',
@@ -41,14 +43,14 @@ class DateTimeInfo(object):
                            onupdate=datetime.now)
 
 
-# Store general info of a lab
+# A Lab is in reality a form which consists a list of questions(Experiment)
 class Lab(db.Model):
     __tablename__ = 'Lab'
     id = db.Column(db.String(128), nullable=False, unique=True,
                    primary_key=True)
-    name = db.Column(db.String(128), nullable=False)
-    class_name = db.Column(db.String(128), nullable=False)
-    prof_name = db.Column(db.String(128), nullable=False)
+    name = db.Column(db.String(64), nullable=False)
+    class_name = db.Column(db.String(32), nullable=False)
+    prof_name = db.Column(db.String(32), nullable=False)
     # lab description contained in description variable
     description = db.Column(db.String(4096))
     status = db.Column(db.Enum('Activated', 'Downloadable', 'Unactivated',
@@ -84,13 +86,13 @@ class Lab(db.Model):
         return formatted
 
 
-# Store experiments' info of a lab
+# An experiment represents a question in a lab form
 class Experiment(db.Model):
     __tablename__ = 'Experiment'
-    id = db.Column(db.String(128), nullable=False, unique=True,
+    id = db.Column(db.String(192), nullable=False, unique=True,
                    primary_key=True)
-    name = db.Column(db.String(512), nullable=False)
-    description = db.Column(db.String(512))
+    name = db.Column(db.String(64), nullable=False)
+    description = db.Column(db.String(1024))
     order = db.Column(db.Integer, nullable=False)
     # Type of value expected for this experiment
     value_type = db.Column(db.Enum('Number', 'Text', name='value_type'))
@@ -126,17 +128,18 @@ class Experiment(db.Model):
         return formatted
 
 
-# Store data entered by students
+# An Observation a group of students' response towards a question(Experiment)
+# in a lab
 class Observation(db.Model, DateTimeInfo):
     __tablename__ = 'Observation'
-    id = db.Column(db.String(128), nullable=False, unique=True,
+    id = db.Column(db.String(320), nullable=False, unique=True,
                    primary_key=True)
-    student_name = db.Column(db.String(256), nullable=False)
+    student_name = db.Column(db.String(128), nullable=False)
     datum = db.Column(db.String(512), nullable=False)
 
     # Many-to-One: an experiment can have mulitple datasets inputted by
     # different students
-    experiment_id = db.Column(db.String(128), db.ForeignKey('Experiment.id'))
+    experiment_id = db.Column(db.String(192), db.ForeignKey('Experiment.id'))
     experiment = db.relationship("Experiment", back_populates="observations")
 
     def __repr__(self):
@@ -196,10 +199,9 @@ class User(UserMixin, db.Model):
         return self.role is not None and power in self.get_power()
 
     def __repr__(self):
-        tpl = ('User<id: {id}, username: {username}, password: {password},'
-               ' role: {role_name}, classes: {classes}, labs: {labs}>')
+        tpl = ('User<id: {id}, username: {username},'
+               ' role_name: {role_name}, classes: {classes}, labs: {labs}>')
         formatted = tpl.format(id=self.id, username=self.username,
-                               password=self.password,
                                role_name=self.role_name,
                                classes=[c.id for c in self.classes],
                                labs=[l.id for l in self.labs])
@@ -266,9 +268,9 @@ class Role(db.Model):
 
     def __repr__(self):
         tpl = ('Role<name: {name},'
-               ' permissions: {permissions}>')
+               ' powers: {powers}>')
         formatted = tpl.format(name=self.name,
-                               permissions=self.permissions)
+                               powers=self.powers)
         return formatted
 
 

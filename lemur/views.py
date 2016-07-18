@@ -1,3 +1,6 @@
+# This file contains the view functions for all the templates this app will use
+# The functions used in all the view functions can be found in utility.py
+# This is meanly for code readability
 # Libraries
 # Standard library
 import json
@@ -75,8 +78,8 @@ def superadmin_home():
 @app.route('/student_enter_data')
 @permission_required(m.Permission.DATA_ENTRY)
 def student_enter_data():
-    labs_query = get_labs_for_user(current_user)
-    lab_list = serialize_lab_list(labs_query)['lab_list']
+    labs_query = get_available_labs_for_user(current_user)
+    lab_list = serialize_lab_list(labs_query)
     return render_template('student_enter_data.html',
                            lab_list=lab_list)
 
@@ -102,7 +105,7 @@ def student_data_entry(lab_id):
 
     # Convert queries into JSON format
     experiments = serialize_experiment_list(experiments_query)
-    lab_info = serialize_lab_list([lab_query])['lab_list']
+    lab_info = serialize_lab_list([lab_query])
 
     return render_template('student_data_entry.html',
                            experiments=experiments, lab_info=lab_info)
@@ -132,8 +135,8 @@ def _student_receive_data():
 @permission_required(m.Permission.LAB_SETUP)
 def admin_setup_labs_and_data_access():
     current_labs = find_all_labs(current_user)
-    class_ids = serialize_class_ids_list()
-    prof_names = serialize_prof_name_list()
+    class_ids = get_class_id_list()
+    prof_names = get_prof_name_list()
     # If data sent by client is in correct format redirect to lab setup page
     # with user's entered data
     if request.method == 'POST':
@@ -154,8 +157,8 @@ def admin_setup_labs():
     # Assume labinfo to be a python3 list(the security is guranteed
     # by the permission checking)
     labinfo = ast.literal_eval(request.args['labinfo'])
-    class_ids = serialize_class_ids_list()
-    prof_names = serialize_prof_name_list()
+    class_ids = get_class_id_list()
+    prof_names = get_prof_name_list()
     return render_template('admin_modify_lab.html', labinfo=labinfo,
                            class_ids=class_ids, prof_names=prof_names,
                            post_address='_admin_receive_setup_labs_data')
@@ -198,10 +201,10 @@ def admin_modify_lab(lab_id):
                    'All the existing labs are:{}'.format(find_all_labs(current_user)))
         return err_html(err_msg)
     # get info to send to template
-    class_ids = serialize_class_ids_list()
-    prof_names = serialize_prof_name_list()
+    class_ids = get_class_id_list()
+    prof_names = get_prof_name_list()
     experiments = serialize_experiment_list(experiments_query)
-    lab_info = serialize_lab_list([lab_query])['lab_list'][0]
+    lab_info = serialize_lab_list([lab_query])[0]
     # Sort the list of experiments according to order and add them into labinfo
     sorted(experiments, key=lambda experiment: experiment['order'])
     lab_info['experiments'] = experiments
@@ -224,7 +227,7 @@ def _admin_modify_lab():
     return normal_json(lab_json)
 
 
-# Duplicate an existing lab
+# Duplicate an existing lab in database
 @app.route('/_admin_duplicate_lab', methods=['POST'])
 @permission_required(m.Permission.LAB_SETUP)
 def _admin_duplicate_lab():
@@ -238,7 +241,7 @@ def _admin_duplicate_lab():
     return normal_json(jsonData)
 
 
-# Delete labs
+# Delete a lab in database
 @app.route('/_admin_delete_lab', methods=['POST'])
 @permission_required(m.Permission.LAB_SETUP)
 def _admin_delete_lab():
@@ -251,7 +254,7 @@ def _admin_delete_lab():
     return normal_json(jsonData)
 
 
-# Changes lab status (activated, unactivated, downloadable)
+# Changes a lab's status (activated, unactivated, downloadable) in database
 @app.route('/_admin_change_status/<new_status>', methods=['POST'])
 @permission_required(m.Permission.LAB_SETUP)
 def _admin_change_status(new_status):
@@ -342,6 +345,7 @@ def _admin_delete_data():
 @permission_required(m.Permission.DATA_EDIT)
 def _admin_download_data(lab_ids):
     lab_ids = json.loads(lab_ids)
+
     # Query data to download
     # underscores are placeholders for data not currently needed
     (_, observations_by_student, experiment_names, err_msg, _) = find_all_observations_for_labs(lab_ids)
@@ -394,7 +398,7 @@ def superadmin_manage_classes():
     # query professors' names and current classes from the database and
     # convert them into JSON format
     classes_query = get_all_class()
-    prof_names = serialize_prof_name_list()
+    prof_names = get_prof_name_list()
     current_classes = serialize_class_list(classes_query)
 
     return render_template('superadmin_manage_classes.html',
@@ -448,12 +452,6 @@ def internal_error(error):
     return render_template('error_500.html'), 500
 
 
-# Whenever a CSRF validation fails, it will return a 400 response.
-# @csrf.error_handler
-# def csrf_error(reason):
-#     return render_template('csrf_error.html', reason=reason), 400
-
-
 # --- Utility ---
 # Enable all the templates can access the class Permission
 @app.context_processor
@@ -461,11 +459,24 @@ def inject_permissions():
     return dict(Permission=m.Permission)
 
 
-# Add the demand to the format of the inputs
+# Make the requirments to the format of input fields global
 @app.context_processor
 def inject_patterns():
-    return dict(patter_for_name='[-a-zA-Z0-9\s]{1,60}',
-                pattern_for_name_hint=('must be a combination of number(s),'
-                                       'letter(s), hyphen(s) and white'
-                                       'space(s) with length between 1 and 60'
-                                       ))
+    return dict(patter_for_name='[-a-zA-Z0-9?\s]{1,60}',
+                pattern_for_name_hint=('must be a combination of some of the'
+                                       ' following: number(s), question mark,'
+                                       ' letter(s), hyphen(s) and white'
+                                       ' space(s) with length between 1 and 60'
+                                       ),
+                pattern_for_experiment_description='.{,500}',
+                pattern_for_experiment_description_hint=('no more than 500'
+                                                         'characters'),
+
+                pattern_for_value_candidates=('[0-9a-zA-Z\-]*'
+                                              '(,[0-9a-zA-Z\-]*)*'),
+                pattern_for_value_candidates_hint=('valueCandidates should'
+                                                   'be in the format:N,C'),
+                pattern_for_value_range=('[0-9]{1,10}[.]?[0-9]{0,10}'
+                                         '-[0-9]{1,10}[.]?[0-9]{0,10}'),
+                pattern_for_value_range_hint=('valueRange should be'
+                                              'in the format:0.3-6.5'))
