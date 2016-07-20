@@ -135,8 +135,8 @@ def _student_receive_data():
 @permission_required(m.Permission.LAB_SETUP)
 def admin_setup_labs_and_data_access():
     current_labs = find_all_labs(current_user)
-    class_ids = get_class_id_list()
-    prof_names = get_prof_name_list()
+    class_ids = get_class_id_list(current_user)
+    prof_names = get_prof_name_list(current_user)
     # If data sent by client is in correct format redirect to lab setup page
     # with user's entered data
     if request.method == 'POST':
@@ -157,8 +157,8 @@ def admin_setup_labs():
     # Assume labinfo to be a python3 list(the security is guranteed
     # by the permission checking)
     labinfo = ast.literal_eval(request.args['labinfo'])
-    class_ids = get_class_id_list()
-    prof_names = get_prof_name_list()
+    class_ids = get_class_id_list(current_user)
+    prof_names = get_prof_name_list(current_user)
     return render_template('admin_modify_lab.html', labinfo=labinfo,
                            class_ids=class_ids, prof_names=prof_names,
                            post_address='_admin_receive_setup_labs_data')
@@ -201,8 +201,8 @@ def admin_modify_lab(lab_id):
                    'All the existing labs are:{}'.format(find_all_labs(current_user)))
         return err_html(err_msg)
     # get info to send to template
-    class_ids = get_class_id_list()
-    prof_names = get_prof_name_list()
+    class_ids = get_class_id_list(current_user)
+    prof_names = get_prof_name_list(current_user)
     experiments = serialize_experiment_list(experiments_query)
     lab_info = serialize_lab_list([lab_query])[0]
     # Sort the list of experiments according to order and add them into labinfo
@@ -398,7 +398,7 @@ def superadmin_manage_classes():
     # query professors' names and current classes from the database and
     # convert them into JSON format
     classes_query = get_all_class()
-    prof_names = get_prof_name_list()
+    prof_names = get_all_prof_name_list()
     current_classes = serialize_class_list(classes_query)
 
     return render_template('superadmin_manage_classes.html',

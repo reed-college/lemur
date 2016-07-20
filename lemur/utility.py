@@ -326,13 +326,27 @@ def serialize_class_list(class_list):
 # of all the objects in this class ----
 
 # return the list of all class ids
-def get_class_id_list():
-    return [c.id for c in get_all_class()]
+def get_class_id_list(user):
+    if user.role_name == 'SuperAdmin':
+        return [c.id for c in get_all_class()]
+    else:
+        return [c.id for c in user.classes]
 
 
 # return the list of all professors' names
-def get_prof_name_list():
+def get_all_prof_name_list():
     return [u.name for u in get_all_admin()] + [u.name for u in get_all_superadmin()]
+
+
+# return the list of professors' names that can be used
+# by user. i.e. if user is a superadmin, the list of all
+# professors' names will be returned; only user's name will
+# be returned otherwise.
+def get_prof_name_list(user):
+    if user.role_name == 'SuperAdmin':
+        return get_all_prof_name_list()
+    else:
+        return [user.name]
 
 
 # --- Find the information of labs ---
@@ -413,7 +427,9 @@ def modify_lab(lab_json):
     err_msg = check_existence(lab_json, 'labName', 'classId',
                                         'professorName', 'labDescription',
                                         'experiments', 'oldLabId')
+    lab_status = 'Activated'
     if lab_exists(lab_json['oldLabId']):
+        lab_status = get_lab(lab_json['oldLabId']).status
         delete_lab(lab_json['oldLabId'])
     if not class_exists(lab_json['classId']):
         err_msg += 'class id: {0} doesn\' exist in the database'.format(lab_json['classId'])
@@ -470,7 +486,7 @@ def modify_lab(lab_json):
                     class_name=class_name,
                     prof_name=lab_json['professorName'],
                     description=lab_json['labDescription'],
-                    status='Activated',
+                    status=lab_status,
                     classes=[the_class],
                     experiments=experiments_for_lab,
                     users=class_users)
