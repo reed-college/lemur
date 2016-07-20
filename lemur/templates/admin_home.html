@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block head %}
+    <meta charset="UTF-8">
+    <title>home_admin</title>
+{% endblock %}
+{% block nav_bar_list %}
+        <li><a href="/admin_setup_labs_and_data_access">Setup Labs and Data Access </a></li>  
+        <li><a href="/admin_select_lab_for_data">Review/Edit/Retrieve Data</a></li> 
+{% endblock %}
+{% block content %}
+<div id="welcomeMsg" class="col-md-12"> Hello,
+{% if current_user.is_authenticated %}
+{{current_user.username}}
+{% else %}
+Stranger
+{% endif %} </div>
+{% endblock %}

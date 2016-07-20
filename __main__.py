@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-
-import main
+from myapp import app
 
 if __name__ == '__main__':
-    main.app.run()
+    app.run()

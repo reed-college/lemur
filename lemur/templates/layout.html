@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="/static/css/bootstrap.css">
+    <link rel="stylesheet" href="/static/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="/static/css/bootstrap-select.css">
+    <link rel="stylesheet" href="/static/jquery-ui-1.11.4.custom/jquery-ui.min.css">
+    <script src="/static/js/jquery-2.2.4.min.js"></script>
+    <script src="/static/js/bootstrap.js"></script>
+    <script src="/static/js/bootstrap-select.js"></script>
+    <script src="/static/jquery-ui-1.11.4.custom/jquery-ui.min.js"></script>
+    <script src="/static/js/sorttable.js"></script>
+    
+    {% block head %}
+        <meta charset="UTF-8">
+        <title>Lemur</title>
+    {% endblock %}
+
+    <style>
+        #welcomeMsg{
+            font-size: 60px;
+            text-align: center;
+        }
+        .invisible, .temporaryMessage {
+            display: none;
+        }
+        /*Show a symbol in a sortable table's column headers to indicate that the table is sortable */
+        table.sortable th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_nosort):after { 
+            content: " \25B4\25BE" 
+        }
+        #dLabel{color: grey;}
+         
+    </style>
+    <script>
+        function generateLabId(labName,className,professorName){
+            return labName+'_'+className+'_'+professorName;
+        }
+        function generateExperimentId(labId,experimentName){
+            return labId+':'+experimentName;
+        }
+        function generateObservationId(observationId,studentName){
+            return observationId+':'+studentName;
+        }
+        // Check whether value is in array
+        function isInArray(value, array) {
+            return array.indexOf(value) > -1;
+        }
+        // Check whether n is a number 
+        function isNumeric(n) {
+            return !isNaN(parseFloat(n)) && isFinite(n);
+        }
+        // Validate the input when the student enters data
+        function checkInputStudent(observation,valueType,valueRange,valueCandidates){
+            var wrongInput = false;
+            var errMsg = '';
+            valueCandidates
+            if (valueType=='Text' && valueCandidates.length>0){
+                valueCandidates_arr = valueCandidates.split(',');
+                if (isInArray(observation,valueCandidates_arr)==false){
+                    wrongInput = true;
+                    errMsg = observation+' is not in the value value candidates: '+valueCandidates; 
+                }        
+            }
+            else if (valueType=='Number' && valueRange.length>0){
+                valueRange_arr = valueRange.split('-');
+                var min = parseFloat(valueRange_arr[0]);
+                var max = parseFloat(valueRange_arr[1]);
+                var observation = parseFloat(observation);
+                if (!isNumeric(observation)){
+                    wrongInput = true;
+                    errMsg = observation+' is not a number.';
+                }
+                else if (observation<min || observation>max){
+                    wrongInput = true;
+                    errMsg = observation+' is not in the value range: '+valueRange;
+                }
+            }
+            return {'wrongInput':wrongInput,'errMsg':errMsg};
+        }
+    </script>
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/common_home">Home</a>
+        </div>
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav" id="nav_bar_list">
+            {% block nav_bar_list %}{% endblock %}
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                    {% if current_user.is_authenticated %}
+                    <li><a href="{{url_for('logout')}}">Sign Out</a></li>
+                    {% else %}
+                    <li><a href="{{url_for('login')}}">Sign In</a></li>
+                    {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+<div id="content">{% block content %}
+<div id="welcomeMsg" class="col-md-12"> Welcome! </div>
+{% endblock %}
+</div>
+
+<footer id="footer" class="col-md-12">
+    <div class="container">
+        <hr>
+        <p class="text-center">Lemur is built using Python3, Flask, SQLAlchemy, PostgreSQL and Twitter Bootstrap</p>
+    </div>
+</footer>
+
+
+</body>
+</html>

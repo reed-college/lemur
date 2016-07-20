@@ -51,33 +51,23 @@ Bio data collector
 
 ```
 
-##Part1 Setup
-
-
 ###Step1 Create Virtual Environment for All Required Dependencies
-Pip is a Python package manager – a tool for installing Python packages from the Python Package Index<br\>
+Pip is a Python package manager - a tool for installing Python packages from the Python Package Index
 * Install pip and python3
-* Install virtualenvwrapper<br\>
-``` pip install virtualenvwrapper ```
-For more tutorials about virtualenv(wrapper), please look up at https://github.com/reed-college/2016_sds_lesson_notes/blob/master/lesson_03_beginning_development.markdown
-* Create a virtual environment for your app. I’ll name mine todoapp.<br\>
-``` mkvirtualenv lemur --python=python3```
-* In order to use the created virtual environment type:<br\>
-``` workon lemur ```
+* Install virtualenvwrapper ```pip install virtualenvwrapper``` For more tutorials about virtualenv(wrapper), look at https://github.com/reed-college/2016_sds_lesson_notes/blob/master/lesson_03_beginning_development.markdown
+* Create a virtual environment for your app. ```mkvirtualenv [name] --python=python3```
+* In order to use the virtual environment use ```workon [name]```
 
 
 ###Step2 Install Required Packages: Flask, psycopg2, SQLAlchemy, WTForms, Flask-WTF
-* install Flask <br\>
-```
-pip install Flask
-```
+* install Flask with ```pip install Flask```
 * To integrate our app with PostgreSQL we need to install:
 	* Psycopg2 – a Python adapter for Postgres
 	* Flask-SQLAlchemy – Flask wrapper for SQLAlchemy (a powerful relational database framework that offers a high level ORM and low level access to a database’s native SQL functionality for Python.)
 	```
 	pip install psycopg2 Flask-SQLAlchemy
 	```
-* install WTForms, Flask-WTF and Flask-Script```pip install WTForms Flask-WTF```
+* install WTForms, Flask-WTF and Flask-Script with ```pip install WTForms Flask-WTF```
 
 
 ###Step 3: Create requirements.txt File With All Dependencies Listed
@@ -95,10 +85,7 @@ psql
 create user zzy with password 'mypassword';
 create database lemur owner zzy encoding 'utf-8'; 
 ```
-
-
-For errors like ```psql: FATAL:  database "<user>" does not exist``` <br\>
-Please refer http://stackoverflow.com/questions/17633422/psql-fatal-database-user-does-not-exist
+For errors like ```psql: FATAL:  database "<user>" does not exist``` please refer to http://stackoverflow.com/questions/17633422/psql-fatal-database-user-does-not-exist
 
 ###Step 5: Organize the Structure of the Application
 
@@ -116,8 +103,8 @@ For our needs, the structure is simplistic. If you want to know how to structure
 
 ###Step 6: Setup boostrap
 Bootstrap is the most popular front-end framework for web development.<br/>
-*You can add Bootstrap to your project by downloading a zip file from the project’s website
-*Unzip the compressed file and move the files to the /static folder in the todoapp directory.
+You can add Bootstrap to your project by downloading a zip file from the project’s website
+Unzip the compressed file and move the files to the /static folder in the todoapp directory.
 
 ###Step 7: Setup boostrap-select
 Bootstrap-select is a jQuery plugin that utilizes Bootstrap's dropdown.js to style and bring additional functionality to standard select elements. A form to pick a category and a priority for todo is a simple select list with customized .selectpicker class.
@@ -131,7 +118,8 @@ Bootstrap-select is a jQuery plugin that utilizes Bootstrap's dropdown.js to sty
 
 ###Step9: Run the app `python3 myapp`
 
-###Step10: Set up tables in the database by entering `http://127.0.0.1:5000/admin/bootstrap` in the address line and click `Return`
+###Step10: Set up tables in the database 
+Enter `http://127.0.0.1:5000/admin/bootstrap` in the address line and click `Return`
 
 ##Part2 Development process
 1.Preparation
