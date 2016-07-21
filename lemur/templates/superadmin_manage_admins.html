@@ -1,0 +1,80 @@
+{% extends "superadmin_home.html" %}
+{% block head %}
+    <meta charset="UTF-8">
+    <title>Superadmin Manage Users</title>
+    <script src="/static/js/superadmin_manage_admins.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="table-wrapper">
+    <div class="title"> User Information </div>
+	<label> Guide:</label><br><br>
+	1. User Name must be a <b>unique</b> combination of number(s),letter(s) and dash(s) with length between 3 and 60 <br><br>
+	2. Name is optional; It must be a combination of number(s),letter(s) and dash(s); its length cannot exceed 60<br><br>
+	{% if user_list|length==0 %}
+	<p> No user exists </p> 
+	{% else %}
+		<form id="existingUsers">
+			<table class="table sortable">
+			    <thead>
+			    	<tr>
+				      <th>Index</th>
+				      <th>ID</th>
+				      <th>Username</th>
+				      <th>Name</th>
+				      <th>Role</th>
+		              <th>Classes</th>
+		              <th>Labs</th>
+			    	</tr>
+			    </thead>
+			    <tbody>
+			    	{% for a in user_list %}
+				    	<tr id={{a["id"]}}>
+				      		<td>{{loop.index}}</th>
+				      		<td>{{a["id"]}}</td>
+				      		<td>{{a["username"]}}</td>
+				      		<td>{{a["name"]}}</td>
+				      		<td>{{a["role_name"]}}</td>
+				      		<td>
+				      		{% for c in a["classes"] %}
+				      		{{c}}<br>
+				      		{% endfor %}
+				      		</td>
+				      		<td>
+				      		{% for l in a["labs"] %}
+				      		{{l}}<br>
+				      		{% endfor %}
+				      		</td>	   
+						    <td><button name=delete>Delete</button></td>
+				    	</tr>
+			    	{% endfor %}    	
+			    </tbody>
+			</table>
+		</form> 
+	{% endif%}
+	<form method=post action="/superadmin_manage_admins">
+	    <h4><b>Add a new user:</b></h4>
+	    <div>
+			<label>User Name*: </label>
+			<input type="text" name="username" pattern="[-!$%^*()_+|~=`{}\[\]:;?,.\/a-zA-Z0-9]{3,60}" title="Class Name must be a combination of number(s),letter(s) and dash(s), with length between 3 and 60" required>
+		</div>
+		<div>
+			<label>Name: </label>
+			<input type="text" name="name" pattern="[-a-zA-Z0-9]{1,60}" title="Class Name must be a combination of number(s),letter(s) and dash(s), with length between 3 and 60">
+		</div>
+		<div>
+		    <label>Role: </label>
+			<select class="selectpicker" name="role" required>
+			    <option value="SuperAdmin">SuperAdmin</option>
+				<option value="Admin">Admin</option>
+				<option value="Student">Student</option>
+			</select>
+		</div>
+		<br>
+		<div>
+			<button name="submitNewAdmin" type="submit">Submit</button>
+			<button name="resetNewAdmin" type="reset">Reset</button>
+		</div>
+	</form>
+</div>
+{% endblock %}

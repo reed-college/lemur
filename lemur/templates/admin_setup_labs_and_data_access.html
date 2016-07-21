@@ -1,161 +1,211 @@
+{% if current_user.is_authenticated and current_user.role_name=="SuperAdmin" %}
+{% extends "superadmin_home.html" %}
+{% else %}
 {% extends "admin_home.html" %}
+{% endif %}
 {% block head %}
-<meta charset="UTF-8">
-<title>Set up labs and data access</title>
-<script>
-	$(document).ready(function(){
-		//Modify an existing lab
-		$('.modify_lab').click(function(){
-			var lab_name = $(this).closest('tr').data('labname');
-			var class_name = $(this).closest('tr').data('classname');
-			var prof_name = $(this).closest('tr').data('profname');
-			var lab_id = Generate_lab_id(lab_name,class_name,prof_name);
-			window.location.replace('/admin_modify_lab/'+lab_id);	    
-		});
-
-		//Duplicate/Delete a lab
-		$('.duplicate_lab').add($('.delete_lab')).click(function(){
-			var operation = $(this).attr('class');
-			var lab_name = $(this).closest('tr').data('labname');
-			var class_name = $(this).closest('tr').data('classname');
-			var prof_name = $(this).closest('tr').data('profname');
-			var lab_id = Generate_lab_id(lab_name,class_name,prof_name);
-			console.log($(this).attr('class'));
-		    //Communicate the name of the lab to be duplicated with python via Ajax 
-			$.ajax({
-			  type: 'POST',
-			  contentType: 'application/json',
-			  dataType: 'json',
-			  url: 'http://127.0.0.1:5000/_admin_'+operation,
-			  data: JSON.stringify({'lab_id':lab_id}),
-			  success: function(result){
-   					  alert('Duplicate successfully');
-   					},
-			  error : function(result){
-   					  alert('Fail to '+operation);
-					}
-		    });
-		    if (operation=='delete_lab'){
-		    	$(this).closest('tr').remove();
-		    }
-		    location.reload();
-
-		});
-
-		//Change a lab's status
-		$('.make_download_only').add($('.activate_lab')).add($('.deactivate_lab')).click(function(){
-			var lab_name = $(this).closest('tr').data('labname');
-			var class_name = $(this).closest('tr').data('classname');
-			var prof_name = $(this).closest('tr').data('profname');
-			var lab_id = Generate_lab_id(lab_name,class_name,prof_name);
-
-			var status_class_name = $(this).attr('class')
-			var new_status = 'Activated';
-			if (status_class_name=='make_download_only'){
-				new_status = 'Downloaded';
-			}
-			else if (status_class_name=='activate_lab'){
-				new_status = 'Activated';
-			}
-			else if (status_class_name=='deactivate_lab'){
-				new_status = 'Unactivated';
-			}
-
-		    //Communicate the name of the lab to be duplicated with python via Ajax 
-			$.ajax({
-			  type: 'POST',
-			  contentType: 'application/json',
-			  dataType: 'json',
-			  url: 'http://127.0.0.1:5000/_admin_change_status/'+new_status,
-			  data: JSON.stringify({'lab_id':lab_id}),
-			  success: function(result){
-   					  alert('Change status successfully');
-   					},
-			  error : function(result){
-   					  alert('Fail to change lab status');
-					}
-		    });
-		    location.reload();	 
-		});
-
-	});
-</script>
+    <meta charset="UTF-8">
+	<title>Set up lab and data access({{current_user.role_name}})</title>
+	<script src="/static/js/admin_setup_labs_and_data_access.js"></script>
 {% endblock %}
-
 
 {% block content %}
-	<div> <h1> Lab Information </h> </div>
-	<br>Enter a new lab:<br>
-	<form method=post action="/admin_setup_labs_and_data_access">
-		<label>Lab Name*: </label>
-		<input type="text" name="lab_name" required/><br>
-		<label>Class Name*: </label>
-		<input type="text" name="class_name" required/><br>
-		<label>Prof Name*: </label>
-		<input type="text" name="prof_name" required/><br>
-		<label>Lab Instruction: </label> <br>
-		<textarea class="longInput" cols="30" rows="5" name="lab_desc" ></textarea>	<br>
-		<label>Number of Lab Questions*: </label>
-		<input type="number" name="lab_questions" min="1" step="1" required/> <br>
-		<input name="submit_labinfo" type="submit"></input>
-		<input name="reset_labinfo" type="reset"></input>
+	<div class="table-wrapper">
+		<div class="col-lg-12 col-md-12 col-sm-12 mb">
+			<div class="title"> Lab Information </div>
+			<label> Guide:</label><br><br>
+			1. Lab Name format: {{pattern_for_name_hint}}.<br><br>
+			2. Lab Instruction should be not longer than 4000 characters.<br><br>
+			3. The number of lab questions should be an integer between 1 and 100.
+			<br><br>
+			<b><h4>Create a new lab:</h4></b>
+		</div>
+		<form method=post action="/admin_setup_labs_and_data_access">
+		    <div class="col-lg-6 col-md-6 col-sm-6 mb">
+				<label>Lab Name*: </label>
+				<input type="text" name="labName" pattern="{{patter_for_name}}" title="{{patter_for_name_hint}}" required >
+			</div>
+			<div class="col-lg-6 col-md-6 col-sm-6 mb">
+				<label>Class*: </label>
+				<select class="selectpicker" name="classId" required>
+				    {% for c in class_ids %}
+					<option value="{{c}}">{{c}}</option>
+					{% endfor %}
+				</select>
+			</div>
 
-	</form>
+			<div class="col-lg-6 col-md-6 col-sm-6 mb">
+			<label>Lab Instruction: </label> <br></br>
+			<textarea class="longInput" cols="30" rows="5" name="labDescription" pattern=".{,4000}" title="no more than 4000 characters"></textarea><br></br>
+			</div>
+			<div class="col-lg-6 col-md-6 col-sm-6 mb">
+			<label>Number of Lab Questions*: </label>
+			<input type="number" name="labQuestions" min="1" max="100" step="1" required title="1 to 100 questions"><br></br>
+			</div>
+			<div class="col-lg-6 col-md-6 col-sm-6 mb">
+			<button name="submitLab" type="submit">submit</button>
+			<button name="resetLab" type="reset">reset</button>
+			</div>
+		</form>
 
-{% if current_labs.activated|length > 0 %}
-<div class="title"> <h1> Labs for Data Collection Only </h1> </div>
-{% endif %}
-<table class="tg activated">
-{% for lab in current_labs.activated %}		
-		<tr data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">
-		    <th class="tg-yw4l">{{loop.index}}</th>
-		    <th class="tg-yw4l" name='lab_name' >{{lab.lab_name}}</th>
-		    <th class="tg-yw4l" name='class_name' >{{lab.class_name}}</th>
-		    <th class="tg-yw4l" name='prof_name' >{{lab.prof_name}}</th>
-		    <th class="tg-yw4l"><button class="modify_lab" > Modify Lab and Questions</button></th>
-		    <th class="tg-yw4l"><button class="duplicate_lab" > Duplicate Lab</button></th>
-		    <th class="tg-yw4l"><button class="delete_lab"  >Delete Lab</button></th>
-		    <th class="tg-yw4l"><button class="make_download_only" >Make Download Only</button></th>
-		</tr>	
-{% endfor %}
-</table>
 
-{% if current_labs.downloaded|length > 0 %}
-<div class="title"> <h1> Labs for Download Only </h1> </div>
-{% endif %}
-<table class="tg downloaded">
-{% for lab in current_labs.downloaded %}
-		<tr data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">
-		    <th class="tg-yw4l">{{loop.index}}</th>
-		    <th class="tg-yw4l" name='lab_name' >{{lab.lab_name}}</th>
-		    <th class="tg-yw4l" name='class_name' >{{lab.class_name}}</th>
-		    <th class="tg-yw4l" name='prof_name' >{{lab.prof_name}}</th>
-		    <th class="tg-yw4l"><button class="modify_lab" >Modify Lab and Questions</button></th>
-		    <th class="tg-yw4l"><button class="duplicate_lab" >Duplicate Lab</button></th>
-		    <th class="tg-yw4l"><button class="delete_lab" >Delete Lab</button></th>
-		    <th class="tg-yw4l"><button class="activate_lab" >Activate Data Collection</button></th>
-		    <th class="tg-yw4l"><button class="deactivate_lab" >Make Unavailable and Clear</button></th>
-		</tr>
-{% endfor %}
-</table>
+        {% if current_labs.activated|length > 0 %}
+        	<div class="col-lg-12 col-md-12 col-sm-12 mb">
+			    <div class="title">Labs for Data Collection Only </div>
+				<table class="table sortable activated">
+				    
+				    <thead>
+				    	<tr>
+					      <th>Index</th>
+					      <th>Lab ID</th>
+					      <th>Lab Name</th>
+					      <th>Class</th>
+					      <th>Professor</th>
+				    	</tr>
+				    </thead>
+					<tbody>
+					{% for lab in current_labs.activated %}		
+							<tr data-labid="{{lab["lab_id"]}}">
+							    <td>{{loop.index}}</td>
+							    <td>{{lab.lab_id}}</td>
+							    <td>{{lab.lab_name}}</td>
+							    <td>{{lab.class_id}}</td>
+							    <td>{{lab.prof_name}}</td>
+							    <td><button class="modifyLab" > Modify Lab and Questions</button></td>
+							    <td><button class="duplicateLab" data-operation="duplicate_lab"> Duplicate Lab</button></td>
+							    <td><button class="deleteLab" data-toggle="modal" data-target="#deleteConfirmActivated">Delete Lab</button>
+			                        <div class="modal fade" id="deleteConfirmActivated" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+									  <div class="modal-dialog" role="document">
+									    <div class="modal-content">
+									      <div class="modal-header">
+									        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+									        <h4 class="modal-title" id="myModalLabel">Confirmation</h4>
+									      </div>
+									      <div class="modal-body" id="errorMsgs">
+									      Are you sure that you want to delete this lab?
+									      </div>
+									      <div class="modal-footer">
+									        <button name="confirm" data-operation="delete_lab">Yes</button>
+									        <button data-dismiss="modal">No</button>
+									      </div>
+									    </div>
+									  </div>
+									</div>
+							    </td>
+							    <td><button class="makeDownloadOnly" >Make Download Only</button></td>
+							    <td><button class="deactivateLab" >Make Unavailable</button></td>
+							</tr>	
+					{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		{% endif %}
 
-{% if current_labs.unactivated|length > 0 %}
-<div class="title"> <h1> Unavailable Labs </h1> </div>
-{% endif%}
-<table class="tg unactivated">
-{% for lab in current_labs.unactivated %}
-		<tr data-labname="{{lab.lab_name}}" data-classname="{{lab.class_name}}" data-profname="{{lab.prof_name}}">
-		    <th class="tg-yw4l">{{loop.index}}</th>
-		    <th class="tg-yw4l" name='lab_name' >{{lab.lab_name}}</th>
-		    <th class="tg-yw4l" name='class_name' >{{lab.class_name}}</th>
-		    <th class="tg-yw4l" name='prof_name' >{{lab.prof_name}}</th>
-		    <th class="tg-yw4l"><button class="modify_lab" >Modify Lab and Questions</button></th>
-		    <th class="tg-yw4l"><button class="duplicate_lab" >Duplicate Lab</button></th>
-		    <th class="tg-yw4l"><button class="delete_lab" >Delete Lab</button></th>
-		    <th class="tg-yw4l"><button class="activate_lab" >Activate Lab</button></th>
-		</tr>
-{% endfor %}
-</table>
-
+		{% if current_labs.downloadable|length > 0 %}
+		    <div class="col-lg-12 col-md-12 col-sm-12 mb">
+		        <div class="title"> Labs for Download Only </div>
+				<table class="table sortable downloadable">
+				    <thead>
+				    	<tr>
+					      <th>Index</th>
+					      <th>Lab ID</th>
+					      <th>Lab Name</th>
+					      <th>Class</th>
+					      <th>Professor</th>
+				    	</tr>
+				    </thead>
+					<tbody>
+					{% for lab in current_labs.downloadable %}
+							<tr data-labid="{{lab["lab_id"]}}">
+							    <td>{{loop.index}}</td>
+							    <td>{{lab.lab_id}}</td>
+							    <td>{{lab.lab_name}}</td>
+							    <td>{{lab.class_id}}</td>
+							    <td>{{lab.prof_name}}</td>
+							    <td><button class="modifyLab" >Modify Lab and Questions</button></td>
+							    <td><button class="duplicateLab" data-operation="duplicate_lab">Duplicate Lab</button></td>
+							    <td><button class="deleteLab" data-toggle="modal" data-target="#deleteConfirmDownloadable">Delete Lab</button>
+		                            <div class="modal fade" id="deleteConfirmDownloadable" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+									  <div class="modal-dialog" role="document">
+									    <div class="modal-content">
+									      <div class="modal-header">
+									        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+									        <h4 class="modal-title" id="myModalLabel">Confirmation</h4>
+									      </div>
+									      <div class="modal-body" id="errorMsgs">
+									      Are you sure that you want to delete this group lab?
+									      </div>
+									      <div class="modal-footer">
+									        <button name="confirm" data-operation="delete_lab">Yes</button>
+									        <button data-dismiss="modal">No</button>
+									      </div>
+									    </div>
+									  </div>
+									</div>
+							    </td>
+							    <td><button class="activateLab" >Activate Data Collection</button></td>
+							    <td><button class="deactivateLab" >Make Unavailable</button></td>
+							</tr>
+					{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		{% endif %}
+        
+		{% if current_labs.unactivated|length > 0 %}
+		<div class="col-lg-12 col-md-12 col-sm-12 mb">
+		    <div class="title"> Unavailable Labs </div>
+			<table class="table sortable unactivated">
+			    <thead>
+			    	<tr>
+				      <th>Index</th>
+				      <th>Lab ID</th>
+				      <th>Lab Name</th>
+				      <th>Class</th>
+				      <th>Professor</th>
+			    	</tr>
+			    </thead>
+				<tbody>
+				{% for lab in current_labs.unactivated %}
+						<tr data-labid="{{lab["lab_id"]}}">
+						    <td>{{loop.index}}</td>
+						    <td>{{lab.lab_id}}</td>
+						    <td>{{lab.lab_name}}</td>
+						    <td>{{lab.class_id}}</td>
+						    <td>{{lab.prof_name}}</td>
+						    <td><button class="modifyLab" >Modify Lab and Questions</button></td>
+						    <td><button class="duplicateLab" data-operation="duplicate_lab" data-toggle="modal" data-target="#deleteConfirmUnactivated">Duplicate Lab</button></td>
+						    <td><button class="deleteLab" data-toggle="modal" data-target="#deleteConfirmUnactivated">Delete Lab</button>
+	                            <div class="modal fade" id="deleteConfirmUnactivated" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+								  <div class="modal-dialog" role="document">
+								    <div class="modal-content">
+								      <div class="modal-header">
+								        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+								        <h4 class="modal-title" id="myModalLabel">Confirmation</h4>
+								      </div>
+								      <div class="modal-body" id="errorMsgs">
+								      Are you sure that you want to delete this lab?
+								      </div>
+								      <div class="modal-footer">
+								        <button name="confirm" data-operation="delete_lab">Yes</button>
+								        <button data-dismiss="modal">No</button>   
+								      </div>
+								    </div>
+								  </div>
+								</div>
+						    </td>
+						    <td><button class="activateLab" >Activate Data Collection</button></td>
+						    <td><button class="makeDownloadOnly" >Make Downloadable Only</button></td>
+						</tr>
+				{% endfor %}
+				</tbody>
+				</div>
+			</table>
+		</div>
+		{% endif%}
+	</div>
 
 {% endblock %}
+
+
+

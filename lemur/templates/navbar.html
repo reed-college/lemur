@@ -1,0 +1,12 @@
+<header>
+<nav>
+    <div class="toggle" href="menu-toggle" id="menu-toggle" data-placement="right">
+        <h1 class="hvr-float-shadow">Lemur</h1>
+    </div>
+    {% if current_user.is_authenticated %}
+        <div class="nav pull-right logout">
+            <li><a class="logouthere" href="/logout">Logout</a></li>
+        </div>
+    {% endif %}
+</nav></header><hr></hr>
+

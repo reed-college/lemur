@@ -1,0 +1,328 @@
+/* This file contains the customized css code for all the templates */
+/* Header */
+hr {
+    padding: 0px;
+    margin: 0px;
+    color: #DDDDDD;
+    border-width: 1px;
+    border-color:#DDDDDD;
+}
+header {
+    position: relative;
+}
+
+/* Body */
+body {
+    width: 100%;
+    height: 80%;
+    position: relative;
+    background-color: white;
+    font-family: times;
+}
+
+/* Navbar */
+nav {
+    width: 100%;
+    background-color: #870400;
+    position: fixed;
+    z-index: 1;
+}
+
+/* Sidebar */
+.toggle {
+    float: left;
+    padding-left: 80px;
+    padding-right: 40px;
+    padding-bottom: 20px;
+    cursor: pointer;
+    color: white;
+    font-size: 60px;
+
+}
+
+
+
+/* Buttons */
+button {
+    background-color: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.37);
+    border-radius: 3px 3px 3px 3px;
+    box-shadow: 0 1px 1px 0 rgba(255, 255, 255, 0.698) inset, 0 1px 0 0 rgba(0, 0, 0, 0.075);
+    color: #595959;
+    cursor: pointer;
+    display: inline-block;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 20px;
+    margin: 0;
+    padding: 8px 16px;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    text-shadow: 0 1px 0 #FFFFFF;
+    transition: all 0.2s ease 0s;
+    vertical-align: middle;
+}
+button:hover {
+    background-color: #F6F6F6;
+    outline: medium none;
+}
+button:focus{
+    outline: medium none;
+}
+button:active, .button.active{
+    background-color: #DDDDDD;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.075) inset;
+    outline: medium none;
+    transition: none 0s ease 0s;
+}
+
+/* Underline from Center Effect for Buttons */
+button {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+button:before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  right: 50%;
+  bottom: 0;
+  background: #2098d1;
+  height: 4px;
+  -webkit-transition-property: left, right;
+  transition-property: left, right;
+  -webkit-transition-duration: 0.3s;
+  transition-duration: 0.3s;
+  -webkit-transition-timing-function: ease-out;
+  transition-timing-function: ease-out;
+}
+button:hover:before, button:focus:before, button:active:before {
+  left: 0;
+  right: 0;
+}
+
+
+/* Logout Button*/
+.logout {
+    color: #293155;
+    font-size: 12px;
+    border-radius: 200px;
+    -webkit-border-radius: 200px;
+    border: 5px solid #E0DDCE;
+    padding: 4px 4px;
+    margin-right: 50px;
+    background: #293155;
+    margin-top: 27px;
+}
+
+.logouthere {
+    font-weight: bold;
+    color: #000000;
+    background-color: #ffffff;
+    border-radius: 100px;
+}
+
+.logouthere:hover {
+    background-color: #bfbfbf !important;
+    color: #666666;
+}
+
+
+/* Login  Page */
+#container {
+    position: relative;
+
+}
+
+#profile-img {
+	height: 30%;
+	width: 30%;
+}
+
+.card-container.card {
+    max-width: 350px;
+    padding: 40px 40px;
+    opacity: 0.98;
+    position: relative;
+}
+
+.card {
+    background-color: #F4F5F7;
+    /* just in case there no is content*/
+    padding: 20px 25px 30px;
+    margin: 0 auto 25px;
+    margin-top: 50px;
+    /* shadows and rounded borders */
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+    -moz-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+    -webkit-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.profile-img-card {
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 10px;
+    display: block;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+}
+
+.profile-name-card {
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    margin: 10px 0 0;
+    min-height: 1em;
+}
+
+.form-signin #inputName{
+    direction: ltr;
+    height: 44px;
+    font-size: 16px;
+}
+
+.form-signin input[type=text],
+.form-signin button {
+    width: 100%;
+    display: block;
+    margin-bottom: 10px;
+    z-index: 1;
+    position: relative;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.form-signin .form-control:focus {
+    border-color: rgb(104, 145, 162);
+    outline: 0;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgb(104, 145, 162);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgb(104, 145, 162);
+}
+
+.btn.btn-signin {
+    /* background-color: #4d90fe; */
+    background-color: rgb(104, 44, 162);
+    /* background-color: linear-gradient(rgb(104, 145, 162), rgb(12, 97, 33));*/
+    padding: 0px;
+    font-weight: 700;
+    font-size: 14px;
+    height: 36px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+    border: none;
+    -o-transition: all 0.218s;
+    -moz-transition: all 0.218s;
+    -webkit-transition: all 0.218s;
+    transition: all 0.218s;
+}
+
+.btn.btn-signin:hover,
+.btn.btn-signin:active,
+.btn.btn-signin:focus {
+    background-color: rgb(104, 145, 162);
+}
+
+/* Big Buttons */
+#student_button{
+    margin: 2% 25% 2% 25%;
+    width: 50%;
+}
+.add { 
+    text-align: center;
+    border: 1px solid rgba(0, 0, 0, 0.37);
+    border-radius: 5px 5px 5px 5px;
+    cursor: pointer;
+    display: inline-block; 
+    margin: 2% 2% 2% 5%;
+    padding: 2% 1% 8% 1%;
+    position: relative;
+}
+
+.add:hover {
+    background-color: #F6F6F6;
+    outline: medium none;
+}
+.add:focus{
+    outline: medium none;
+}
+.add:active, .button.active{
+    background-color: #DDDDDD;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.075) inset;
+    outline: medium none;
+    transition: none 0s ease 0s;
+}
+
+
+/* Icons on Big Buttons*/
+i {
+    margin-top: 40px;
+    color: #595959;
+    opacity:0.98;
+}
+
+/* Words on Big Buttons */
+p {
+    margin-top: 20px;
+    color: #595959;
+    font-family: inherit;
+    font-size: 25px;
+    font-weight: bold;
+    line-height: 20px;
+    opacity:0.98;
+}
+
+
+/* Page Title */
+.title{
+    text-align: center;
+    font-size: 20px;
+    padding-top: 40px;
+}
+
+/* Wrapper for the Content on a Page*/
+.table-wrapper {
+    display: inline-block; 
+    margin: 2%;
+    padding: 2%;
+    position: relative;
+    width:100%;
+}
+
+/* Welcome Message */
+#welcomeMsg{
+    color: #595959;
+    font-family: times;
+    font-weight: bold;
+    font-size: 30px;
+    text-align: center;
+    padding-top: 40px;
+}
+
+/* Utility */
+.mt {
+    margin-top: 25px;
+}
+
+.mb {
+    margin-bottom: 25px;
+}
+
+/* Show Value Range/Value Type field according to user's choice of value Type field */
+.valueRange .valueCandidates {
+    display:none;
+}
+

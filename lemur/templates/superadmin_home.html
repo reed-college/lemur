@@ -1,9 +1,10 @@
 {% extends "layout.html" %}
 {% block head %}
     <meta charset="UTF-8">
-    <title>home_admin</title>
+    <title>home_superadmin</title>
 {% endblock %}
 {% block content %}
+
     <p id="welcomeMsg" class="col-md-12"> Welcome,
     {% if current_user.is_authenticated %}
     {{current_user.username}}!
@@ -23,8 +24,16 @@
             <p>Manage/Retrieve Data</p>
         </div>
     </a>
-
+    <a href="/superadmin_manage_admins">
+        <div class="add col-lg-5 col-md-5 col-sm-5 mb hvr-ripple-out">
+            <i class="fa fa-users fa-5x"></i>
+            <p>Create/Manage User</p>
+        </div>
+    </a>
+    <a href="/superadmin_manage_classes">
+        <div class="add col-lg-5 col-md-5 col-sm-5 mb hvr-ripple-out">
+            <i class="fa fa-university fa-5x"></i>
+            <p>Create/Manage Class</p>
+        </div>
+    </a>
 {% endblock %}
-
-
-

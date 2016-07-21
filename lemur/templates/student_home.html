@@ -3,16 +3,18 @@
     <meta charset="UTF-8">
     <title>home_student</title>
 {% endblock %}
-{% block nav_bar_list %}
-    <div class="navbar-header">
-        <a class="navbar-brand" href="/student_home">Student Home</a>
-    </div>
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-        <ul class="nav navbar-nav" >
-            <li><a href="/student_enter_data">Enter data for a lab</a></li>
-        </ul>
-    </div>
-{% endblock %}
 {% block content %}
-<div id="welcome_msg" class="col-md-12"> Welcome, student! </div>
+    <p id="welcomeMsg" class="col-md-12"> Welcome,
+    {% if current_user.is_authenticated %}
+    {{current_user.username}}!
+    {% else %}
+    student!
+    {% endif %} 
+    </p>
+    <a href="/student_enter_data">
+        <div id="student_button" class="add col-lg-5 col-md-5 col-sm-5 mb hvr-ripple-out">
+            <i class="fa fa-plus-circle fa-5x"></i>
+            <p>Enter Data For Lab</p>
+        </div>
+    </a>
 {% endblock %}

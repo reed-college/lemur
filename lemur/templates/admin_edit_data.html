@@ -1,127 +1,91 @@
+{% if current_user.is_authenticated and current_user.role_name=="SuperAdmin" %}
+{% extends "superadmin_home.html" %}
+{% else %}
 {% extends "admin_home.html" %}
+{% endif %}
 {% block head %}
     <meta charset="UTF-8">
     <title>Edit Data</title>
-<script>
-	$(document).ready(function(){		
-		$('button[name=save_all]').click(function(){
-			//Collect all the data in the table
-			old_data_ids_list = []
-			new_data_list = []
-			var all_data = document.getElementsByTagName('input');
-			for (var i=0;i<all_data.length;i++){
-				if ($(all_data[i]).attr('class')!='student_name'){
-					old_data_ids_list.push($(all_data[i]).data('dataid'));
-					var row_id = $(all_data[i]).data('rowid');
-					var student_name = $(all_data[i]).closest('tr').find(".student_name").val();
-					var data_id = Generate_data_id(row_id,student_name);
-					new_data_list.push({'row_id':row_id,'data_id':data_id,'student_name':student_name,'row_data':$(all_data[i]).val()})
-
-				}
-			}		
-			
-			$.ajax({
-			  type: 'POST',
-			  contentType: 'application/json',
-			  dataType: 'json',
-			  url: 'http://127.0.0.1:5000/_admin_change_data',
-			  data: JSON.stringify({'old_data_ids_list':old_data_ids_list,'new_data_list':new_data_list}),
-			  success: function(result){
-   					  alert('Change successfully');
-   					},
-			  error : function(result){
-   					  alert('Fail to change');
-					}
-		    });
-			location.reload();
-
-
-
-		});
-		$('button[name=delete]').click(function(){
-			var data_ids_to_be_removed = [];
-			var tr_id = $(this).closest('tr').attr('id');
-			var data_to_be_removed = document.getElementById(tr_id).getElementsByTagName('input');
-			// Skip the first one(which is student_name)
-			for (var i=1;i<data_to_be_removed.length;i++){
-				data_ids_to_be_removed.push($(data_to_be_removed[i]).data('dataid'));
-			}
-
-			$.ajax({
-			  type: 'POST',
-			  contentType: 'application/json',
-			  dataType: 'json',
-			  url: 'http://127.0.0.1:5000/_admin_delete_data',
-			  data: JSON.stringify({'data_ids_to_be_removed':data_ids_to_be_removed}),
-			  success: function(result){
-   					  alert('Delete successfully');
-   					},
-			  error : function(result){
-   					  alert('Fail to delete');
-					}
-		    });
-			$(this).closest('tr').remove();
-			location.reload();
-		});		
-		$('button[name=download]').click(function(){
-			var undownloadable_labs = $('table').data('undownloadable');
-			if (undownloadable_labs==''){
-				var lab_ids = $('table').attr('id');
-			    window.location.replace('/_admin_download_data/'+JSON.stringify(lab_ids));
-			}
-			else{
-				alert(undownloadable_labs+' are not downloadable');
-			}
-			
-		});
-
-	});
-
-
-</script>
-
-
+    <script src="/static/js/admin_edit_data.js"></script>
 {% endblock %}
 
 
-
 {% block content %}
-{% if lab_data|length==0 %}
-<h1> No data available for this lab </h1> 
+{% if observations|length==0 %}
+<div class="title"> No data available for this lab </div>
 {% elif err_msg!="" %}
-<h1> {{err_msg}} <h1>
+<div class="title"> {{err_msg}} </div>
 {% else %}
-	<p> 1.Delete will be saved automatically.<br>
-		2.To download data, please click save all first.<br>
-	<table class="table sortable" id="{{lab_ids}}" data-undownloadable="{{undownloadable_labs}}" name={{lab_data|length}}>
+<div class="title">  Available Labs </div>
+<div class="table-wrapper">
+    <label> Guide:</label><br><br>
+    1.To download data, please click save all first and make sure the labs, which these data belong to are downloadable.<br><br>
+	<table class="table sortable" id="{{lab_ids}}" data-undownloadable="{{undownloadable_labs}}" name={{observations|length}}>
 	    <thead>
 	    	<tr>
 		      <th>Index</th>
 		      <th>Student Name</th>
 		      <th>Lab ID</th>
-		      {%  for r in lab_data  %}
-		          <th>{{r["row_name"]}}</th>
+		      {%  for r in observations  %}
+		          <th>{{r["experiment_name"]}}</th>
 		      {% endfor %}
 	    	</tr>
 	    </thead>
 	    <tbody>
 	    	{% for s in student_data %}
 		    	<tr id={{loop.index}}>
-		      		<td>{{loop.index}}</th>
-		      		<td><input class="student_name" value={{s["student_name"]}}></td>
+		      		<td>{{loop.index}}</td>
+		      		<td sorttable_customkey="{{s["student_name"]}}"><input class="studentName" value="{{s["student_name"]}}"></td>
 		      		<td>{{s["lab_id"]}}</td>
-				    {%  for i in range(lab_data|length)  %}
-				        <td><input class="data" data-dataid={{s["row_data_list"][i]["data_id"]}} data-rowid={{s["row_data_list"][i]["row_id"]}} value={{s["row_data_list"][i]["row_data"]}}></td>
-				    {% endfor %}		    
-				    <td><button name=delete>Delete</button></td>
+				    {%  for i in range(observations|length)  %}
+				        <td sorttable_customkey="{{s["observations"][i]["observation_data"]}}"><input class="data" data-observationid="{{s["observations"][i]["observation_id"]}}" data-rowid="{{s["observations"][i]["experiment_id"]}}" value="{{s["observations"][i]["observation_data"]}}"></td>
+				    {% endfor %}		
+				    <td><button name=delete data-toggle="modal" data-target="#deleteConfirm">Delete</button>
+                        <div class="modal fade" id="deleteConfirm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+						  <div class="modal-dialog" role="document">
+						    <div class="modal-content">
+						      <div class="modal-header">
+						        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+						        <h4 class="modal-title" id="myModalLabel">Confirmation</h4>
+						      </div>
+						      <div class="modal-body" id="errorMsgs">
+						      Are you sure that you want to delete this group of data?
+						      </div>
+						      <div class="modal-footer">
+						        <button name="confirm">Yes</button>
+						        <button data-dismiss="modal">No</button>
+						      </div>
+						    </div>
+						  </div>
+						</div>
+				    </td>
+				    
 		    	</tr>
 	    	{% endfor %}    	
 	    </tbody>
 	</table>
-	<td><button name="save_all">Save All</button></td>
-	<td><button name="download">Download</button></td>
-	<button><a href="/admin_select_lab_for_data">Return</a></button>
-	
+	<td><button name="saveAll">Save All</button></td>
+	<td><button name="download">Download</button>
+	    <!-- Modal(checking and confirmation page) -->
+		<div class="modal fade" id="errorPage" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+		  <div class="modal-dialog" role="document">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title" id="myModalLabel">Error Page</h4>
+		      </div>
+		      <div class="modal-body" id="errorMsgsDownload">
+		        ...
+		      </div>
+		      <div class="modal-footer">
+		        <button data-dismiss="modal">Go back</button>
+		      </div>
+		    </div>
+		  </div>
+		</div>
+	</td>
+	<a href="/admin_select_lab_for_data"><button>Return</button></a>
+</div>
 {% endif%}
 
 {% endblock %}

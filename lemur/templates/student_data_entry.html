@@ -1,158 +1,88 @@
+{% if current_user.is_authenticated and current_user.role_name=="SuperAdmin" %}
+{% extends "superadmin_home.html" %}
+{% elif current_user.is_authenticated and current_user.role_name=="Admin"%}
+{% extends "admin_home.html" %}
+{% else %}
 {% extends "student_home.html" %}
 {% block head %}
 	<meta charset="UTF-8">
 	<title>Student Enter Data</title>
-	<script>
-		function Row_data(lab_id,row_name,row_data) {
-			this.lab_id = lab_id;
-		    this.row_name = row_name;
-		    this.row_data = row_data;
-		} 
-		var data_arr_2D = [];
-		var num_of_entry = 1;
-
-		$(document).ready(function(){
-		    $('button[name=submit]').click(function(){	
-				//empty_entry checks whether there is any empty entry left
-				//wrong_input checks whether all the input are valid
-				var empty_entry = false;
-				var wrong_input = false;
-				var err_msgs = [];
-				//The number of rows besides student name
-				var remaining_rows = document.getElementsByClassName('Customized_Rows');
-
-				//Pack data into a 2D array
-				var student_name = document.getElementsByClassName('student_name');
-
-				for (var j=0; j<num_of_entry; j++){
-					var current_student_name = $(student_name[j]).val();
-					var data_arr = [];
-					var lab_response = document.getElementsByClassName('lab_response');
-
-					//Check if the student_name is empty
-					if (current_student_name==''){
-						var err_msg = 'Student Name in data entry'+num_of_entry.toString()+' should not be empty';
-				        err_msgs.push(err_msg);
-					}
-					
-					//Find all the customized rows of the current entry
-					for (var i = j; i < lab_response.length; i+=num_of_entry) {
-	                        //a.Since the lab_name should be the same across all the entries, we 
-	                        //pick their values of the first entry's
-	                        //b.elements of different entries on the same row should have the same row_name
-	                        var lab_id = $('form').attr('id');
-	                        var row_name = $(lab_response[i]).closest('tr').data('rowname');
-			                var row_data = $(lab_response[i]).val(); 
-			                var value_type = $(lab_response[i]).closest('tr').data('valuetype');
-			                var value_range = $(lab_response[i]).closest('tr').data('valuerange');
-			                var value_candidates =$(lab_response[i]).closest('tr').data('valuecandidates');
-			                if (row_data==''){
-			                	empty_entry = true;
-			                	var err_msg = row_name+' in data entry'+num_of_entry.toString()+' should not be empty';
-			                	err_msgs.push(err_msg);
-			                }
-			                //validate the input data
-			                result = Check_input_student(row_data,value_type,value_range,value_candidates);
-			                if (result.wrong_input){
-			                	wrong_input = true;
-			                	err_msgs.push(result.err_msg);
-			                }
-			                
-							new_row_data = new Row_data(lab_id,row_name,row_data);
-	                        data_arr.push(new_row_data);
-					}
-					data_arr_2D.push({'student_name':current_student_name,'rows_info':data_arr});
-				}
-				if (wrong_input || empty_entry){
-
-					alert(err_msgs.join("\n"));
-				}
-				else {
-				    //Communicate the lab data with python via Ajax 
-		            $.ajax({
-					  type: 'POST',
-					  contentType: 'application/json',
-					  dataType: 'json',
-					  url: 'http://127.0.0.1:5000/_student_receive_data',
-					  data: JSON.stringify({'lab_data':data_arr_2D}),
-					  success: function(result){
-					  		  alert('submit successfully!');
-					  		},
-					  error : function(result){
-					  	      console.log(result);
-	       					  alert('fail to submit');
-	    					}
-				    });
-				    //Redirect to the enter data page
-				    window.location.replace('/student_enter_data');
-				}
-				
-		    });
-
-		    //Add a new column of entry
-		    $('button[name=new_entry]').click(function(){
-		    	num_of_entry += 1;
-		    	$('tr[name=Title]').append('<th class="tg-yw4l">data entry'+num_of_entry.toString()+'</th>');
-		    	$('tr[name=StudentName]').append('<th class="tg-yw4l"><input class=student_name name=student_name'+num_of_entry.toString()+'></input> </th> ');
-		    	for (var i=0;i<remaining_rows.length;i++){
-		    		$(remaining_rows[i]).append('<th class="tg-yw4l"><input class=lab_response required></input> </th>');
-		    	}
-		    	
-			});
-		});
-
-	</script>
+	<script src="/static/js/student_data_entry.js"></script>
 {% endblock %}
 
 {% block content %}
-	{% if (rows_info|length)==0 %}
-		This lab doesn't exist<br>
-	{% else %}
-	    Lab Name: {{ lab_info[0].lab_name }}<br>
-	    {% for lab in lab_info %}
-	    	Lab Description: {{ lab_info[0].lab_desc }}<br>
-	    {% endfor %}
-	    <form id={{lab_info[0].lab_id}}>
-			<table class="tg">
-				<tr name="Title">
-				    <th class="tg-yw4l">index</th>
-				    <th class="tg-yw4l">row name</th>
-				    <th class="tg-yw4l">row desc</th>
-				    <th class="tg-yw4l">value type</th>
-				    <th class="tg-yw4l">value range/candidates</th>
-				    <th class="tg-yw4l">data entry1</th>
-				</tr>
-				<tr name="StudentName">
-				    <th class="tg-yw4l" >1</th>
-				    <th class="tg-yw4l">Student Name</th>
-				    <th class="tg-yw4l">Enter students' names in your group separated with &quot; , &quot; </th>
-				    <th class="tg-yw4l">Text</th>
-				    <th class="tg-yw4l">N/A</th>
-				    <th class="tg-yw4l"><input class=student_name name=student_name required></input> </th>    
-				</tr>
-				{% for i in range((rows_info|length)) %}
-				<tr class="Customized_Rows" data-rowname="{{rows_info[i].row_name}}" data-valuetype="{{rows_info[i].value_type}}" data-valuerange="{{rows_info[i].value_range}}" data-valuecandidates="{{rows_info[i].value_candidates}}">
-				    <th class="tg-yw4l" >{{ loop.index+1 }}</th>
-				    <th class="tg-yw4l">{{ rows_info[i].row_name }}</th>
-				    <th class="tg-yw4l">{{ rows_info[i].row_desc }}</th>
-				    <th class="tg-yw4l">{{ rows_info[i].value_type }}</th>
-				    {% if rows_info[i].value_range|length==0 and rows_info[i].value_candidates|length==0 %}
-				    <th class="tg-yw4l">N/A</th>
-				    {% elif rows_info[i].value_type=="Number" %}
-				    <th class="tg-yw4l">{{ rows_info[i].value_range }}</th>
-				    {% else %}
-				    <th class="tg-yw4l">{{ rows_info[i].value_candidates }}</th>
-				    {% endif %}
-				    <th class="tg-yw4l"><input class="lab_response" name="lab_response"+i
-				    required></button></th>
-				</tr>
-				{% endfor %}
-			</table>
-			<input name="reset_labinfo" type="reset"></input>
-		</form>
-	{% endif %}
-    <br>
-	<button name=submit>Submit</button>
-	<button name=new_entry>Add a new entry</button>
-	<button><a href="/student_enter_data">Go back</a> </button>
+    <div class="table-wrapper">
+		{% if (experiments|length)==0 %}
+			<div class="title"> This lab doesn't exist </div>
+		{% else %}
+		    <div class="title"> Lab Name: {{ lab_info[0].lab_name }} </div>
+		    {% for lab in lab_info %}
+		    	<div class="description"> Lab Description: {{ lab_info[0].lab_desc }}</div>
+		    {% endfor %}
+		    <form id={{lab_info[0].lab_id}}>
+				<table class="table">
+				    <thead>
+						<tr name="title">
+						    <th>Index</th>
+						    <th>Question name</th>
+						    <th>Question description</th>
+						    <th>Value type</th>
+						    <th>Value range/candidates</th>
+						    <th>Data entry1</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr name="studentName">
+						    <td >1</td>
+						    <td>Student Name</td>
+						    <td>Enter students' names in your group separated with &quot; , &quot; </td>
+						    <td>Text</td>
+						    <td>N/A</td>
+						    <td><input class=studentName name=studentName required></input> </td>    
+						</tr>
+						{% for i in range((experiments|length)) %}
+						<tr class="customizedExperiments" data-experimentname="{{experiments[i].experiment_name}}" data-valuetype="{{experiments[i].value_type}}" data-valuerange="{{experiments[i].value_range}}" data-valuecandidates="{{experiments[i].value_candidates}}">
+						    <td >{{ loop.index+1 }}</td>
+						    <td>{{ experiments[i].experiment_name }}</td>
+						    <td>{{ experiments[i].description }}</td>
+						    <td>{{ experiments[i].value_type }}</td>
+						    {% if experiments[i].value_range|length==0 and experiments[i].value_candidates|length==0 %}
+						    <td>N/A</td>
+						    {% elif experiments[i].value_type=="Number" %}
+						    <td>{{ experiments[i].value_range }}</td>
+						    {% else %}
+						    <td>{{ experiments[i].value_candidates }}</td>
+						    {% endif %}
+						    <td><input class="studentObservation" name="studentObservation"+i
+						    required></button></td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				<button name="resetLab" type="reset">Reset</button>
+			</form>
+			<button name=submit data-toggle="modal" data-target="#errorChecking">Submit</button>
+			<button name=newDataEntry>Add a new data entry</button>
+			<a href="/student_enter_data"><button>Go back</button></a>
+		{% endif %}
+	</div>
+
+<!-- Modal(checking and confirmation page) -->
+<div class="modal fade" id="errorChecking" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Error Checking Page</h4>
+      </div>
+      <div class="modal-body" id="errorMsgs">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button data-dismiss="modal">Go back</button>
+        <button name="confirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
