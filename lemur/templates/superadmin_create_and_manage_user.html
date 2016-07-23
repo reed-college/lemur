@@ -2,7 +2,7 @@
 {% block head %}
     <meta charset="UTF-8">
     <title>Superadmin Manage Users</title>
-    <script src="/static/js/superadmin_manage_admins.js"></script>
+    <script src="/static/js/superadmin_create_and_manage_user.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -19,19 +19,18 @@
 			    <thead>
 			    	<tr>
 				      <th>Index</th>
-				      <th>ID</th>
-				      <th>Username</th>
+				      <th>Username/ID</th>
 				      <th>Name</th>
 				      <th>Role</th>
 		              <th>Classes</th>
 		              <th>Labs</th>
+		              <th></th>
 			    	</tr>
 			    </thead>
 			    <tbody>
 			    	{% for a in user_list %}
 				    	<tr id={{a["id"]}}>
 				      		<td>{{loop.index}}</th>
-				      		<td>{{a["id"]}}</td>
 				      		<td>{{a["username"]}}</td>
 				      		<td>{{a["name"]}}</td>
 				      		<td>{{a["role_name"]}}</td>
@@ -52,15 +51,15 @@
 			</table>
 		</form> 
 	{% endif%}
-	<form method=post action="/superadmin_manage_admins">
+	<form method=post action="/superadmin_create_and_manage_user">
 	    <h4><b>Add a new user:</b></h4>
 	    <div>
 			<label>User Name*: </label>
-			<input type="text" name="username" pattern="[-!$%^*()_+|~=`{}\[\]:;?,.\/a-zA-Z0-9]{3,60}" title="Class Name must be a combination of number(s),letter(s) and dash(s), with length between 3 and 60" required>
+			<input type="text" name="username" pattern="{{pattern_for_name}}" title="{{pattern_for_name_hint}}" required>
 		</div>
 		<div>
 			<label>Name: </label>
-			<input type="text" name="name" pattern="[-a-zA-Z0-9]{1,60}" title="Class Name must be a combination of number(s),letter(s) and dash(s), with length between 3 and 60">
+			<input type="text" name="name" pattern="{{pattern_for_name}}" title="{{pattern_for_name_hint}}">
 		</div>
 		<div>
 		    <label>Role: </label>

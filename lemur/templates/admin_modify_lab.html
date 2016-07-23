@@ -28,7 +28,7 @@
             <br></br>
             <div class="col-lg-6 col-md-6 col-sm-6 mb">
                 <label>Lab Name*: </label>
-                <input type="text" name="labName" value="{{labinfo.lab_name}}"" pattern="{{patter_for_name}}" title="{{pattern_for_name_hint}}" required><br></br>
+                <input type="text" name="labName" value="{{labinfo.lab_name}}"" pattern="{{pattern_for_name}}" title="{{pattern_for_name_hint}}" required><br></br>
                 
                 <label>Class: </label>
                 <select class="selectpicker" name="classId" required>
@@ -47,7 +47,7 @@
                 <div class="col-lg-6 col-md-6 col-sm-6 mb experiment" name="{{loop.index}}" id="ttt">
                     <h4>Question{{loop.index}}:</h4>
                     <label>Name*: </label>
-                    <input type="text" name="experimentName" value="{{experiment.experiment_name}}" pattern="{{patter_for_name}}" title="{{pattern_for_name_hint}}" required><br>
+                    <input type="text" name="experimentName" value="{{experiment.experiment_name}}" pattern="{{pattern_for_name}}" title="{{pattern_for_name_hint}}" required><br>
                     <label>Description: </label> <br>
                     <textarea class="longInput" cols="30" rows="5" name="experimentDescription" pattern="{{pattern_for_experiment_description}}" title="{{pattern_for_experiment_description_hint}}">{{experiment.description}}</textarea>
                     <div class="valueType">
@@ -85,7 +85,7 @@
         <button name="deleteExperiment">Delete an question</button>(Question Number)<input type="number" min="1" step="1" name="questionDeleted">
     </div>
     <div>
-        <a href="/admin_setup_labs_and_data_access"><button>Return</button></a>
+        <a href="/admin_create_and_manage_lab"><button>Return</button></a>
     </div>
 </div>
 <!-- Modal(checking and confirmation page) -->

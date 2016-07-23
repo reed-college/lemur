@@ -129,7 +129,7 @@ $(document).ready(function(){
                     }
                   });
                 // Redirect to the main page of setup lab and data access
-                window.location.replace('/admin_setup_labs_and_data_access');
+                window.location.replace('/admin_create_and_manage_lab');
 
             }
             

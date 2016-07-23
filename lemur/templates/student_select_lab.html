@@ -1,8 +1,14 @@
+{% if current_user.is_authenticated and current_user.role_name=="SuperAdmin" %}
+{% extends "superadmin_home.html" %}
+{% elif current_user.is_authenticated and current_user.role_name=="Admin"%}
+{% extends "admin_home.html" %}
+{% else %}
 {% extends "student_home.html" %}
+{% endif %}
 {% block head %}
 	<meta charset="UTF-8">
-	<title>Choose a lab</title>
-	<script src="/static/js/student_enter_data.js"></script>
+	<title>student_select_lab</title>
+	<script src="/static/js/student_select_lab.js"></script>
 {% endblock %}
 {% block content %}
 	{% if (lab_list|length)==0 %}
@@ -14,9 +20,8 @@
 		    <thead>
 				<tr>
 				    <th>Index</th>
-				    <th>Lab name</th>
-				    <th>Class name</th>
-				    <th>Professor name</th>
+				    <th>Lab Name</th>
+				    <th>Class ID</th>
 				    <th>Questions</th>
 				    <th>Choose</th>
 				</tr>
@@ -26,10 +31,9 @@
 				<tr>
 				    <td>{{ loop.index }}</td>
 				    <td>{{ lab_list[i].lab_name }}</td>
-				    <td>{{ lab_list[i].class_name }}</td>
-				    <td>{{ lab_list[i].prof_name }}</td>
+				    <td>{{ lab_list[i].class_id }}</td>
 				    <td>{{ lab_list[i].experiments+1 }}</td>
-				    <td><input type="radio" name="labName" data-labname="{{lab_list[i].lab_name}}"  data-classname="{{lab_list[i].class_name }}" data-profname="{{lab_list[i].prof_name}}"> </td>
+				    <td><input type="radio" name="labName" data-labname="{{lab_list[i].lab_name}}"  data-classid="{{lab_list[i].class_id }}" > </td>
 				</tr>
 				{% endfor %}
 			</tbody>

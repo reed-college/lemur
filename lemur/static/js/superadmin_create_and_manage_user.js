@@ -1,13 +1,13 @@
 
 $(document).ready(function(){       
     $('button[name=delete]').click(function(){
-        var adminIdToBeRemoved = $(this).closest('tr').attr('id');
+        var userIdToBeRemoved = $(this).closest('tr').attr('id');
         $.ajax({
           type: 'POST',
           contentType: 'application/json',
           dataType: 'json',
-          url: 'http://127.0.0.1:5000/_superadmin_delete_admin',
-          data: JSON.stringify({'adminIdToBeRemoved':adminIdToBeRemoved}),
+          url: 'http://127.0.0.1:5000/_superadmin_delete_user',
+          data: JSON.stringify({'userIdToBeRemoved':userIdToBeRemoved}),
           success: function(result){
                   console.log('Delete successfully');
                 },
@@ -17,6 +17,6 @@ $(document).ready(function(){
                 }
         });
         $(this).closest('tr').remove();
-        location.reload();
+        //location.reload();
     });     
 });

@@ -1,8 +1,8 @@
 {% extends "superadmin_home.html" %}
 {% block head %}
     <meta charset="UTF-8">
-    <title>Superadmin Manage Classes</title>
-    <script src="/static/js/superadmin_manage_classes.js"></script>
+    <title>Superadmin Create And Manage Classes</title>
+    <script src="/static/js/superadmin_create_and_manage_class.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -21,23 +21,23 @@
 		    <thead>
 		    	<tr>
 			      <th>Index</th>
-			      <th>Class ID</th>
 			      <th>Class name</th>
 			      <th>Time</th>
 	              <th>Professor</th>
 	              <th>Students</th>
 	              <th>Labs</th>
+	              <th></th>
+	              <th></th>
 		    	</tr>
 		    </thead>
 		    <tbody>
 		    	{% for class in current_classes %}
 			    	<tr id={{class["id"]}}>
 			    	    <td>{{loop.index}}</th>
-			      		<td>{{class["id"]}}</td>
 			      		<td>{{class["name"]}}</td>
 			      		<td>{{class["time"]}}</td>
 			      		<td>
-						<select class="selectpicker" name="professor" required>
+						<select class="selectpicker" data-width="auto" name="professor" required>
 						    {% for p in professor_usernames %}
 							    {% if p==class["professors"][0] %}
 								    <option value="{{p}}" selected="selected">{{p}}</option>
@@ -48,7 +48,7 @@
 						</select>
 			      		</td>
 			      		<td>
-			      		<textarea class="longInput" cols="30" rows="5" name="students" pattern="[-0-9a-zA-Z]((,[-0-9a-zA-Z])*)" title="student names should be in the format: andrew,george(student names separeted by comma)">{% for s in class["students"] %}{% if loop.index==(class["students"]|length)%}{{s}}{% else %}{{s}},{% endif %}{% endfor %}</textarea>
+			      		<textarea class="longInput" cols="20" rows="5" name="students" pattern="[-0-9a-zA-Z]((,[-0-9a-zA-Z])*)" title="student names should be in the format: andrew,george(student names separeted by comma)">{% for s in class["students"] %}{% if loop.index==(class["students"]|length)%}{{s}}{% else %}{{s}},{% endif %}{% endfor %}</textarea>
 			      		</td>	
 
 			      		<td>
@@ -65,19 +65,19 @@
 	</form>
 
 	{% endif%}
-	<form method=post action="/superadmin_manage_classes">
+	<form method=post action="/superadmin_create_and_manage_class">
 	    <h4><b>Add a new class:</b></h4>
 	    <div>
 			<label>Class Name*: </label>
-			<input type="text" name="className" pattern="[a-zA-Z0-9\-]{3,60}" title="Class Name must be a combination of number(s),letter(s) and dash(s), with length between 3 and 60" required>
+			<input type="text" name="className" pattern="{{pattern_for_name}}" title="{{pattern_for_name_hint}}" required>
 		</div>
 		<div>
 			<label>Class Time: </label>
-			<input type="text" name="classTime" pattern="[0-9]{2,4}[a-zA-Z]{4,7}" title="Class Time is a combination of year and semester. e.g. 16fall" required>
+			<input type="text" name="classTime" pattern="{{pattern_for_class_time}}" title="{{pattern_for_class_time_hint}}" required>
 		</div>
 		<div>
 			<label>Professor Name*: </label>
-			<select class="selectpicker" name="professors" required>
+			<select class="selectpicker" data-width="auto" name="professors" required>
 			    {% for p in professor_usernames %}
 				    {% if p==current_user.name %}
 					    <option value="{{p}}" selected="selected">{{p}}</option>
@@ -89,7 +89,7 @@
 		</div>
 		<div>
 			<label>Students: </label><br>
-			<textarea class="longInput" cols="30" rows="5" name="students" pattern="[0-9a-zA-Z\-](,[0-9a-zA-Z\-])*" title="student names should be in the format: andrew,george(student names separeted by comma)"></textarea>
+			<textarea class="longInput" cols="30" rows="5" name="students" pattern="{{pattern_for_student_name}}" title="{{pattern_for_student_name_hint}}"></textarea>
 			<br><br>
 		</div>
 

@@ -3,19 +3,19 @@
         <li class="sidebar-brand">
         {% if current_user.role_name == "Student" %}
             <a href="/student_home" class="sidebar-title hvr-sweep-to-right"> Home </a>
-            <a href="/student_enter_data" class="hvr-sweep-to-right">Enter Data For Lab</a>
+            <a href="/student_select_lab" class="hvr-sweep-to-right">Enter Data For Lab</a>
         {% elif current_user.role_name=="Admin"%}
             <a href="/admin_home" class="sidebar-title hvr-sweep-to-right"> Home </a>
-            <a href="/student_enter_data" class="hvr-sweep-to-right">Enter Data For Lab</a>
-            <a href="/admin_setup_labs_and_data_access" class="hvr-sweep-to-right"> Create/Manage Lab </a>
+            <a href="/student_select_lab" class="hvr-sweep-to-right">Enter Data For Lab</a>
+            <a href="/admin_create_and_manage_lab" class="hvr-sweep-to-right"> Create/Manage Lab </a>
             <a href="/admin_select_lab_for_data" class="hvr-sweep-to-right"> Manage/Retrieve Data </a>
         {% elif current_user.role_name=="SuperAdmin" %}
             <a href="/superadmin_home" class="sidebar-title hvr-sweep-to-right"> Home </a>
-            <a href="/student_enter_data" class="hvr-sweep-to-right">Enter Data For Lab</a>
-            <a href="/admin_setup_labs_and_data_access" class="hvr-sweep-to-right"> Create/Manage Lab </a>
+            <a href="/student_select_lab" class="hvr-sweep-to-right">Enter Data For Lab</a>
+            <a href="/admin_create_and_manage_lab" class="hvr-sweep-to-right"> Create/Manage Lab </a>
             <a href="/admin_select_lab_for_data" class="hvr-sweep-to-right"> Manage/Retrieve Data </a>
-            <a href="/superadmin_manage_admins" class="hvr-sweep-to-right"> Create/Manage User </a>
-            <a href="/superadmin_manage_classes" class="hvr-sweep-to-right"> Create/Manage Class </a>
+            <a href="/superadmin_create_and_manage_user" class="hvr-sweep-to-right"> Create/Manage User </a>
+            <a href="/superadmin_create_and_manage_class" class="hvr-sweep-to-right"> Create/Manage Class </a>
         {% endif %}
         </li>
     </ul>

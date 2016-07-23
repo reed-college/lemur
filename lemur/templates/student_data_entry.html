@@ -4,6 +4,7 @@
 {% extends "admin_home.html" %}
 {% else %}
 {% extends "student_home.html" %}
+{% endif %}
 {% block head %}
 	<meta charset="UTF-8">
 	<title>Student Enter Data</title>
@@ -19,7 +20,7 @@
 		    {% for lab in lab_info %}
 		    	<div class="description"> Lab Description: {{ lab_info[0].lab_desc }}</div>
 		    {% endfor %}
-		    <form id={{lab_info[0].lab_id}}>
+		    <form id="{{lab_info[0].lab_id}}">
 				<table class="table">
 				    <thead>
 						<tr name="title">
@@ -63,7 +64,7 @@
 			</form>
 			<button name=submit data-toggle="modal" data-target="#errorChecking">Submit</button>
 			<button name=newDataEntry>Add a new data entry</button>
-			<a href="/student_enter_data"><button>Go back</button></a>
+			<a href="/student_select_lab"><button>Go back</button></a>
 		{% endif %}
 	</div>
 

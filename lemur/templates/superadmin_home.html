@@ -7,12 +7,12 @@
 
     <p id="welcomeMsg" class="col-md-12"> Welcome,
     {% if current_user.is_authenticated %}
-    {{current_user.username}}!
+    {{current_user.id}}!
     {% else %}
     student!
     {% endif %} 
     </p>
-    <a href="/admin_setup_labs_and_data_access">
+    <a href="/admin_create_and_manage_lab">
         <div class="add col-lg-5 col-md-5 col-sm-5 mb hvr-ripple-out">
             <i class="fa fa-plus-circle fa-5x"></i>
             <p>Create/Manage Lab</p>
@@ -24,13 +24,13 @@
             <p>Manage/Retrieve Data</p>
         </div>
     </a>
-    <a href="/superadmin_manage_admins">
+    <a href="/superadmin_create_and_manage_user">
         <div class="add col-lg-5 col-md-5 col-sm-5 mb hvr-ripple-out">
             <i class="fa fa-users fa-5x"></i>
             <p>Create/Manage User</p>
         </div>
     </a>
-    <a href="/superadmin_manage_classes">
+    <a href="/superadmin_create_and_manage_class">
         <div class="add col-lg-5 col-md-5 col-sm-5 mb hvr-ripple-out">
             <i class="fa fa-university fa-5x"></i>
             <p>Create/Manage Class</p>

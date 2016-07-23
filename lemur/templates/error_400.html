@@ -9,11 +9,11 @@
         <p> {{err_msg}} </p>
         <h1>File Not Found</h1>
         {% if current_user.role_name=="SuperAdmin" %}
-            <a href="/superadmin_home"><button>Back to Login</button></a>
+            <a href="/superadmin_home"><button>Back to Homepage</button></a>
         {% elif current_user.role_name=="Admin" %}
-            <a href="/admin_home"><button>Back to Login</button></a>
+            <a href="/admin_home"><button>Back to Homepage</button></a>
         {% else %}
-            <a href="/student_home"><button>Back to Login</button></a>
+            <a href="/student_home"><button>Back to Homepage</button></a>
         {% endif %}
    </div>
 {% endblock %}

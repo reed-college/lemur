@@ -53,7 +53,7 @@ $(document).ready(function(){
           type: 'POST',
           contentType: 'application/json',
           dataType: 'json',
-          url: 'http://127.0.0.1:5000/_admin_change_status/'+newStatus,
+          url: 'http://127.0.0.1:5000/_admin_change_lab_status/'+newStatus,
           data: JSON.stringify({'labId':labId}),
           success: function(result){
                   console.log('Change status successfully');

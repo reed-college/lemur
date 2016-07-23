@@ -6,12 +6,12 @@
 {% block content %}
     <p id="welcomeMsg" class="col-md-12"> Welcome,
     {% if current_user.is_authenticated %}
-    {{current_user.username}}!
+    {{current_user.id}}!
     {% else %}
     student!
     {% endif %} 
     </p>
-    <a href="/student_enter_data">
+    <a href="/student_select_lab">
         <div id="student_button" class="add col-lg-5 col-md-5 col-sm-5 mb hvr-ripple-out">
             <i class="fa fa-plus-circle fa-5x"></i>
             <p>Enter Data For Lab</p>

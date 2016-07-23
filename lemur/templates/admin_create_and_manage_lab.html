@@ -5,8 +5,8 @@
 {% endif %}
 {% block head %}
     <meta charset="UTF-8">
-	<title>Set up lab and data access({{current_user.role_name}})</title>
-	<script src="/static/js/admin_setup_labs_and_data_access.js"></script>
+	<title>admin_create_and_manage_lab({{current_user.role_name}})</title>
+	<script src="/static/js/admin_create_and_manage_lab.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -20,14 +20,14 @@
 			<br><br>
 			<b><h4>Create a new lab:</h4></b>
 		</div>
-		<form method=post action="/admin_setup_labs_and_data_access">
+		<form method=post action="/admin_create_and_manage_lab">
 		    <div class="col-lg-6 col-md-6 col-sm-6 mb">
 				<label>Lab Name*: </label>
-				<input type="text" name="labName" pattern="{{patter_for_name}}" title="{{patter_for_name_hint}}" required >
+				<input type="text" name="labName" pattern="{{pattern_for_name}}" title="{{patter_for_name_hint}}" required >
 			</div>
 			<div class="col-lg-6 col-md-6 col-sm-6 mb">
 				<label>Class*: </label>
-				<select class="selectpicker" name="classId" required>
+				<select class="selectpicker" data-width="auto" name="classId" required>
 				    {% for c in class_ids %}
 					<option value="{{c}}">{{c}}</option>
 					{% endfor %}
@@ -57,20 +57,21 @@
 				    <thead>
 				    	<tr>
 					      <th>Index</th>
-					      <th>Lab ID</th>
 					      <th>Lab Name</th>
 					      <th>Class</th>
-					      <th>Professor</th>
+					      <th></th>             
+	                      <th></th>
+			              <th></th>
+			              <th></th>
+			              <th></th>
 				    	</tr>
 				    </thead>
 					<tbody>
 					{% for lab in current_labs.activated %}		
 							<tr data-labid="{{lab["lab_id"]}}">
 							    <td>{{loop.index}}</td>
-							    <td>{{lab.lab_id}}</td>
 							    <td>{{lab.lab_name}}</td>
 							    <td>{{lab.class_id}}</td>
-							    <td>{{lab.prof_name}}</td>
 							    <td><button class="modifyLab" > Modify Lab and Questions</button></td>
 							    <td><button class="duplicateLab" data-operation="duplicate_lab"> Duplicate Lab</button></td>
 							    <td><button class="deleteLab" data-toggle="modal" data-target="#deleteConfirmActivated">Delete Lab</button>
@@ -108,20 +109,21 @@
 				    <thead>
 				    	<tr>
 					      <th>Index</th>
-					      <th>Lab ID</th>
 					      <th>Lab Name</th>
 					      <th>Class</th>
-					      <th>Professor</th>
+					      <th></th>             
+	                      <th></th>
+			              <th></th>
+			              <th></th>
+			              <th></th>
 				    	</tr>
 				    </thead>
 					<tbody>
 					{% for lab in current_labs.downloadable %}
 							<tr data-labid="{{lab["lab_id"]}}">
 							    <td>{{loop.index}}</td>
-							    <td>{{lab.lab_id}}</td>
 							    <td>{{lab.lab_name}}</td>
 							    <td>{{lab.class_id}}</td>
-							    <td>{{lab.prof_name}}</td>
 							    <td><button class="modifyLab" >Modify Lab and Questions</button></td>
 							    <td><button class="duplicateLab" data-operation="duplicate_lab">Duplicate Lab</button></td>
 							    <td><button class="deleteLab" data-toggle="modal" data-target="#deleteConfirmDownloadable">Delete Lab</button>
@@ -159,20 +161,21 @@
 			    <thead>
 			    	<tr>
 				      <th>Index</th>
-				      <th>Lab ID</th>
 				      <th>Lab Name</th>
 				      <th>Class</th>
-				      <th>Professor</th>
+				      <th></th>             
+                      <th></th>
+		              <th></th>
+		              <th></th>
+		              <th></th>
 			    	</tr>
 			    </thead>
 				<tbody>
 				{% for lab in current_labs.unactivated %}
 						<tr data-labid="{{lab["lab_id"]}}">
 						    <td>{{loop.index}}</td>
-						    <td>{{lab.lab_id}}</td>
 						    <td>{{lab.lab_name}}</td>
 						    <td>{{lab.class_id}}</td>
-						    <td>{{lab.prof_name}}</td>
 						    <td><button class="modifyLab" >Modify Lab and Questions</button></td>
 						    <td><button class="duplicateLab" data-operation="duplicate_lab" data-toggle="modal" data-target="#deleteConfirmUnactivated">Duplicate Lab</button></td>
 						    <td><button class="deleteLab" data-toggle="modal" data-target="#deleteConfirmUnactivated">Delete Lab</button>

@@ -95,6 +95,7 @@ $(document).ready(function(){
             dataArr2D.push({'studentName':currentStudentName,'observationsForOneExperiment':dataArr});
         }
         //Communicate the lab data with python via Ajax 
+        console.log(dataArr2D);
         $.ajax({
           type: 'POST',
           contentType: 'application/json',
@@ -109,8 +110,9 @@ $(document).ready(function(){
                   console.log('fail to submit');
                 }
         });
+
         //Redirect to the enter data page
-        window.location.replace('/student_enter_data');
+        window.location.replace('/student_select_lab');
     });
 
     //Add a new column of entry

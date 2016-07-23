@@ -1,10 +1,14 @@
 // This file contains all the JS utility functions
 
-function generateLabId(labName,className,professorName){
-    return labName+'_'+className+'_'+professorName;
+function generateLabId(labName,classId){
+    return labName+':'+classId;
 }
 function generateObservationId(experimentId,studentName){
     return experimentId+':'+studentName;
+}
+function decomposeClassId(classId){
+    classInfo = classId.split('_')
+    return classInfo;
 }
 // Check whether value is in array
 function isInArray(value, array) {
