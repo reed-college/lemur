@@ -23,7 +23,7 @@
 			      <th>Index</th>
 			      <th>Class name</th>
 			      <th>Time</th>
-	              <th>Professor</th>
+	              <th>Professors</th>
 	              <th>Students</th>
 	              <th>Labs</th>
 	              <th></th>
@@ -37,18 +37,30 @@
 			      		<td>{{class["name"]}}</td>
 			      		<td>{{class["time"]}}</td>
 			      		<td>
-						<select class="selectpicker" data-width="auto" name="professor" required>
-						    {% for p in professor_usernames %}
-							    {% if p==class["professors"][0] %}
-								    <option value="{{p}}" selected="selected">{{p}}</option>
-								{% else %}
-								    <option value="{{p}}">{{p}}</option>
+						<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="professors" multiple data-actions-box="true" data-live-search="true" title="Choose professors" required>
+						    {% for u in all_users %}
+							    {% if u.role_name != "Student" %}
+								    {% if u.id in class["professors"] %}
+									    <option value="{{u.id}}" selected="selected">{{u.id}}</option>
+									{% else %}
+									    <option value="{{u.id}}">{{u.id}}</option>
+									{% endif %}
 								{% endif %}
 							{% endfor %}
 						</select>
 			      		</td>
 			      		<td>
-			      		<textarea class="longInput" cols="20" rows="5" name="students" pattern="[-0-9a-zA-Z]((,[-0-9a-zA-Z])*)" title="student names should be in the format: andrew,george(student names separeted by comma)">{% for s in class["students"] %}{% if loop.index==(class["students"]|length)%}{{s}}{% else %}{{s}},{% endif %}{% endfor %}</textarea>
+			      		<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="students" multiple data-actions-box="true" data-live-search="true" title="Choose students" required>
+						    {% for u in all_users %}
+							    {% if u.role_name == "Student" %}
+								    {% if u.id in class["students"] %}
+									    <option value="{{u.id}}" selected="selected">{{u.id}}</option>
+									{% else %}
+									    <option value="{{u.id}}">{{u.id}}</option>
+									{% endif %}
+								{% endif %}
+							{% endfor %}
+						</select>
 			      		</td>	
 
 			      		<td>
@@ -56,7 +68,7 @@
 				      		{{l}}<br>
 			      		{% endfor %}
 			      		</td>		
-			      		<td><button name=saveAll>Save</button></td>    
+			      		<td><button name=save>Save</button></td>    
 					    <td><button name=delete>Delete</button></td>
 			    	</tr>
 		    	{% endfor %}    	
@@ -77,22 +89,29 @@
 		</div>
 		<div>
 			<label>Professor Name*: </label>
-			<select class="selectpicker" data-width="auto" name="professors" required>
-			    {% for p in professor_usernames %}
-				    {% if p==current_user.name %}
-					    <option value="{{p}}" selected="selected">{{p}}</option>
-					{% else %}
-					    <option value="{{p}}">{{p}}</option>
+			<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="professors" multiple data-actions-box="true" data-live-search="true" title="Choose professors" required>
+			    {% for u in all_users %}
+				    {% if u.role_name != "Student" %}
+					    {% if p==current_user.id %}
+						    <option value="{{u.id}}" selected="selected">{{u.id}}</option>
+						{% else %}
+						    <option value="{{u.id}}">{{u.id}}</option>
+						{% endif %}
 					{% endif %}
 				{% endfor %}
 			</select>
 		</div>
 		<div>
-			<label>Students: </label><br>
-			<textarea class="longInput" cols="30" rows="5" name="students" pattern="{{pattern_for_student_name}}" title="{{pattern_for_student_name_hint}}"></textarea>
-			<br><br>
+			<label>Students: </label>
+			<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="students" multiple data-actions-box="true" data-live-search="true" title="Choose students" required>
+			    {% for u in all_users %}
+				    {% if u.role_name == "Student" %}
+						<option value="{{u.id}}">{{u.id}}</option>
+					{% endif %}
+				{% endfor %}
+			</select>
 		</div>
-
+		<br>
 		<button name="submitNewAdmin" type="submit">Submit</button>
 		<button name="resetNewAdmin" type="reset">Reset</button>
 	</form>

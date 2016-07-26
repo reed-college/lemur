@@ -25,25 +25,49 @@
 		              <th>Classes</th>
 		              <th>Labs</th>
 		              <th></th>
+		              <th></th>
 			    	</tr>
 			    </thead>
 			    <tbody>
-			    	{% for a in user_list %}
-				    	<tr id={{a["id"]}}>
+			    	{% for u in user_list %}
+				    	<tr id="{{u["username"]}}"">
 				      		<td>{{loop.index}}</th>
-				      		<td>{{a["username"]}}</td>
-				      		<td>{{a["name"]}}</td>
-				      		<td>{{a["role_name"]}}</td>
+				      		<td>{{u["username"]}}</td>
+				      		<td>{{u["name"]}}</td>
 				      		<td>
-				      		{% for c in a["classes"] %}
-				      		{{c}}<br>
-				      		{% endfor %}
+					      		<select class="selectpicker" id="roleSelector" data-style="btn-inverse" data-width="auto" name="role" title="Choose Role" required>
+					      		    {% if u["role_name"] == "SuperAdmin" %}
+									    <option value="SuperAdmin" selected>SuperAdmin</option>
+										<option value="Admin">Admin</option>
+										<option value="Student">Student</option>
+									{% elif u["role_name"] == "Admin" %}
+									    <option value="SuperAdmin">SuperAdmin</option>
+										<option value="Admin" selected>Admin</option>
+										<option value="Student">Student</option>
+									{% else %}
+									    <option value="SuperAdmin">SuperAdmin</option>
+										<option value="Admin">Admin</option>
+										<option value="Student" selected>Student</option>
+									{% endif %}
+								</select>
+			               </td>
+				      		<td>
+					      		<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="classIds" multiple data-actions-box="true" data-live-search="true" title="Choose Classes" required>
+							    {% for c in class_ids %}    
+								    {% if c in u["classes"] %}
+									    <option value="{{c}}" selected>{{c}}</option>
+									{% else %}
+									    <option value="{{c}}">{{c}}</option>
+									{% endif %}
+								{% endfor %}
+								</select>
 				      		</td>
 				      		<td>
-				      		{% for l in a["labs"] %}
-				      		{{l}}<br>
-				      		{% endfor %}
-				      		</td>	   
+					      		{% for l in u["labs"] %}
+					      		    {{l}}<br>
+					      		{% endfor %}
+				      		</td>   
+				      		<td><button name=save>Save</button></td>
 						    <td><button name=delete>Delete</button></td>
 				    	</tr>
 			    	{% endfor %}    	
@@ -62,11 +86,19 @@
 			<input type="text" name="name" pattern="{{pattern_for_name}}" title="{{pattern_for_name_hint}}">
 		</div>
 		<div>
-		    <label>Role: </label>
-			<select class="selectpicker" name="role" required>
+		    <label>Role*: </label>
+			<select class="selectpicker" name="role" id="roleSelector" data-style="btn-inverse" data-width="auto" name="role" title="Choose Role" required>
 			    <option value="SuperAdmin">SuperAdmin</option>
 				<option value="Admin">Admin</option>
 				<option value="Student">Student</option>
+			</select>
+		</div>
+		<div id="classSelector">
+		    <label>Classes: </label>
+			<select class="selectpicker" name="classIds" data-style="btn-inverse" data-width="auto"  multiple data-actions-box="true" data-live-search="true" title="Choose Classes">
+			    {% for c in class_ids %}
+				    <option value="{{c}}">{{c}}</option>
+				{% endfor %}
 			</select>
 		</div>
 		<br>

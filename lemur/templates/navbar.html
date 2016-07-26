@@ -1,7 +1,10 @@
 <header>
 <nav>
-    <div class="toggle" href="menu-toggle" id="menu-toggle" data-placement="right">
-        <h1 class="hvr-float-shadow">Lemur</h1>
+    <div id="menu-toggle">
+    <img  class="logo hvr-float-shadow" src="/static/imgs/Wider.gif" />
+    <div id="lemurtitle" class="hvr-float-shadow" >
+        <h1>Lemur</h1>
+    </div>
     </div>
     {% if current_user.is_authenticated %}
         <div class="nav pull-right logout">

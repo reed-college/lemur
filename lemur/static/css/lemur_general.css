@@ -26,18 +26,26 @@ nav {
     background-color: #870400;
     position: fixed;
     z-index: 1;
+    height: 105px;
+}
+
+.logo {
+    border-color: #870400;
+    width: 105px;
+    position:absolute;
+    padding-top: 15px;
+    padding-left: 30px;
+    cursor: pointer;
 }
 
 /* Sidebar */
-.toggle {
+#lemurtitle {
     float: left;
-    padding-left: 80px;
-    padding-right: 40px;
-    padding-bottom: 20px;
+    margin-left: 105px;
+    padding-top: 15px;
     cursor: pointer;
     color: white;
     font-size: 60px;
-
 }
 
 

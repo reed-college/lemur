@@ -36,6 +36,11 @@ $(document).ready(function(){
     $('button[name=addExperiment]').click(function(){
         var existingExperiments = document.getElementsByClassName('experiment');
         var newIndexStr = (existingExperiments.length+1).toString();
+        
+        //clone code
+        //$("#question").clone(true).appendTo("div[name=formBody]");
+        
+        //previous code
         $('div[name=formBody]').append('<div class="col-lg-6 col-md-6 col-sm-6 mb experiment">'+
                                            '<h4>Question'+newIndexStr+':</h4>'+
                                            '<label> Name*: </label>'+
@@ -130,10 +135,7 @@ $(document).ready(function(){
                   });
                 // Redirect to the main page of setup lab and data access
                 window.location.replace('/admin_create_and_manage_lab');
-
             }
-            
-            
         }
     });
 });
