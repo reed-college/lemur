@@ -86,16 +86,17 @@
                     </div>
                 {% endfor %}
             </div>
-            <button name="resetLab" type="reset">Reset</button>
+            <button name="hiddenresetLab" type="reset" style="display: none;">Reset</button>
         </form>
         <div>
+            <button name="resetLab">Reset</button>
             <button name="saveChange">Save Change</button>
         </div>
         <div>
             <button name="addExperiment">Add a new question</button>
         </div>
         <div>
-            <button name="deleteExperiment">Delete an question</button><input type="number" min="1" step="1" name="questionDeleted">(Question Number)
+            <button name="deleteExperiment">Delete a question</button>(Question Number)<input type="number" min="1" step="1" name="questionDeleted">
         </div>
         <div>
             <a href="/admin_create_and_manage_lab"><button>Return</button></a>
@@ -114,6 +115,23 @@
                 </div>
                 <div class="modal-footer">
                     <button data-dismiss="modal">Go back</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal(error popup) -->
+    <div class="modal fade" id="errorPopup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">An error occurs</h4>
+                </div>
+                <div class="modal-body" id="errorMsgsPopUp">
+                ...
+                </div>
+                <div class="modal-footer">
+                    <button data-dismiss="modal">Go back</button>   
                 </div>
             </div>
         </div>

@@ -11,8 +11,10 @@ $(document).ready(function(){
                   console.log('Delete successfully');
                 },
           error : function(result){
-                  console.log('Fail to delete');
-                  console.log(result)
+                    $('#errorMsgs').html('Fail to delete<br>'+result);
+                    $('#errorPopup').modal("show");
+                    console.log('Fail to delete');
+                    console.log(result)
                 }
         });
         $(this).closest('tr').remove();
@@ -33,8 +35,10 @@ $(document).ready(function(){
                     console.log('Save successfully');
                   },
             error : function(result){
-                    console.log('Fail to save');
-                    console.log(result);
+                      $('#errorMsgs').html('Fail to save<br>'+result);
+                      $('#errorPopup').modal("show");
+                      console.log('Fail to save');
+                      console.log(result);
                   }
           });   
           location.reload();      

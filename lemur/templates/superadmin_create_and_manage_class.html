@@ -7,54 +7,41 @@
 {% endblock %}
 
 {% block content %}
-<div class="table-wrapper">
-	<div class="title"> <h2> Class Information </h2></div>
-	<b>Guide:</b><br><br>
-	1. Class Name must be a combination of number(s),letter(s) and dash(s), with length between 3 and 60 <br><br>
-	2. Student names should be in the format: andrew,george(student names separeted by comma)<br><br>
-	<b>Warning:</b><br><br>
-	1.If you delete the a class, all the associated labs will be deleted as well<br><br>
-	{% if current_classes|length==0 %}
-		<h1> No class exists </h1> 
-	{% else %}
-		<form id="existingClasses">
-			<table class="table sortable">
-			    <thead>
-			    	<tr>
-				      <th>Index</th>
-				      <th>Class name</th>
-				      <th>Time</th>
-		              <th>Professors</th>
-		              <th>Students</th>
-		              <th>Labs</th>
-		              <th></th>
-		              <th></th>
-			    	</tr>
-			    </thead>
-			    <tbody>
-			    	{% for class in current_classes %}
-				    	<tr id={{class["id"]}}>
-				    	    <td>{{loop.index}}</th>
-				      		<td>{{class["name"]}}</td>
-				      		<td>{{class["time"]}}</td>
-				      		<td>
-							<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="professors" multiple data-actions-box="true" data-live-search="true" title="Choose professors" required>
-							    {% for u in all_users %}
-								    {% if u.role_name != "Student" %}
-									    {% if u.id in class["professors"] %}
-										    <option value="{{u.id}}" selected="selected">{{u.id}}</option>
-										{% else %}
-										    <option value="{{u.id}}">{{u.id}}</option>
-										{% endif %}
-									{% endif %}
-								{% endfor %}
-							</select>
-				      		</td>
-				      		<td>
-					      		<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="students" multiple data-actions-box="true" data-live-search="true" title="Choose students" required>
+	<div class="table-wrapper">
+		<div class="title"> <h2> Class Information </h2></div>
+		<b>Guide:</b><br><br>
+		1. Class Name must be a combination of number(s),letter(s) and dash(s), with length between 3 and 60 <br><br>
+		2. Student names should be in the format: andrew,george(student names separeted by comma)<br><br>
+		<b>Warning:</b><br><br>
+		1.If you delete the a class, all the associated labs will be deleted as well<br><br>
+		{% if current_classes|length==0 %}
+			<h1> No class exists </h1> 
+		{% else %}
+			<form id="existingClasses">
+				<table class="table sortable">
+				    <thead>
+				    	<tr>
+					      <th>Index</th>
+					      <th>Class name</th>
+					      <th>Time</th>
+			              <th>Professors</th>
+			              <th>Students</th>
+			              <th>Labs</th>
+			              <th></th>
+			              <th></th>
+				    	</tr>
+				    </thead>
+				    <tbody>
+				    	{% for class in current_classes %}
+					    	<tr id={{class["id"]}}>
+					    	    <td>{{loop.index}}</th>
+					      		<td>{{class["name"]}}</td>
+					      		<td>{{class["time"]}}</td>
+					      		<td>
+								<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="professors" multiple data-actions-box="true" data-live-search="true" title="Choose professors" required>
 								    {% for u in all_users %}
-									    {% if u.role_name == "Student" %}
-										    {% if u.id in class["students"] %}
+									    {% if u.role_name != "Student" %}
+										    {% if u.id in class["professors"] %}
 											    <option value="{{u.id}}" selected="selected">{{u.id}}</option>
 											{% else %}
 											    <option value="{{u.id}}">{{u.id}}</option>
@@ -62,57 +49,90 @@
 										{% endif %}
 									{% endfor %}
 								</select>
-				      		</td>	
-				      		<td>
-					      		{% for l in class["labs"] %}
-						      		{{l}}<br>
-					      		{% endfor %}
-				      		</td>		
-				      		<td><button name=save>Save</button></td>    
-						    <td><button name=delete>Delete</button></td>
-				    	</tr>
-			    	{% endfor %}    	
-			    </tbody>
-			</table>
-		</form>
-	{% endif%}
-	<form method=post action="/superadmin_create_and_manage_class">
-	    <h4><b>Add a new class:</b></h4>
-	    <div>
-			<label>Class Name*: </label>
-			<input type="text" name="className" pattern="{{pattern_for_name}}" title="{{pattern_for_name_hint}}" required>
-		</div>
-		<div>
-			<label>Class Time: </label>
-			<input type="text" name="classTime" pattern="{{pattern_for_class_time}}" title="{{pattern_for_class_time_hint}}" required>
-		</div>
-		<div>
-			<label>Professor Name*: </label>
-			<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="professors" multiple data-actions-box="true" data-live-search="true" title="Choose professors" required>
-			    {% for u in all_users %}
-				    {% if u.role_name != "Student" %}
-					    {% if p==current_user.id %}
-						    <option value="{{u.id}}" selected="selected">{{u.id}}</option>
-						{% else %}
-						    <option value="{{u.id}}">{{u.id}}</option>
+					      		</td>
+					      		<td>
+						      		<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="students" multiple data-actions-box="true" data-live-search="true" title="Choose students" required>
+									    {% for u in all_users %}
+										    {% if u.role_name == "Student" %}
+											    {% if u.id in class["students"] %}
+												    <option value="{{u.id}}" selected="selected">{{u.id}}</option>
+												{% else %}
+												    <option value="{{u.id}}">{{u.id}}</option>
+												{% endif %}
+											{% endif %}
+										{% endfor %}
+									</select>
+					      		</td>	
+					      		<td>
+						      		{% for l in class["labs"] %}
+							      		{{l}}<br>
+						      		{% endfor %}
+					      		</td>		
+					      		<td><button name=save>Save</button></td>    
+							    <td><button name=delete>Delete</button></td>
+					    	</tr>
+				    	{% endfor %}    	
+				    </tbody>
+				</table>
+			</form>
+		{% endif%}
+		<form method=post action="/superadmin_create_and_manage_class">
+		    <h4><b>Add a new class:</b></h4>
+		    <div>
+				<label>Class Name*: </label>
+				<input type="text" name="className" pattern="{{pattern_for_name}}" title="{{pattern_for_name_hint}}" required>
+			</div>
+			<div>
+				<label>Class Time: </label>
+				<input type="text" name="classTime" pattern="{{pattern_for_class_time}}" title="{{pattern_for_class_time_hint}}" required>
+			</div>
+			<div>
+				<label>Professor Name*: </label>
+				<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="professors" multiple data-actions-box="true" data-live-search="true" title="Choose professors" required>
+				    {% for u in all_users %}
+					    {% if u.role_name != "Student" %}
+						    {% if p==current_user.id %}
+							    <option value="{{u.id}}" selected="selected">{{u.id}}</option>
+							{% else %}
+							    <option value="{{u.id}}">{{u.id}}</option>
+							{% endif %}
 						{% endif %}
-					{% endif %}
-				{% endfor %}
-			</select>
-		</div>
-		<div>
-			<label>Students: </label>
-			<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="students" multiple data-actions-box="true" data-live-search="true" title="Choose students" required>
-			    {% for u in all_users %}
-				    {% if u.role_name == "Student" %}
-						<option value="{{u.id}}">{{u.id}}</option>
-					{% endif %}
-				{% endfor %}
-			</select>
-		</div>
-		<br>
-		<button name="submitNewAdmin" type="submit">Submit</button>
-		<button name="resetNewAdmin" type="reset">Reset</button>
-	</form>
-</div>
+					{% endfor %}
+				</select>
+			</div>
+			<div>
+				<label>Students: </label>
+				<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="students" multiple data-actions-box="true" data-live-search="true" title="Choose students" required>
+				    {% for u in all_users %}
+					    {% if u.role_name == "Student" %}
+							<option value="{{u.id}}">{{u.id}}</option>
+						{% endif %}
+					{% endfor %}
+				</select>
+			</div>
+			<br>
+			<button name="submitNewAdmin" type="submit">Submit</button>
+			<button name="resetNewAdmin" type="reset">Reset</button>
+		</form>
+	</div>
+
+    <!-- Modal(Error Popup) -->
+	<div class="modal fade" id="errorPopup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	    <div class="modal-dialog" role="document">
+	        <div class="modal-content">
+	        	<div class="modal-header">
+	        		<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        		<h4 class="modal-title" id="myModalLabel">An error occurs</h4>
+	      	  	</div>
+		      	<div class="modal-body" id="errorMsgs">
+			    ...
+		        </div>
+		      	<div class="modal-footer">
+		        	<button data-dismiss="modal">Go back</button>   
+		        </div>
+	        </div>
+	    </div>
+	</div>
+
+
 {% endblock %}

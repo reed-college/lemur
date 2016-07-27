@@ -32,6 +32,13 @@ $(document).ready(function(){
     // both when the doc is initialized and when user select another option
     ShowFieldByChoice();
     
+    // Reset Input field
+    // The reason that we don't directly put the reset inside the form and use it directly
+    // is for better formatting of the page
+    $('button[name=resetLab]').click(function(){
+        $('button[name=hiddenresetLab]').click();
+    });
+
     // Add a new experiment
     $('button[name=addExperiment]').click(function(){
         var existingExperiments = document.getElementsByClassName('experiment');
@@ -62,6 +69,8 @@ $(document).ready(function(){
                                            '<label>Order Number: </label>'+
                                            '<input type="number" name="experimentOrder"  value='+newIndexStr+' min="1" step="1" required>'+
                                        '</div>');
+        $('.selectpicker').selectpicker('render');
+
     });
         
     //Delete an existing experiment by specifying the question number
@@ -125,6 +134,8 @@ $(document).ready(function(){
                           console.log('Change successfully');
                     },
                     error : function(result){
+                          $('#errorMsgsPopUp').html('Fail to save change<br>'+result);
+                          $('#errorPopup').modal("show");
                           console.log('Fail to change(lab id must be unique)');
                           console.log(result);
                     }

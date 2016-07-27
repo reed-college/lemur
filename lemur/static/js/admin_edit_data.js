@@ -24,11 +24,13 @@ $(document).ready(function(){
           url: 'http://127.0.0.1:5000/_admin_change_data',
           data: JSON.stringify({'oldObservationIdsList':oldObservationIdsList,'newObservationList':newObservationList}),
           success: function(result){
-                  console.log('Change successfully');
+                    console.log('Change successfully');
                 },
           error : function(result){
-                  console.log('Fail to change');
-                  console.log(result);
+                    $('#errorMsgs').html('Fail to save change<br>'+result);
+                    $('#errorPopup').modal("show");
+                    console.log('Fail to change');
+                    console.log(result);
                 }
         });
         location.reload();
@@ -55,8 +57,10 @@ $(document).ready(function(){
                   console.log('Delete successfully');
                 },
           error : function(result){
-                  console.log('Fail to delete');
-                  console.log(result);
+                    $('#errorMsgs').html('Fail to delete<br>'+result);
+                    $('#errorPopup').modal("show");
+                    console.log('Fail to delete');
+                    console.log(result);
                 }
         });
         $(this).closest('tr').remove();

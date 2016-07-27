@@ -11,6 +11,8 @@ $(document).ready(function(){
                   console.log('Delete successfully');
                 },
           error : function(result){
+                  $('#errorMsgs').html('Fail to delete<br>'+result);
+                  $('#errorPopup').modal("show");
                   console.log('Fail to delete');
                   console.log(result);
                 }
@@ -33,6 +35,8 @@ $(document).ready(function(){
                     console.log('Save successfully');
                   },
             error : function(result){
+                    $('#errorMsgs').html('Fail to save<br>'+result);
+                    $('#errorPopup').modal("show");
                     console.log('Fail to save');
                     console.log(result);
                   }

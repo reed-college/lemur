@@ -28,10 +28,12 @@ $(document).ready(function(){
                     console.log(operation+' successfully');               
                 },
           error : function(result){
-                  console.log('Fail to '+operation);
-                  console.log(result);
-                  console.log('url: '+'http://127.0.0.1:5000/_admin_'+operation);
-                  console.log('labId: '+labId);
+                    $('#errorMsgs').html('Fail to duplicate lab<br>'+result);
+                    $('#errorPopup').modal("show");
+                    console.log('Fail to '+operation);
+                    console.log(result);
+                    console.log('url: '+'http://127.0.0.1:5000/_admin_'+operation);
+                    console.log('labId: '+labId);
                 }
         });
         if (operation=='delete_lab'){
@@ -64,13 +66,15 @@ $(document).ready(function(){
           url: 'http://127.0.0.1:5000/_admin_change_lab_status/'+newStatus,
           data: JSON.stringify({'labId':labId}),
           success: function(result){
-                  console.log('Change status successfully');
+                    console.log('Change status successfully');
                 },
           error : function(result){
-                  console.log('Fail to change lab status');
-                  console.log(result);
-                  console.log('url: '+'http://127.0.0.1:5000/_admin_change_status/'+newStatus);
-                  console.log('labid: '+labId);
+                    $('#errorMsgs').html('Fail to change status<br>'+result);
+                    $('#errorPopup').modal("show");
+                    console.log('Fail to change lab status');
+                    console.log(result);
+                    console.log('url: '+'http://127.0.0.1:5000/_admin_change_status/'+newStatus);
+                    console.log('labid: '+labId);
                 }
         });
         location.reload();   

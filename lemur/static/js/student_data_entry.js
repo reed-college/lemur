@@ -141,6 +141,8 @@ $(document).ready(function(){
                   console.log('submit successfully!');
                 },
           error : function(result){
+                  $('#errorMsgs').html('Fail to submit data<br>'+result);
+                  $('#errorPopup').modal("show");
                   console.log(result);
                   console.log('fail to submit');
                 }
