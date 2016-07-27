@@ -24,9 +24,9 @@ function Experiment(name,description,order,valueType,valueRange,valueCandidates)
     this.valueType = valueType;
     this.valueRange = valueRange;
     this.valueCandidates = valueCandidates;
-    
 }
 var experiments = [];
+
 $(document).ready(function(){
     // Show Value Range/Value Type field according to user's choice of value Type field
     // both when the doc is initialized and when user select another option
@@ -36,11 +36,6 @@ $(document).ready(function(){
     $('button[name=addExperiment]').click(function(){
         var existingExperiments = document.getElementsByClassName('experiment');
         var newIndexStr = (existingExperiments.length+1).toString();
-        
-        //clone code
-        //$("#question").clone(true).appendTo("div[name=formBody]");
-        
-        //previous code
         $('div[name=formBody]').append('<div class="col-lg-6 col-md-6 col-sm-6 mb experiment">'+
                                            '<h4>Question'+newIndexStr+':</h4>'+
                                            '<label> Name*: </label>'+
@@ -51,7 +46,7 @@ $(document).ready(function(){
                                            '<textarea class="longInput" cols="30" rows="5" name="experimentDescription" pattern="'+PATTERN_FOR_EXPERIMENT_DESCRIPTION+'" title="'+PATTERN_FOR_EXPERIMENT_DESCRIPTION_HINT+'"></textarea>'+
                                            '<div class="valueType">'+
                                            '<label>Value Type*: </label>'+
-                                           '<select class="selectpicker" name="valueType" required>'+
+                                           '<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="valueType" title="Choose A Value Type" required>'+
                                            '<option value="Text" selected="selected">Text</option>'+
                                            '<option value="Number">Number</option>'+
                                            '</select>'+
@@ -74,6 +69,7 @@ $(document).ready(function(){
         var experimentNameDeleted = $('input[name=questionDeleted]').val();
         $('.experiment[name='+experimentNameDeleted+']').remove();
     });
+    
     //Submit labinfo
     $('button[name=saveChange]').click(function(){
         // Flag used to check the correctness of the input

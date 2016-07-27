@@ -15,6 +15,5 @@ $(document).ready(function(){
             //Redirect to the page that shows the data of the selected labs
             window.location.replace('/admin_edit_data/'+JSON.stringify(labIds));
         }
-
     });
 });

@@ -1,4 +1,7 @@
 $(document).ready(function(){    
+    function generateObservationId(experimentId,studentName){
+        return experimentId+':'+studentName;
+    }
     $('button[name=saveAll]').click(function(){
         //Collect all the data in the table
         oldObservationIdsList = []
@@ -31,6 +34,7 @@ $(document).ready(function(){
         location.reload();
 
     });
+
     $('button[name=confirm]').click(function(){
         var observationIdsToBeRemoved = [];
         var trId = $(this).closest('tr').attr('id');
@@ -58,6 +62,7 @@ $(document).ready(function(){
         $(this).closest('tr').remove();
         location.reload();
     });     
+    
     $('button[name=download]').click(function(){
         var undownloadableLabs = $('table').data('undownloadable').split(',').join('<br>');
         if (undownloadableLabs==''){

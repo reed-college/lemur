@@ -1,8 +1,10 @@
 {% extends "layout.html" %}
+
 {% block head %}
     <meta charset="UTF-8">
     <title>home_admin</title>
 {% endblock %}
+
 {% block content %}
     <p id="welcomeMsg" class="col-md-12"> Welcome,
     {% if current_user.is_authenticated %}
@@ -23,7 +25,6 @@
             <p>Manage/Retrieve Data</p>
         </div>
     </a>
-
 {% endblock %}
 
 

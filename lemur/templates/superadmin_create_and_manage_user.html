@@ -1,4 +1,5 @@
 {% extends "superadmin_home.html" %}
+
 {% block head %}
     <meta charset="UTF-8">
     <title>Superadmin Manage Users</title>
@@ -6,106 +7,106 @@
 {% endblock %}
 
 {% block content %}
-<div class="table-wrapper">
-    <div class="title"> User Information </div>
-	<label> Guide:</label><br><br>
-	1. User Name must be a <b>unique</b> combination of number(s),letter(s) and dash(s) with length between 3 and 60 <br><br>
-	2. Name is optional; It must be a combination of number(s),letter(s) and dash(s); its length cannot exceed 60<br><br>
-	{% if user_list|length==0 %}
-	<p> No user exists </p> 
-	{% else %}
-		<form id="existingUsers">
-			<table class="table sortable">
-			    <thead>
-			    	<tr>
-				      <th>Index</th>
-				      <th>Username/ID</th>
-				      <th>Name</th>
-				      <th>Role</th>
-		              <th>Classes</th>
-		              <th>Labs</th>
-		              <th></th>
-		              <th></th>
-			    	</tr>
-			    </thead>
-			    <tbody>
-			    	{% for u in user_list %}
-				    	<tr id="{{u["username"]}}"">
-				      		<td>{{loop.index}}</th>
-				      		<td>{{u["username"]}}</td>
-				      		<td>{{u["name"]}}</td>
-				      		<td>
-					      		<select class="selectpicker" id="roleSelector" data-style="btn-inverse" data-width="auto" name="role" title="Choose Role" required>
-					      		    {% if u["role_name"] == "SuperAdmin" %}
-									    <option value="SuperAdmin" selected>SuperAdmin</option>
-										<option value="Admin">Admin</option>
-										<option value="Student">Student</option>
-									{% elif u["role_name"] == "Admin" %}
-									    <option value="SuperAdmin">SuperAdmin</option>
-										<option value="Admin" selected>Admin</option>
-										<option value="Student">Student</option>
-									{% else %}
-									    <option value="SuperAdmin">SuperAdmin</option>
-										<option value="Admin">Admin</option>
-										<option value="Student" selected>Student</option>
-									{% endif %}
-								</select>
-			               </td>
-				      		<td>
-					      		<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="classIds" multiple data-actions-box="true" data-live-search="true" title="Choose Classes" required>
-							    {% for c in class_ids %}    
-								    {% if c in u["classes"] %}
-									    <option value="{{c}}" selected>{{c}}</option>
-									{% else %}
-									    <option value="{{c}}">{{c}}</option>
-									{% endif %}
-								{% endfor %}
-								</select>
-				      		</td>
-				      		<td>
-					      		{% for l in u["labs"] %}
-					      		    {{l}}<br>
-					      		{% endfor %}
-				      		</td>   
-				      		<td><button name=save>Save</button></td>
-						    <td><button name=delete>Delete</button></td>
+	<div class="table-wrapper">
+	    <div class="title"> User Information </div>
+		<label> Guide:</label><br><br>
+		1. User Name must be a <b>unique</b> combination of number(s),letter(s) and dash(s) with length between 3 and 60 <br><br>
+		2. Name is optional; It must be a combination of number(s),letter(s) and dash(s); its length cannot exceed 60<br><br>
+		{% if user_list|length==0 %}
+			<p> No user exists </p> 
+		{% else %}
+			<form id="existingUsers">
+				<table class="table sortable">
+				    <thead>
+				    	<tr>
+					      <th>Index</th>
+					      <th>Username/ID</th>
+					      <th>Name</th>
+					      <th>Role</th>
+			              <th>Classes</th>
+			              <th>Labs</th>
+			              <th></th>
+			              <th></th>
 				    	</tr>
-			    	{% endfor %}    	
-			    </tbody>
-			</table>
-		</form> 
-	{% endif%}
-	<form method=post action="/superadmin_create_and_manage_user">
-	    <h4><b>Add a new user:</b></h4>
-	    <div>
-			<label>User Name*: </label>
-			<input type="text" name="username" pattern="{{pattern_for_name}}" title="{{pattern_for_name_hint}}" required>
-		</div>
-		<div>
-			<label>Name: </label>
-			<input type="text" name="name" pattern="{{pattern_for_name}}" title="{{pattern_for_name_hint}}">
-		</div>
-		<div>
-		    <label>Role*: </label>
-			<select class="selectpicker" name="role" id="roleSelector" data-style="btn-inverse" data-width="auto" name="role" title="Choose Role" required>
-			    <option value="SuperAdmin">SuperAdmin</option>
-				<option value="Admin">Admin</option>
-				<option value="Student">Student</option>
-			</select>
-		</div>
-		<div id="classSelector">
-		    <label>Classes: </label>
-			<select class="selectpicker" name="classIds" data-style="btn-inverse" data-width="auto"  multiple data-actions-box="true" data-live-search="true" title="Choose Classes">
-			    {% for c in class_ids %}
-				    <option value="{{c}}">{{c}}</option>
-				{% endfor %}
-			</select>
-		</div>
-		<br>
-		<div>
-			<button name="submitNewAdmin" type="submit">Submit</button>
-			<button name="resetNewAdmin" type="reset">Reset</button>
-		</div>
-	</form>
-</div>
+				    </thead>
+				    <tbody>
+				    	{% for u in user_list %}
+					    	<tr id="{{u["username"]}}"">
+					      		<td>{{loop.index}}</th>
+					      		<td>{{u["username"]}}</td>
+					      		<td>{{u["name"]}}</td>
+					      		<td>
+						      		<select class="selectpicker" id="roleSelector" data-style="btn-inverse" data-width="auto" name="role" title="Choose Role" required>
+						      		    {% if u["role_name"] == "SuperAdmin" %}
+										    <option value="SuperAdmin" selected>SuperAdmin</option>
+											<option value="Admin">Admin</option>
+											<option value="Student">Student</option>
+										{% elif u["role_name"] == "Admin" %}
+										    <option value="SuperAdmin">SuperAdmin</option>
+											<option value="Admin" selected>Admin</option>
+											<option value="Student">Student</option>
+										{% else %}
+										    <option value="SuperAdmin">SuperAdmin</option>
+											<option value="Admin">Admin</option>
+											<option value="Student" selected>Student</option>
+										{% endif %}
+									</select>
+				               </td>
+					      		<td>
+						      		<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="classIds" multiple data-actions-box="true" data-live-search="true" title="Choose Classes" required>
+								    {% for c in class_ids %}    
+									    {% if c in u["classes"] %}
+										    <option value="{{c}}" selected>{{c}}</option>
+										{% else %}
+										    <option value="{{c}}">{{c}}</option>
+										{% endif %}
+									{% endfor %}
+									</select>
+					      		</td>
+					      		<td>
+						      		{% for l in u["labs"] %}
+						      		    {{l}}<br>
+						      		{% endfor %}
+					      		</td>   
+					      		<td><button name=save>Save</button></td>
+							    <td><button name=delete>Delete</button></td>
+					    	</tr>
+				    	{% endfor %}    	
+				    </tbody>
+				</table>
+			</form> 
+		{% endif%}
+		<form method=post action="/superadmin_create_and_manage_user">
+		    <h4><b>Add a new user:</b></h4>
+		    <div>
+				<label>User Name*: </label>
+				<input type="text" name="username" pattern="{{pattern_for_name}}" title="{{pattern_for_name_hint}}" required>
+			</div>
+			<div>
+				<label>Name: </label>
+				<input type="text" name="name" pattern="{{pattern_for_name}}" title="{{pattern_for_name_hint}}">
+			</div>
+			<div>
+			    <label>Role*: </label>
+				<select class="selectpicker" name="role" id="roleSelector" data-style="btn-inverse" data-width="auto" name="role" title="Choose Role" required>
+				    <option value="SuperAdmin">SuperAdmin</option>
+					<option value="Admin">Admin</option>
+					<option value="Student">Student</option>
+				</select>
+			</div>
+			<div id="classSelector">
+			    <label>Classes: </label>
+				<select class="selectpicker" name="classIds" data-style="btn-inverse" data-width="auto"  multiple data-actions-box="true" data-live-search="true" title="Choose Classes">
+				    {% for c in class_ids %}
+					    <option value="{{c}}">{{c}}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<br>
+			<div>
+				<button name="submitNewAdmin" type="submit">Submit</button>
+				<button name="resetNewAdmin" type="reset">Reset</button>
+			</div>
+		</form>
+	</div>
 {% endblock %}

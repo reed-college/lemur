@@ -1,45 +1,51 @@
 <!doctype html>
 <html lang="en">
-<head>
-    <link rel="icon" href="/static/imgs/RedLogo.gif">
-    <link rel="stylesheet" href="/static/css/bootstrap.css">
-    <link rel="stylesheet" href="/static/css/bootstrap-theme.min.css">
-    <link rel="stylesheet" href="/static/css/bootstrap-select.css">
-    <link rel="stylesheet" href="/static/jquery-ui-1.11.4.custom/jquery-ui.min.css">
-    <link rel="stylesheet" href="/static/css/hover.css">
-    <link rel="stylesheet" href="/static/css/animate.css">
-    <link rel="stylesheet" href="/static/css/font-awesome/css/font-awesome.css">
-    <link rel="stylesheet" href="/static/css/lemur_general.css">
-    <link rel="stylesheet" href="/static/css/simple-sidebar.css">
+    <head>
+        <link rel="icon" href="/static/imgs/RedLogo.gif">
+        <link rel="stylesheet" href="/static/css/bootstrap.css">
+        <link rel="stylesheet" href="/static/css/bootstrap-theme.min.css">
+        <link rel="stylesheet" href="/static/css/bootstrap-select.css">
+        <link rel="stylesheet" href="/static/jquery-ui-1.11.4.custom/jquery-ui.min.css">
+        <link rel="stylesheet" href="/static/css/hover.css">
+        <link rel="stylesheet" href="/static/css/animate.css">
+        <link rel="stylesheet" href="/static/css/font-awesome.css">
+        <link rel="stylesheet" href="/static/css/lemur_general.css">
+        <link rel="stylesheet" href="/static/css/simple-sidebar.css">
 
-    <script src="/static/js/jquery-2.2.4.min.js"></script>
-    <script src="/static/js/bootstrap.js"></script>
-    <script src="/static/js/bootstrap-select.js"></script>
-    <script src="/static/jquery-ui-1.11.4.custom/jquery-ui.min.js"></script>
-    <script src="/static/js/sorttable.js"></script>
-    <script src="/static/js/utility.js"></script>
-    <script src="/static/js/constants.js"></script>
+        <script src="/static/js/jquery-2.2.4.min.js"></script>
+        <script src="/static/js/bootstrap.js"></script>
+        <script src="/static/js/bootstrap-select.js"></script>
+        <script src="/static/jquery-ui-1.11.4.custom/jquery-ui.min.js"></script>
+        <script src="/static/js/sorttable.js"></script>
+        <script src="/static/js/constants.js"></script>
 
-    {% block head %}
-        <meta charset="UTF-8">
-        <title>Lemur</title>
-    {% endblock %}
-</head>
-<body>
-{% include "navbar.html" %}
-<script>
-    $("#menu-toggle").click(function() {
-        $("#wrap").toggleClass("toggled");
-    });
-</script>
-<div id="sidebar">
-    <section id="container">
-        <div id="wrap">
-            {% include "sidebar.html" %}
-            {% block content %}
-            {% endblock %}
+        {% block head %}
+            <meta charset="UTF-8">
+            <title>Lemur</title>
+        {% endblock %}
+    </head>
+    <body>
+        {% include "navbar.html" %}
+        <script>
+            $("#menu-toggle").click(function(e) {
+                e.stopPropagation();
+                $("#wrap").toggleClass("toggled");
+            });
+            // Hide the sidebar by clicking anywhere
+            $('body').click(function(e) {
+                if ($('#wrap').hasClass('toggled')){
+                    $("#wrap").toggleClass("toggled");
+                }
+            });
+        </script>
+        <div id="sidebar">
+            <section id="container">
+                <div id="wrap">
+                    {% include "sidebar.html" %}
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </section>
         </div>
-    </section>
-</div>
-</body>
+    </body>
 </html>

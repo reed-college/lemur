@@ -1,6 +1,4 @@
-
-$(document).ready(function(){
-  
+$(document).ready(function(){  
     $('button[name=delete]').click(function(){
         var userIdToBeRemoved = $(this).closest('tr').attr('id');
         $.ajax({
@@ -20,6 +18,7 @@ $(document).ready(function(){
         $(this).closest('tr').remove();
         location.reload();
     });   
+    
     $('button[name=save]').click(function(){
           var username = $(this).closest('tr').attr('id');
           var role = $(this).closest('tr').find('select[name=role]').val();
@@ -41,6 +40,3 @@ $(document).ready(function(){
           location.reload();      
     });   
 });
-
-
-

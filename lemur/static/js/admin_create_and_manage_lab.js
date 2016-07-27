@@ -5,6 +5,7 @@ $(document).ready(function(){
         var labId = $(this).closest('tr').data('labid');
         window.location.replace('/admin_modify_lab/'+labId);        
     });
+    
     // The reason that we use javascript to show the modal rather than html is that this enables us
     // to show the modal that is closest to the delete button such that the modal is within the tr
     // that we want to delete

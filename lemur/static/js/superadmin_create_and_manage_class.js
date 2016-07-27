@@ -1,4 +1,3 @@
-
 $(document).ready(function(){       
     $('button[name=delete]').click(function(){
         var classIdToBeRemoved = $(this).closest('tr').attr('id');
@@ -19,6 +18,7 @@ $(document).ready(function(){
         $(this).closest('tr').remove();
         location.reload();
     }); 
+
     $('button[name=save]').click(function(){
           var classId = $(this).closest('tr').attr('id');
           var professorUserNames = $(this).closest('tr').find('select[name=professors]').val();
@@ -37,6 +37,5 @@ $(document).ready(function(){
                     console.log(result);
                   }
           });
-
     });     
 });

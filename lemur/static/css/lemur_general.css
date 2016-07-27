@@ -1,20 +1,14 @@
 /* This file contains the customized css code for all the templates */
 /* Header */
-hr {
-    padding: 0px;
-    margin: 0px;
-    color: #DDDDDD;
-    border-width: 1px;
-    border-color:#DDDDDD;
-}
 header {
     position: relative;
+    height: 1px;
 }
 
 /* Body */
 body {
     width: 100%;
-    height: 80%;
+    height: 100%;
     position: relative;
     background-color: white;
     font-family: times;
@@ -28,9 +22,7 @@ nav {
     z-index: 1;
     height: 105px;
 }
-
 .logo {
-    border-color: #870400;
     width: 105px;
     position:absolute;
     padding-top: 15px;
@@ -48,29 +40,31 @@ nav {
     font-size: 60px;
 }
 
-
-
 /* Buttons */
 button {
+    position: relative;
+    display: inline-block;
     background-color: #FFFFFF;
+    color: #595959;
     border: 1px solid rgba(0, 0, 0, 0.37);
     border-radius: 3px 3px 3px 3px;
-    box-shadow: 0 1px 1px 0 rgba(255, 255, 255, 0.698) inset, 0 1px 0 0 rgba(0, 0, 0, 0.075);
-    color: #595959;
     cursor: pointer;
-    display: inline-block;
     font-family: inherit;
     font-size: 14px;
     font-weight: bold;
     line-height: 20px;
-    margin: 0;
     padding: 8px 16px;
-    position: relative;
     text-align: center;
     text-decoration: none;
     text-shadow: 0 1px 0 #FFFFFF;
     transition: all 0.2s ease 0s;
     vertical-align: middle;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
 }
 button:hover {
     background-color: #F6F6F6;
@@ -84,16 +78,6 @@ button:active, .button.active{
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.075) inset;
     outline: medium none;
     transition: none 0s ease 0s;
-}
-
-/* Underline from Center Effect for Buttons */
-button {
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-  -moz-osx-font-smoothing: grayscale;
-  overflow: hidden;
 }
 button:before {
   content: "";
@@ -116,51 +100,43 @@ button:hover:before, button:focus:before, button:active:before {
   right: 0;
 }
 
-
 /* Logout Button*/
 .logout {
     color: #293155;
+    background: #293155;
     font-size: 12px;
     border-radius: 200px;
     -webkit-border-radius: 200px;
     border: 5px solid #E0DDCE;
     padding: 4px 4px;
     margin-right: 50px;
-    background: #293155;
     margin-top: 27px;
 }
-
-.logouthere {
+.logoutcontent {
     font-weight: bold;
     color: #000000;
     background-color: #ffffff;
     border-radius: 100px;
 }
-
-.logouthere:hover {
+.logoutcontent:hover {
     background-color: #bfbfbf !important;
     color: #666666;
 }
 
-
 /* Login  Page */
 #container {
     position: relative;
-
 }
-
 #profile-img {
 	height: 30%;
 	width: 30%;
 }
-
 .card-container.card {
     max-width: 350px;
     padding: 40px 40px;
     opacity: 0.98;
     position: relative;
 }
-
 .card {
     background-color: #F4F5F7;
     /* just in case there no is content*/
@@ -176,7 +152,6 @@ button:hover:before, button:focus:before, button:active:before {
     box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
     position: relative;
 }
-
 .profile-img-card {
     width: 96px;
     height: 96px;
@@ -186,7 +161,6 @@ button:hover:before, button:focus:before, button:active:before {
     -webkit-border-radius: 50%;
     border-radius: 50%;
 }
-
 .profile-name-card {
     font-size: 16px;
     font-weight: bold;
@@ -194,13 +168,11 @@ button:hover:before, button:focus:before, button:active:before {
     margin: 10px 0 0;
     min-height: 1em;
 }
-
 .form-signin #inputName{
     direction: ltr;
     height: 44px;
     font-size: 16px;
 }
-
 .form-signin input[type=text],
 .form-signin button {
     width: 100%;
@@ -212,14 +184,12 @@ button:hover:before, button:focus:before, button:active:before {
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
 }
-
 .form-signin .form-control:focus {
     border-color: rgb(104, 145, 162);
     outline: 0;
     -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgb(104, 145, 162);
     box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgb(104, 145, 162);
 }
-
 .btn.btn-signin {
     /* background-color: #4d90fe; */
     background-color: rgb(104, 44, 162);
@@ -237,7 +207,6 @@ button:hover:before, button:focus:before, button:active:before {
     -webkit-transition: all 0.218s;
     transition: all 0.218s;
 }
-
 .btn.btn-signin:hover,
 .btn.btn-signin:active,
 .btn.btn-signin:focus {
@@ -259,7 +228,6 @@ button:hover:before, button:focus:before, button:active:before {
     padding: 2% 1% 8% 1%;
     position: relative;
 }
-
 .add:hover {
     background-color: #F6F6F6;
     outline: medium none;
@@ -273,7 +241,6 @@ button:hover:before, button:focus:before, button:active:before {
     outline: medium none;
     transition: none 0s ease 0s;
 }
-
 
 /* Icons on Big Buttons*/
 i {
@@ -292,7 +259,6 @@ p {
     line-height: 20px;
     opacity:0.98;
 }
-
 
 /* Page Title */
 .title{
@@ -332,8 +298,4 @@ p {
 /* Show Value Range/Value Type field according to user's choice of value Type field */
 .valueRange .valueCandidates {
     display:none;
-}
-
-select {
-    width: 10;
 }

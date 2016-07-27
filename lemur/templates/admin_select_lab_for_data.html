@@ -1,8 +1,9 @@
 {% if current_user.is_authenticated and current_user.role_name=="SuperAdmin" %}
-{% extends "superadmin_home.html" %}
+	{% extends "superadmin_home.html" %}
 {% else %}
-{% extends "admin_home.html" %}
+	{% extends "admin_home.html" %}
 {% endif %}
+
 {% block head %}
     <meta charset="UTF-8">
     <title>Select lab for data({{current_user.role_name}})</title>
@@ -10,41 +11,39 @@
 {% endblock %}
 
 {% block content %}
-
 	{% if (lab_list|length)==0 %}
 		<div class="title"><h2>No Lab exists</h2></div>
 	{% else %}
-	<div class="title"><h2>Lab List</h2></div>
-		<div class="table-wrapper">
-		<table class="table">
-			<thead>
-			    <tr>
-				    <th class="tg-yw4l">Lab Index</th>
-				    <th class="tg-yw4l">Lab Name</th>
-				    <th class="tg-yw4l">Class ID</th>
-				    <th class="tg-yw4l">Lab Status</th>
-				    <th class="tg-yw4l">Number of data available</th>	
-				    <th class="tg-yw4l">Choose</th>  
-	    		</tr>
-	  		</thead>
-	  		<tbody>
-			{% for lab in lab_list %}
-				<tr>
-				    <th class="tg-yw4l">{{loop.index}}</th>
-				    <td class="tg-yw4l">{{lab.lab_name}}</td>
-				    <td class="tg-yw4l">{{lab.class_id}}</td>
-				    <th class="tg-yw4l">{{lab.lab_status}}</th>
-				    <td class="tg-yw4l">{{lab.data_num}}</td>
-				    <td class="tg-yw4l"><input type="checkbox" data-labid="{{lab.lab_id}}"></td>
-				</tr>
-			{% endfor %}
-			</tbody>	
-		</table>
-		<button name="goToLab">Go to lab</button>
-		<div class="temporaryMessage" id="errMsgNoLabchoosed">You need to select one lab</div>
+	    <div class="title"><h2>Lab List</h2></div>
+			<div class="table-wrapper">
+			<table class="table">
+				<thead>
+				    <tr>
+					    <th class="tg-yw4l">Lab Index</th>
+					    <th class="tg-yw4l">Lab Name</th>
+					    <th class="tg-yw4l">Class ID</th>
+					    <th class="tg-yw4l">Lab Status</th>
+					    <th class="tg-yw4l">Number of data available</th>	
+					    <th class="tg-yw4l">Choose</th>  
+		    		</tr>
+		  		</thead>
+		  		<tbody>
+				{% for lab in lab_list %}
+					<tr>
+					    <th class="tg-yw4l">{{loop.index}}</th>
+					    <td class="tg-yw4l">{{lab.lab_name}}</td>
+					    <td class="tg-yw4l">{{lab.class_id}}</td>
+					    <th class="tg-yw4l">{{lab.lab_status}}</th>
+					    <td class="tg-yw4l">{{lab.data_num}}</td>
+					    <td class="tg-yw4l"><input type="checkbox" data-labid="{{lab.lab_id}}"></td>
+					</tr>
+				{% endfor %}
+				</tbody>	
+			</table>
+			<button name="goToLab">Go to lab</button>
+			<div class="temporaryMessage" id="errMsgNoLabchoosed">You need to select one lab</div>
 		</div>
-{% endif %}
-
+	{% endif %}
 {% endblock %}
 
 

@@ -1,8 +1,9 @@
 {% if current_user.is_authenticated and current_user.role_name=="SuperAdmin" %}
-{% extends "superadmin_home.html" %}
+	{% extends "superadmin_home.html" %}
 {% else %}
-{% extends "admin_home.html" %}
+	{% extends "admin_home.html" %}
 {% endif %}
+
 {% block head %}
     <meta charset="UTF-8">
 	<title>admin_create_and_manage_lab({{current_user.role_name}})</title>
@@ -35,25 +36,23 @@
 			</div>
 
 			<div class="col-lg-6 col-md-6 col-sm-6 mb">
-			<label>Lab Instruction: </label> <br></br>
-			<textarea class="longInput" cols="30" rows="5" name="labDescription" pattern=".{,4000}" title="no more than 4000 characters"></textarea><br></br>
+				<label>Lab Instruction: </label><br>
+				<textarea class="longInput" cols="30" rows="5" name="labDescription" pattern=".{,4000}" title="no more than 4000 characters"></textarea>
 			</div>
 			<div class="col-lg-6 col-md-6 col-sm-6 mb">
-			<label>Number of Lab Questions*: </label>
-			<input type="number" name="labQuestions" min="1" max="100" step="1" required title="1 to 100 questions"><br></br>
+				<label>Number of Lab Questions*: </label>
+				<input type="number" name="labQuestions" min="1" max="100" step="1" required title="1 to 100 questions">
 			</div>
-			<div class="col-lg-6 col-md-6 col-sm-6 mb">
-			<button name="submitLab" type="submit">submit</button>
-			<button name="resetLab" type="reset">reset</button>
+				<div class="col-lg-6 col-md-6 col-sm-6 mb">
+				<button name="submitLab" type="submit">submit</button>
+				<button name="resetLab" type="reset">reset</button>
 			</div>
 		</form>
-
 
         {% if current_labs.activated|length > 0 %}
         	<div class="col-lg-12 col-md-12 col-sm-12 mb">
 			    <div class="title">Labs for Data Collection Only </div>
 				<table class="table sortable activated">
-				    
 				    <thead>
 				    	<tr>
 					      <th>Index</th>
@@ -208,7 +207,6 @@
 		</div>
 		{% endif%}
 	</div>
-
 {% endblock %}
 
 

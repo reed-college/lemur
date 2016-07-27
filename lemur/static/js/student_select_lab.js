@@ -1,5 +1,11 @@
-
 $(document).ready(function(){
+    function decomposeClassId(classId){
+    classInfo = classId.split('_')
+    return classInfo;
+    }
+    function generateLabId(labName,classId){
+        return labName+':'+classId;
+    }
     $('button[name=goToLab]').click(function(){
         var labId = '';
         var radios = document.getElementsByTagName('input')
