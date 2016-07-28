@@ -9,7 +9,6 @@
 from functools import wraps
 import linecache
 import sys
-import re
 
 # Third-party libraries
 from flask import make_response, render_template, jsonify, redirect, url_for
@@ -103,8 +102,8 @@ def generate_err_msg(name1, value1, name2, value2):
 
 
 # --- ID generators/decomposers ---
-def generate_lab_id(lab_name, class_name, prof_name):
-    return lab_name+'_'+class_name+'_'+prof_name
+def generate_lab_id(lab_name, class_id):
+    return lab_name+':'+class_id
 
 
 def generate_experiment_id(lab_id, experiment_name):
@@ -115,20 +114,13 @@ def generate_observation_id(experiment_id, student_name):
     return experiment_id+':'+student_name
 
 
-# The user_id is the same as username at this point,
-# both of them must be unique
-def generate_user_id(username):
-    return username
-
-
 def generate_class_id(class_name, class_time):
     return class_name+'_'+class_time
 
 
 def decompose_lab_id(lab_id):
-    return {'lab_name': lab_id.split('_')[0],
-            'prof_name': lab_id.split('_')[1],
-            'class_name': lab_id.split('_')[2]}
+    return {'lab_name': lab_id.split(':')[0],
+            'class_id': lab_id.split(':')[1]}
 
 
 def decompose_class_id(class_id):
@@ -156,8 +148,9 @@ def class_exists(class_id):
     return ds.query(m.Class).filter(m.Class.id == class_id).count() > 0
 
 
-def user_exists(user_id):
-    return ds.query(m.User).filter(m.User.id == user_id).count() > 0
+# username is id of a User in database
+def user_exists(username):
+    return ds.query(m.User).filter(m.User.id == username).count() > 0
 
 
 # --- Get an object from database ---
@@ -181,14 +174,15 @@ def get_observation(observation_id):
 
 
 @failure_handler
-def get_user(user_id):
+def get_user(username):
     return ds.query(m.User).filter(
-        m.User.id == user_id).one()
+        m.User.id == username).one()
 
 
 @failure_handler
-def get_class(class_id):
-    return ds.query(m.Class).filter(m.Class.id == class_id).one()
+def get_power(power_id):
+    return ds.query(m.Power).filter(
+        m.Power.id == power_id).one()
 
 
 @failure_handler
@@ -198,9 +192,8 @@ def get_role(role_name):
 
 
 @failure_handler
-def get_power(power_id):
-    return ds.query(m.Power).filter(
-        m.Power.id == power_id).one()
+def get_class(class_id):
+    return ds.query(m.Class).filter(m.Class.id == class_id).one()
 
 
 # --- Get a list of objects from database ---
@@ -217,6 +210,10 @@ def get_all_experiment():
 
 def get_all_class():
     return ds.query(m.Class).all()
+
+
+def get_all_user():
+    return ds.query(m.User).all()
 
 
 def get_all_admin():
@@ -256,6 +253,19 @@ def get_observations_for_experiment(experiment_id):
         m.Observation.id).all()
 
 
+# Return the the professor of a class
+# We assume that a class only has one professor
+# Return None if the class cannot be found or the class
+# doesn't have a professor
+def get_professors_for_class(class_id):
+    professors = []
+    the_class = get_class(class_id)
+    for u in the_class.users:
+        if u.role_name == 'Admin' or u.role_name == 'SuperAdmin':
+            professors.append(u)
+    return professors
+
+
 # This one is a bit different:
 # It returns the number of observations for a certain experiment
 def observation_number_for_experiment(experiment_id):
@@ -271,12 +281,18 @@ def observation_number_for_experiment(experiment_id):
 
 def serialize_lab_list(lab_list):
     labs = []
+
     for lab in lab_list:
+        if lab.the_class:
+            class_id = lab.the_class.id
+        else:
+            class_id = None
+        prof_name = ','.join([u.name for u in lab.users if u.role_name != 'Student'])
         labs.append({'lab_id': lab.id,
                      'lab_name': lab.name,
                      'description': lab.description,
-                     'class_name': lab.class_name,
-                     'prof_name': lab.prof_name,
+                     'class_id': class_id,
+                     'prof_name': prof_name,
                      'status': lab.status,
                      'experiments': len(lab.experiments)})
     return labs
@@ -295,23 +311,24 @@ def serialize_experiment_list(experiment_list):
     return experiments
 
 
-def serialize_admin_list(admin_list):
-    current_admins = []
-    for admin in admin_list:
-        classes = [c.id for c in admin.classes]
-        labs = [lab.id for lab in admin.labs]
-        current_admins.append({'id': admin.id,
-                               'username': admin.username,
-                               'name': admin.name, 'classes': classes,
+def serialize_user_list(user_list):
+    user_json_list = []
+    for user in user_list:
+        classes = [c.id for c in user.classes]
+        labs = [lab.id for lab in user.labs]
+        user_json_list.append({'username': user.id,
+                               'name': user.name,
+                               'role_name': user.role_name,
+                               'classes': classes,
                                'labs': labs})
-    return current_admins
+    return user_json_list
 
 
 def serialize_class_list(class_list):
     current_classes = []
     for c in class_list:
-        professors = [p.username for p in c.users if (p.role_name == 'Admin' or p.role_name == 'SuperAdmin')]
-        students = [s.username for s in c.users if s.role_name == 'Student']
+        professors = [p.id for p in c.users if (p.role_name == 'Admin' or p.role_name == 'SuperAdmin')]
+        students = [s.id for s in c.users if s.role_name == 'Student']
         labs = [lab.id for lab in c.labs]
         current_classes.append({'id': c.id,
                                 'name': c.name,
@@ -331,22 +348,6 @@ def get_class_id_list(user):
         return [c.id for c in get_all_class()]
     else:
         return [c.id for c in user.classes]
-
-
-# return the list of all professors' names
-def get_all_prof_name_list():
-    return [u.name for u in get_all_admin()] + [u.name for u in get_all_superadmin()]
-
-
-# return the list of professors' names that can be used
-# by user. i.e. if user is a superadmin, the list of all
-# professors' names will be returned; only user's name will
-# be returned otherwise.
-def get_prof_name_list(user):
-    if user.role_name == 'SuperAdmin':
-        return get_all_prof_name_list()
-    else:
-        return [user.name]
 
 
 # --- Find the information of labs ---
@@ -371,8 +372,7 @@ def find_lab_list_for_user(user):
         if len(experiments_query) > 0:
             data_num += observation_number_for_experiment(experiments_query[0].id)
         lab_list.append({'lab_id': lab.id, 'lab_name': lab.name,
-                         'class_name': lab.class_name,
-                         'prof_name': lab.prof_name,
+                         'class_id': lab.class_id,
                          'lab_status': lab.status,
                          'data_num': data_num})
     return lab_list
@@ -399,18 +399,6 @@ def find_all_labs(user):
             'unactivated': serialize_lab_list(get_unactivated)}
 
 
-# Admin can only edit labs in his/her own zone
-def check_power_to_add_lab(user, prof_name, class_id):
-    if user.role_name == 'Admin':
-        if prof_name != user.name:
-            err_msg = 'You cannot edit labs for other Admins'
-            return err_json(err_msg)
-        elif not (class_id in [c.id for c in user.classes]):
-            err_msg = ('You cannot edit labs for classes that are'
-                       'belong to other Admins\' class')
-    return ''
-
-
 # --- Manage labs ---
 
 # Delete a lab's basic info, experiments info and observations info
@@ -424,10 +412,14 @@ def delete_lab(lab_id):
 
 # Modify a lab
 def modify_lab(lab_json):
-    err_msg = check_existence(lab_json, 'labName', 'classId',
-                                        'professorName', 'labDescription',
-                                        'experiments', 'oldLabId')
+    the_class = None
+    class_users = []
+    experiments_for_lab = []
     lab_status = 'Activated'
+    lab_id = None
+
+    err_msg = check_existence(lab_json, 'labName', 'classId', 'labDescription',
+                                        'experiments', 'oldLabId')
     if lab_exists(lab_json['oldLabId']):
         lab_status = get_lab(lab_json['oldLabId']).status
         delete_lab(lab_json['oldLabId'])
@@ -436,18 +428,12 @@ def modify_lab(lab_json):
     if err_msg != '':
         return err_msg
     the_class = get_class(lab_json['classId'])
-    # Build connection between the current lab and the existing users/classes
-    class_users = []
+    # Build connection between the current lab and the existing users/class
     if the_class is not None:
         class_users = the_class.users
-    class_name = decompose_class_id(lab_json['classId'])['class_name']
-    lab_id = generate_lab_id(lab_json['labName'],
-                             class_name,
-                             lab_json['professorName'])
+    lab_id = generate_lab_id(lab_json['labName'], lab_json['classId'])
     if lab_exists(lab_id):
         return 'lab id:{0} already exists'.format(lab_id)
-    experiments_for_lab = []
-
     for e in lab_json['experiments']:
         err_msg = check_existence(e, 'name', 'description', 'order',
                                      'valueType', 'valueRange',
@@ -481,13 +467,10 @@ def modify_lab(lab_json):
                                                         value_type=e['valueType'],
                                                         value_range=e['valueRange'],
                                                         value_candidates=e['valueCandidates']))
-
     the_lab = m.Lab(id=lab_id, name=lab_json['labName'],
-                    class_name=class_name,
-                    prof_name=lab_json['professorName'],
                     description=lab_json['labDescription'],
                     status=lab_status,
-                    classes=[the_class],
+                    the_class=the_class,
                     experiments=experiments_for_lab,
                     users=class_users)
     ds.add(the_lab)
@@ -511,12 +494,11 @@ def duplicate_lab(old_lab_id):
     # Copy info from old lab and add to new lab
     old_lab = get_lab(old_lab_id)
     # A lab can only belong to one class at this point
-    old_class = get_class(old_lab.classes[0].id)
+    old_class = get_class(old_lab.the_class.id)
     new_lab = m.Lab(
         id=new_lab_id, name=decompose_lab_id(new_lab_id)['lab_name'],
-        class_name=old_lab.class_name, prof_name=old_lab.prof_name,
         description=old_lab.description, status=old_lab.status,
-        classes=[old_class], users=old_class.users)
+        the_class=old_class, users=old_class.users)
 
     new_experiments = []
     for e in old_lab.experiments:
@@ -547,7 +529,6 @@ def change_lab_status(lab_id, new_status):
 # Check and return lab information sent from the client
 def pack_labinfo_sent_from_client(client_form):
     err_msg = check_existence(client_form, 'labName', 'classId',
-                                           'professorName',
                                            'labDescription',
                                            'labQuestions')
     if err_msg != '':
@@ -556,7 +537,6 @@ def pack_labinfo_sent_from_client(client_form):
     lab_info = {'lab_id': '',
                 'lab_name': client_form['labName'],
                 'class_id': client_form['classId'],
-                'prof_name': client_form['professorName'],
                 'description': client_form['labDescription']}
     # Add empty experiments to be consistent with the variables used in the
     # template admin_modify_lab.html
@@ -732,83 +712,93 @@ def add_observations_sent_by_students(observations_group_by_student):
 # --- Manage admins ---
 
 # add an admin into the database according to admin_info
-def add_admin(admin_info):
+def add_user(user_info):
     # Get role object from table
-    role_admin = get_role('Admin')
+    user_role = get_role(user_info['role'])
     # id of the Admin must be unique before user can be created
-    err_msg = check_existence(admin_info, 'username')
+    err_msg = check_existence(user_info, 'username', 'role')
     if err_msg != '':
         return err_msg
-    new_admin_id = generate_user_id(admin_info['username'])
-    if not user_exists(new_admin_id):
-        new_admin = m.User(id=new_admin_id,
-                           username=admin_info['username'],
-                           name=admin_info['name'],
-                           role=role_admin)
-        ds.add(new_admin)
+    classes = []
+    labs = []
+    if user_info['role'] == 'Student':
+        for class_id in user_info.getlist('classIds'):
+            if class_exists(class_id):
+                the_class = get_class(class_id)
+                classes.append(the_class)
+                for lab in the_class.labs:
+                    labs.append(lab)
+            else:
+                return 'the class with id:{} doesn\'t exist.'.format(class_id)
+    if not user_exists(user_info['username']):
+        new_user = m.User(id=user_info['username'],
+                          name=user_info['name'],
+                          role=user_role,
+                          classes=classes,
+                          labs=labs)
+        ds.add(new_user)
         ds.commit()
     else:
-        err_msg = 'The Admin_id already exists'
+        err_msg = 'The username:{} already exists'.format(user_info['username'])
     return err_msg
 
 
+# change the user's info(including role and classes)
+def change_user_info(username, role, class_ids):
+    user = get_user(username)
+    classes = []
+    labs = []
+    for c in class_ids:
+        the_class = get_class(c)
+        classes.append(the_class)
+        for lab in the_class.labs:
+            labs.append(lab)
+    user.role = get_role(role)
+    user.classes = classes
+    user.labs = labs
+    ds.commit()
+
+
 # delete an admin from the database
-def delete_admin(admin_id):
-    admin_to_be_removed = get_user(admin_id)
-    ds.delete(admin_to_be_removed)
+def delete_user(username):
+    user_to_be_removed = get_user(username)
+    ds.delete(user_to_be_removed)
     ds.commit()
 
 
 # add a class into the database according to class_info
 def add_class(class_info):
-    # get role objects from the Role table
-    role_student = get_role('Student')
-    role_admin = get_role('Admin')
-
     # Check the correctness of data format
     err_msg = check_existence(class_info, 'professors', 'students',
                               'className', 'classTime')
     if err_msg != '':
         return err_msg
-
     users = []
-    user_ids = []
-    professor_names = class_info['professors'].split(',')
-    # Process the string to strip all the white space
-    student_names_str = ''.join(class_info['students'].split())
-    student_names = ''.join(class_info['students'].split()).split(',')
-    # Check the correctness of the string to be strings delimited only
-    # by comma
-    pattern_for_student_names = '[a-zA-Z]((,[a-zA-Z])*)'
-
-    if (re.match(pattern_for_student_names, student_names_str) is None):
-        err_msg = 'The pattern for student names is not correct'
-        return err_msg
-
+    usernames = []
     # create new class with data sent by client to be added to database
     new_class_id = generate_class_id(
         class_info['className'], class_info['classTime'])
 
     if not class_exists(new_class_id):
-        for p in professor_names:
-            p_id = generate_user_id(p)
-            if not user_exists(p_id):
-                ds.add(m.User(id=p_id, username=p, role=role_admin))
-            user_ids.append(p_id)
+        for p in class_info.getlist('professors'):
+            if not user_exists(p):
+                err_msg = 'The professor with id:{} doesn\'t exist.'.format(p)
+                return err_msg
+            else:
+                usernames.append(p)
 
-        for s in student_names:
-            s_id = generate_user_id(s)
-            if not user_exists(s_id):
-                ds.add(m.User(id=s_id, username=s, role=role_student))
-            elif get_user(s_id).role_name != 'Student':
+        for s in class_info.getlist('students'):
+            if not user_exists(s):
+                err_msg = 'The student with id:{} doesn\'t exist.'.format(p)
+                return err_msg
+            elif get_user(s).role_name != 'Student':
                 err_msg = s+(' already exists and is not a student.'
                              'You should not put their name into student name')
-                ds.rollback()
                 return err_msg
-            user_ids.append(s_id)
-
-        for user_id in user_ids:
-            users.append(get_user(user_id))
+            else:
+                usernames.append(s)
+        for username in usernames:
+            users.append(get_user(username))
         new_class = m.Class(id=new_class_id,
                             name=class_info['className'],
                             time=class_info['classTime'],
@@ -837,46 +827,32 @@ def delete_class(class_id):
     ds.commit()
 
 
-# change the students in a class with class id
-def change_class_students(class_id, student_names):
-    # clean up all the white space in the string
-    student_names_str = ''.join(student_names.split())
-    # get role objects from the Role table
-    role_student = get_role('Student')
-    # Process the string to strip all the white space;
-    # then split it over commas and join with commas
-    student_names = student_names_str.split(',')
-    # Check the correctness of the string to be strings delimited only by comma
-    pattern_for_student_names = '[a-zA-Z](,[a-zA-Z])*'
-    if (re.match(pattern_for_student_names, student_names_str) is None):
-        err_msg = 'The pattern for student names is not correct'
-        return err_msg
-    student_ids = [generate_user_id(s) for s in student_names]
+# Change the users(both professors and students) in a class
+def change_class_users(class_id, new_users):
+    if not class_exists(class_id):
+        return 'Class with id: {} doesn\'t exist'.format(class_id)
     the_class = get_class(class_id)
-
-    # Delete the students that you chose to be removed from the class
-    # if they are not in any other class
-    # If they are in another class, remove the class from their class list
-    for s in the_class.users:
-        if s.role_name == 'Student' and (not (s.id in student_ids)):
-            if len(s.classes) == 1:
-                ds.delete(s)
-            else:
-                s.classes = [c for c in s.classes if c.id != class_id]
-    ds.commit()
-    # Check the that the students you are adding already exist if they don't,
-    # create the student account and add the class to their class list
-    for s in student_names:
-        s_id = generate_user_id(s)
-        if not user_exists(s_id):
-            ds.add(m.User(id=s_id, username=s,
-                          role=role_student, classes=[the_class],
-                          labs=the_class.labs))
+    old_users = the_class.users
+    the_class.users = []
+    # Add new users to the class;
+    # add the associated labs to these users lab list
+    for u in new_users:
+        if not user_exists(str(u)):
+            ds.rollback()
+            return 'User with username: {} doesn\'t exist'.format(u)
         else:
-            the_classes = get_user(s_id).classes
-            if not (class_id in [c.id for c in the_classes]):
-                get_user(s_id)
+            user = get_user(u)
+            user.labs = the_class.labs
+            the_class.users.append(user)
     ds.commit()
+    # Delete the class and the associated labs from old users
+    for u in old_users:
+        new_lab_list = []
+        for lab in u.labs:
+            if lab.the_class.id != class_id:
+                new_lab_list.append(lab)
+        u.classes = [c for c in u.classes if c.id != class_id]
+        u.labs = new_lab_list
     return ''
 
 

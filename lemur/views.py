@@ -23,18 +23,18 @@ ds = db.session
 # --- Common Side ---
 # Login page that will check user id and allow user access to the
 # allowed pages
+# It will be replaced by reed login page in the end
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         err_msg = check_existence(request.form, 'username')
         if err_msg != '':
             return render_template('login.html')
-        user_id = generate_user_id(request.form['username'])
-        user = get_user(user_id)
+        user = get_user(request.form['username'])
         # check existence of the use
         if user is not None:
-            # When both the username is valid then redirect to
-            # the corresponding home page
+            # If the username is valid, redirect the user to
+            # the corresponding homepage
             login_user(user, True)
             user_home = {'SuperAdmin': 'superadmin_home',
                          'Admin': 'admin_home',
@@ -44,6 +44,7 @@ def login():
     return render_template('login.html')
 
 
+# Log out the user and redirect to the login page
 @app.route('/logout')
 @login_required
 def logout():
@@ -51,7 +52,9 @@ def logout():
     return redirect(url_for('login'))
 
 
-# homepages
+# Homepages
+# Users will be redirected to one of these homepages after they
+# log into the app according to their identity
 @app.route('/student_home')
 @login_required
 def student_home():
@@ -73,34 +76,38 @@ def superadmin_home():
 # --- Student Side ---
 # Page for student to select labs they want to enter data for
 # A SuperAdmin can select among all the activated labs
-    # A student/Admin can only select labs among all the activated labs
-    # that he/she is in
-@app.route('/student_enter_data')
+# A student/Admin can only select labs among all the activated labs
+# that he/she is in
+@app.route('/student_select_lab')
 @permission_required(m.Permission.DATA_ENTRY)
-def student_enter_data():
+def student_select_lab():
     labs_query = get_available_labs_for_user(current_user)
     lab_list = serialize_lab_list(labs_query)
-    return render_template('student_enter_data.html',
+    return render_template('student_select_lab.html',
                            lab_list=lab_list)
 
 
-# Page for student data entry with the right lab id
+# Page for student to enter data
 @app.route('/student_data_entry/<lab_id>')
 @permission_required(m.Permission.DATA_ENTRY)
 def student_data_entry(lab_id):
     # Get lab information and its experiments information
     # and pack them to send to the template
+
     # student and admin can only access labs he/she is in
+    # This checking is triggered when a student/admin tries to type
+    # the lab id data entry page directly in url
     lab_ids = [lab.id for lab in current_user.labs]
     if (lab_id not in lab_ids) and current_user.role_name != 'SuperAdmin':
+        err_msg = 'no power to access this page. The user can only access: {}'.format('\n'.join(lab_ids))
         return redirect(url_for('login',
-                                err_msg='no power to access this page'))
+                                err_msg=err_msg))
     lab_query = get_lab(lab_id)
     experiments_query = get_experiments_for_lab(lab_id)
 
     # check if the lab exists
     if not lab_exists(lab_id):
-        err_msg = 'The lab doesn\'t exist'
+        err_msg = 'The lab with id: {} doesn\'t exist'.format(lab_id)
         return err_html(err_msg)
 
     # Convert queries into JSON format
@@ -131,12 +138,11 @@ def _student_receive_data():
 # Main page for setting up and managing the labs
     # SuperAdmin can see/edit all the labs
     # Admin can only see/edit labs in his/her own zone
-@app.route('/admin_setup_labs_and_data_access', methods=['GET', 'POST'])
+@app.route('/admin_create_and_manage_lab', methods=['GET', 'POST'])
 @permission_required(m.Permission.LAB_SETUP)
-def admin_setup_labs_and_data_access():
+def admin_create_and_manage_lab():
     current_labs = find_all_labs(current_user)
     class_ids = get_class_id_list(current_user)
-    prof_names = get_prof_name_list(current_user)
     # If data sent by client is in correct format redirect to lab setup page
     # with user's entered data
     if request.method == 'POST':
@@ -144,9 +150,8 @@ def admin_setup_labs_and_data_access():
         if err_msg != '':
             return err_json(err_msg)
         return redirect(url_for('.admin_setup_labs', labinfo=lab_info))
-    return render_template('admin_setup_labs_and_data_access.html',
-                           current_labs=current_labs, class_ids=class_ids,
-                           prof_names=prof_names)
+    return render_template('admin_create_and_manage_lab.html',
+                           current_labs=current_labs, class_ids=class_ids)
 
 
 # fill in the experiment details of a lab
@@ -158,9 +163,8 @@ def admin_setup_labs():
     # by the permission checking)
     labinfo = ast.literal_eval(request.args['labinfo'])
     class_ids = get_class_id_list(current_user)
-    prof_names = get_prof_name_list(current_user)
     return render_template('admin_modify_lab.html', labinfo=labinfo,
-                           class_ids=class_ids, prof_names=prof_names,
+                           class_ids=class_ids,
                            post_address='_admin_receive_setup_labs_data')
 
 
@@ -169,19 +173,10 @@ def admin_setup_labs():
 def _admin_receive_setup_labs_data():
     # receive the data, check the format and deserialize it
     jsonData = request.get_json()
-    err_msg = check_existence(jsonData, 'labName', 'classId',
-                                        'professorName', 'labDescription',
-                                        'experiments', 'oldLabId')
-    if err_msg != '':
-        return err_json(err_msg)
     # Admin can only edit labs in his/her own zone
     # SuperAdmin can edit labs for anyone
     # This check has a problem: If two Admins have the same names now, they can
     # edit each other's labs
-    err_msg = check_power_to_add_lab(current_user, jsonData['professorName'],
-                                     jsonData['classId'])
-    if err_msg != '':
-        return err_json(err_msg)
     err_msg = modify_lab(jsonData)
     if err_msg != '':
         return err_json(err_msg)
@@ -198,18 +193,17 @@ def admin_modify_lab(lab_id):
     # check the existence of the lab before modifying it
     if not lab_exists(lab_id):
         err_msg = ('The lab doesn\'t exist.'
-                   'All the existing labs are:{}'.format(find_all_labs(current_user)))
+                   'All the existing labs are: {}'.format(', '.join([lab.id for lab in get_all_lab()])))
         return err_html(err_msg)
     # get info to send to template
     class_ids = get_class_id_list(current_user)
-    prof_names = get_prof_name_list(current_user)
     experiments = serialize_experiment_list(experiments_query)
     lab_info = serialize_lab_list([lab_query])[0]
     # Sort the list of experiments according to order and add them into labinfo
     sorted(experiments, key=lambda experiment: experiment['order'])
     lab_info['experiments'] = experiments
     return render_template('admin_modify_lab.html', labinfo=lab_info,
-                           class_ids=class_ids, prof_names=prof_names,
+                           class_ids=class_ids,
                            post_address='_admin_modify_lab')
 
 
@@ -255,9 +249,9 @@ def _admin_delete_lab():
 
 
 # Changes a lab's status (activated, unactivated, downloadable) in database
-@app.route('/_admin_change_status/<new_status>', methods=['POST'])
+@app.route('/_admin_change_lab_status/<new_status>', methods=['POST'])
 @permission_required(m.Permission.LAB_SETUP)
-def _admin_change_status(new_status):
+def _admin_change_lab_status(new_status):
     jsonData = request.get_json()
     err_msg = check_existence(jsonData, 'labId')
     if err_msg != '':
@@ -361,36 +355,49 @@ def _admin_download_data(lab_ids):
 
 # --- Super Admin Side ---
 # As a SuperAdmin, you can manage all the Admins' account
-@app.route('/superadmin_manage_admins', methods=['GET', 'POST'])
+@app.route('/superadmin_create_and_manage_user', methods=['GET', 'POST'])
 @permission_required(m.Permission.USER_MANAGE)
-def superadmin_manage_admins():
+def superadmin_create_and_manage_user():
     err_msg = ''
     if request.method == 'POST':
-        err_msg = add_admin(request.form)
+        err_msg = add_user(request.form)
     if err_msg != '':
         return err_json(err_msg)
-    # Get existing admins to send to the template
-    admins_query = get_all_admin()
-    current_admins = serialize_admin_list(admins_query)
-    return render_template('superadmin_manage_admins.html',
-                           current_admins=current_admins)
+    # Get existing admins and class ids to send to the template
+    user_list = serialize_user_list(get_all_user())
+    class_ids = [c.id for c in get_all_class()]
+    return render_template('superadmin_create_and_manage_user.html',
+                           user_list=user_list, class_ids=class_ids)
 
 
-@app.route('/_superadmin_delete_admin', methods=['POST'])
+# Modify the class a user belongs to
+@app.route('/_superadmin_change_user_info', methods=['POST'])
 @permission_required(m.Permission.USER_MANAGE)
-def _superadmin_delete_admin():
+def _superadmin_change_user_info():
     jsonData = request.get_json()
     # Check the correctness of data format
-    err_msg = check_existence(jsonData, 'adminIdToBeRemoved')
+    err_msg = check_existence(jsonData, 'classIds', 'username', 'role')
     if err_msg != '':
         return err_json(err_msg)
-    delete_admin(jsonData['adminIdToBeRemoved'])
+    change_user_info(jsonData['username'], jsonData['role'], jsonData['classIds'])
     return normal_json(jsonData)
 
 
-@app.route('/superadmin_manage_classes', methods=['GET', 'POST'])
+@app.route('/_superadmin_delete_user', methods=['POST'])
+@permission_required(m.Permission.USER_MANAGE)
+def _superadmin_delete_user():
+    jsonData = request.get_json()
+    # Check the correctness of data format
+    err_msg = check_existence(jsonData, 'userIdToBeRemoved')
+    if err_msg != '':
+        return err_json(err_msg)
+    delete_user(jsonData['userIdToBeRemoved'])
+    return normal_json(jsonData)
+
+
+@app.route('/superadmin_create_and_manage_class', methods=['GET', 'POST'])
 @permission_required(m.Permission.LAB_MANAGE)
-def superadmin_manage_classes():
+def superadmin_create_and_manage_class():
     if request.method == 'POST':
         err_msg = add_class(request.form)
         if err_msg != '':
@@ -398,12 +405,12 @@ def superadmin_manage_classes():
     # query professors' names and current classes from the database and
     # convert them into JSON format
     classes_query = get_all_class()
-    prof_names = get_all_prof_name_list()
+    all_users = get_all_user()
     current_classes = serialize_class_list(classes_query)
 
-    return render_template('superadmin_manage_classes.html',
+    return render_template('superadmin_create_and_manage_class.html',
                            current_classes=current_classes,
-                           prof_names=prof_names)
+                           all_users=all_users,)
 
 
 # Delete students that are not in any classes after the deletion of the current
@@ -425,11 +432,12 @@ def _superadmin_delete_class():
 def _superadmin_modify_class():
     # get data from post request and check the correctness of data format
     jsonData = request.get_json()
-    err_msg = check_existence(jsonData, 'classId', 'studentNames')
+    err_msg = check_existence(jsonData, 'classId', 'studentUserNames',
+                              'professorUserNames')
     if err_msg != '':
         return err_json(err_msg)
-    err_msg = change_class_students(jsonData['classId'],
-                                    jsonData['studentNames'])
+    err_msg = change_class_users(jsonData['classId'],
+                                 jsonData['studentUserNames']+jsonData['professorUserNames'])
     if err_msg != '':
         return err_json(err_msg)
     return normal_json(jsonData)
@@ -462,7 +470,7 @@ def inject_permissions():
 # Make the requirments to the format of input fields global
 @app.context_processor
 def inject_patterns():
-    return dict(patter_for_name='[-a-zA-Z0-9?\s]{1,60}',
+    return dict(pattern_for_name='[-a-zA-Z0-9?\s]{1,60}',
                 pattern_for_name_hint=('must be a combination of some of the'
                                        ' following: number(s), question mark,'
                                        ' letter(s), hyphen(s) and white'
@@ -479,4 +487,13 @@ def inject_patterns():
                 pattern_for_value_range=('[0-9]{1,10}[.]?[0-9]{0,10}'
                                          '-[0-9]{1,10}[.]?[0-9]{0,10}'),
                 pattern_for_value_range_hint=('valueRange should be'
-                                              'in the format:0.3-6.5'))
+                                              'in the format:0.3-6.5'),
+                pattern_for_class_time='[0-9]{2,4}[a-zA-Z]{4,7}',
+                pattern_for_class_time_hint=('Class Time is a combination',
+                                             'of year and semester. e.g. ',
+                                             '16fall'),
+                pattern_for_student_name='([0-9a-zA-Z\-]*)((,[0-9a-zA-Z\-]*)*)',
+                pattern_for_student_name_hint=('student names should be in',
+                                               'the format: andrew,george',
+                                               '(student names separeted '
+                                               'by comma)'))
