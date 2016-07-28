@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    <meta charset="UTF-8">
+    <title>home_superadmin</title>
+{% endblock %}
+
+{% block content %}
+    <p id="welcomeMsg" class="col-md-12"> 
+        Welcome, {{current_user.id}}!
+    </p>
+    <a href="/admin_create_and_manage_lab">
+        <div class="add col-lg-5 col-md-5 col-sm-5 mb hvr-ripple-out">
+            <i class="fa fa-plus-circle fa-5x"></i>
+            <p>Create/Manage Lab</p>
+        </div>
+    </a>
+    <a href="/admin_select_lab_for_data">
+        <div class="add col-lg-5 col-md-5 col-sm-5 mb hvr-ripple-out">
+            <i class="fa fa-pencil fa-5x"></i>
+            <p>Manage/Retrieve Data</p>
+        </div>
+    </a>
+    <a href="/superadmin_create_and_manage_user">
+        <div class="add col-lg-5 col-md-5 col-sm-5 mb hvr-ripple-out">
+            <i class="fa fa-users fa-5x"></i>
+            <p>Create/Manage User</p>
+        </div>
+    </a>
+    <a href="/superadmin_create_and_manage_class">
+        <div class="add col-lg-5 col-md-5 col-sm-5 mb hvr-ripple-out">
+            <i class="fa fa-university fa-5x"></i>
+            <p>Create/Manage Class</p>
+        </div>
+    </a>
+{% endblock %}

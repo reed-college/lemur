@@ -1,17 +1,31 @@
 {% extends "layout.html" %}
+
 {% block head %}
     <meta charset="UTF-8">
     <title>home_admin</title>
 {% endblock %}
-{% block nav_bar_list %}
-        <li><a href="/admin_setup_labs_and_data_access">Setup Labs and Data Access </a></li>  
-        <li><a href="/admin_select_lab_for_data">Review/Edit/Retrieve Data</a></li> 
-{% endblock %}
+
 {% block content %}
-<div id="welcomeMsg" class="col-md-12"> Hello,
-{% if current_user.is_authenticated %}
-{{current_user.username}}
-{% else %}
-Stranger
-{% endif %} </div>
+    <p id="welcomeMsg" class="col-md-12"> Welcome,
+    {% if current_user.is_authenticated %}
+    {{current_user.id}}!
+    {% else %}
+    student!
+    {% endif %} 
+    </p>
+    <a href="/admin_create_and_manage_lab">
+        <div class="add col-lg-5 col-md-5 col-sm-5 mb hvr-ripple-out">
+            <i class="fa fa-plus-circle fa-5x"></i>
+            <p>Create/Manage Lab</p>
+        </div>
+    </a>
+    <a href="/admin_select_lab_for_data">
+        <div class="add col-lg-5 col-md-5 col-sm-5 mb hvr-ripple-out">
+            <i class="fa fa-pencil fa-5x"></i>
+            <p>Manage/Retrieve Data</p>
+        </div>
+    </a>
 {% endblock %}
+
+
+

@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    <meta charset="UTF-8">
+    <title>404 Error</title>
+{% endblock %}
+
+{% block content %}
+    <div class="table-wrapper">
+        <h1>404 Error: File Not Found</h1>
+        {% if current_user.role_name=="SuperAdmin" %}
+            <a href="/superadmin_home"><button>Back to Login</button></a>
+        {% elif current_user.role_name=="Admin" %}
+            <a href="/admin_home"><button>Back to Login</button></a>
+        {% else %}
+            <a href="/student_home"><button>Back to Login</button></a>
+        {% endif %}
+    </div>
+{% endblock %}
