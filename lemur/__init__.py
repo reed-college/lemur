@@ -46,6 +46,8 @@ config = ConfigParser()
 secret_key = ConfigParser()
 config.read(CONFIG_FILE)
 secret_key.read(KEY_FILE)
+student_api_url = secret_key['key']['STUDENT_API_URL']
+class_api_url = secret_key['key']['CLASS_API_URL']
 login_manager, app = create_app(secret_key, config)
 db = SQLAlchemy(app)
 

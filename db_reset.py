@@ -1,4 +1,4 @@
-# This script is used to reset(drop and create) and repopulate the database
+# This script is used to reset(drop and create)
 import os
 
 
@@ -9,7 +9,7 @@ def reset_database():
     os.system('python3 run.py db init')
     os.system('python3 run.py db migrate')
     os.system('python3 run.py db upgrade')
-    os.system('python3 db_populate.py')
+    os.system('python3 db_populate_real.py')
 
 if __name__ == '__main__':
     reset_database()
