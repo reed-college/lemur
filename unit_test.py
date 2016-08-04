@@ -1,4 +1,3 @@
-# This is file contains a unit test suit which completely test the backend
 # functions of our app.
 # Note:
 # 1.We create some random functions before the test suit to add randomness to
