@@ -146,8 +146,6 @@ class TestCase(unittest.TestCase):
         db.create_all()
         # Insert all the roles(Student, Admin, SuperAdmin) that will be used
         m.Role.insert_roles()
-        # Set a random seed according to current time
-        seed(datetime.now())
 
     # tidy up after a test has been run
     def tearDown(self):
@@ -173,8 +171,8 @@ class TestCase(unittest.TestCase):
 
     # Generate a json format dictionary that consists of information needed to
     # create a new lab with random values
-    def construct_lab_json(self):
-        lab_json = {'labName': randlength_word(),
+    def construct_lab_dict(self):
+        lab_dict = {'labName': randlength_word(),
                     'classId': rand_classid(),
                     'labDescription': randlength_word(),
                     'experiments': [],
@@ -189,8 +187,8 @@ class TestCase(unittest.TestCase):
                         'valueCandidates': rand_value_candidates()
 
                         }
-            lab_json['experiments'].append(exp_json)
-        return lab_json
+            lab_dict['experiments'].append(exp_json)
+        return lab_dict
 
     # Construct a lab with experiments which have observations input by
     # students(they will be stored in the database before the function returns)
@@ -212,19 +210,8 @@ class TestCase(unittest.TestCase):
             lab.experiments.append(experiment)
         return lab
 
-    # Construct and add a class for a lab to be set up according to the info of
-    # the lab in the lab_json provided
-    def add_a_class_for_lab_json(self, lab_json):
-        # Without the existence of the class in the database,
-        # the lab which belongs to this class can't be added
-        class_info = u.decompose_class_id(lab_json['classId'])
-        the_class = m.Class(id=lab_json['classId'],
-                            name=class_info['class_name'],
-                            time=class_info['class_time'])
-        ds.add(the_class)
-        ds.commit()
-
-    # --- Testing functions(no interaction with database) for functions in utility.py ---
+    # --- Testing functions(no interaction with database) for functions in
+    # utility.py ---
     # Note: some of these tests seem trivial. For the completeness of the
     # testing, we still keep them.
     def test_check_existence(self):
@@ -233,7 +220,7 @@ class TestCase(unittest.TestCase):
         key3 = 'key3'
         form = {key1: 'value1', key2: 'value2'}
         success_msg = ''
-        err_msg = key3+' is not defined\n'
+        err_msg = key3 + ' is not defined\n'
         self.assertEqual(u.check_existence(form, key1, key2), success_msg)
         self.assertEqual(u.check_existence(form, key1, key3), err_msg)
 
@@ -429,14 +416,9 @@ class TestCase(unittest.TestCase):
         self.assertEqual(power_query.id, id)
         return power_query
 
-    # --- Testing functions(have interaction with database) for functions in utility.py ---
+    # --- Testing functions(have interaction with database) for functions in
+    # utility.py ---
 
-    # Testing for the existence of an object
-    # This group of functions create a new object in the database with random
-    # and then test the existence of the object by calling the existence
-    # checking function. It also checks the non-existence of a object that
-    # should not be in the database by calling the function to make sure that
-    # the existen checking function will not always return True.
     def test_lab_exists(self):
         lab = self.test_create_lab()
         self.assertTrue(u.lab_exists(lab.id))
@@ -463,9 +445,6 @@ class TestCase(unittest.TestCase):
         self.assertFalse(u.user_exists(user.id+'123'))
 
     # Testing for querying a single object from the database
-    # This group of testing functions query objects from the database by
-    # calling the corresponging utility function and comepare it with
-    # the object we created and added
     def test_get_lab(self):
         lab = self.test_create_lab()
         lab_query = u.get_lab(lab.id)
@@ -473,7 +452,7 @@ class TestCase(unittest.TestCase):
 
     def test_get_experiment(self):
         experiment = self.test_create_experiment()
-        experiment_query = get_experiment(experiment.id)
+        experiment_query = u.get_experiment(experiment.id)
         self.assertEqual(experiment_query, experiment)
 
     def test_get_observation(self):
@@ -502,10 +481,6 @@ class TestCase(unittest.TestCase):
         self.assertEqual(class_query, the_class)
 
     # - Testing for query all objects of a class from the database -
-    # This group of testing functions create a bunch of random objects
-    # of the same class and store them into the database. Then, calling
-    # the corresponding get_all function and check whether all the objects
-    # will be returned
     def test_get_all_lab(self):
         lab_ids = [self.test_create_lab().id for _ in range(rand_round())]
         for lab_id in lab_ids:
@@ -713,12 +688,12 @@ class TestCase(unittest.TestCase):
     def test_modify_lab(self):
         built_in_ids = populate_db()
         the_class = u.get_class(built_in_ids['class_id'])
-        lab_json = self.construct_lab_json()
-        lab_json['classId'] = u.generate_class_id(the_class.name, the_class.time)
+        lab_dict = self.construct_lab_dict()
+        lab_dict['classId'] = u.generate_class_id(the_class.name, the_class.time)
         lab_name = randlength_word()
-        lab_json['labName'] = lab_name
+        lab_dict['labName'] = lab_name
         lab_id = u.generate_lab_id(lab_name, the_class.id)
-        err_msg = u.modify_lab(lab_json)
+        err_msg = u.modify_lab(lab_dict)
         self.assertEqual('', err_msg)
         self.assertTrue(u.lab_exists(lab_id))
 
@@ -1143,17 +1118,17 @@ class TestCase(unittest.TestCase):
         built_in_ids = populate_db()
         superadmin = u.get_user(built_in_ids['superadmin_id'])
         self.login(superadmin.id)
-        lab_json = self.construct_lab_json()
+        lab_dict = self.construct_lab_dict()
         the_class = u.get_class(built_in_ids['class_id'])
-        lab_json['classId'] = u.generate_class_id(the_class.name, the_class.time)
+        lab_dict['classId'] = u.generate_class_id(the_class.name, the_class.time)
         lab_name = randlength_word()
-        lab_json['labName'] = lab_name
+        lab_dict['labName'] = lab_name
         lab_id = u.generate_lab_id(lab_name, the_class.id)
 
         # Add the corresponding class first since without class
         # the lab will not be able to be added
         self.app.post('/_admin_receive_setup_labs_data',
-                      data=json.dumps(lab_json),
+                      data=json.dumps(lab_dict),
                       content_type='application/json')
         self.assertTrue(u.lab_exists(lab_id))
 
@@ -1171,26 +1146,26 @@ class TestCase(unittest.TestCase):
         built_in_ids = populate_db()
         superadmin = u.get_user(built_in_ids['superadmin_id'])
         self.login(superadmin.id)
-        lab_json = self.construct_lab_json()
+        lab_dict = self.construct_lab_dict()
 
         the_class = u.get_class(built_in_ids['class_id'])
-        lab_json['classId'] = u.generate_class_id(the_class.name, the_class.time)
+        lab_dict['classId'] = u.generate_class_id(the_class.name, the_class.time)
         lab_name = randlength_word()
-        lab_json['labName'] = lab_name
+        lab_dict['labName'] = lab_name
         lab_id = u.generate_lab_id(lab_name, the_class.id)
 
         self.app.post('/_admin_receive_setup_labs_data',
-                      data=json.dumps(lab_json),
+                      data=json.dumps(lab_dict),
                       content_type='application/json')
 
         # Modify the lab's description we just set up
-        lab_json['labDescription'] = randlength_word()
-        lab_json['oldLabId'] = lab_id
+        lab_dict['labDescription'] = randlength_word()
+        lab_dict['oldLabId'] = lab_id
         self.app.post('/_admin_modify_lab',
-                      data=json.dumps(lab_json),
+                      data=json.dumps(lab_dict),
                       content_type='application/json')
         lab_query = u.get_lab(lab_id)
-        self.assertEqual(lab_json['labDescription'], lab_query.description)
+        self.assertEqual(lab_dict['labDescription'], lab_query.description)
 
     def test__admin_duplicate_lab(self):
         built_in_ids = populate_db()
