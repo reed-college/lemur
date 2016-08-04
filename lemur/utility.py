@@ -312,16 +312,16 @@ def serialize_experiment_list(experiment_list):
 
 
 def serialize_user_list(user_list):
-    user_json_list = []
+    user_list = []
     for user in user_list:
         classes = [c.id for c in user.classes]
         labs = [lab.id for lab in user.labs]
-        user_json_list.append({'username': user.id,
-                               'name': user.name,
-                               'role_name': user.role_name,
-                               'classes': classes,
-                               'labs': labs})
-    return user_json_list
+        user_list.append({'username': user.id,
+                          'name': user.name,
+                          'role_name': user.role_name,
+                          'classes': classes,
+                          'labs': labs})
+    return user_list
 
 
 def serialize_class_list(class_list):
@@ -833,7 +833,6 @@ def change_class_users(class_id, new_users):
         return 'Class with id: {} doesn\'t exist'.format(class_id)
     the_class = get_class(class_id)
     old_users = the_class.users
-    the_class.users = []
     # Add new users to the class;
     # add the associated labs to these users lab list
     for u in new_users:
@@ -842,17 +841,19 @@ def change_class_users(class_id, new_users):
             return 'User with username: {} doesn\'t exist'.format(u)
         else:
             user = get_user(u)
-            user.labs = the_class.labs
-            the_class.users.append(user)
-    ds.commit()
-    # Delete the class and the associated labs from old users
+            if not (u in the_class.users):
+                the_class.users.append(user)
+                user.labs = the_class.labs
+    # Delete the class and the associated labs from old users who
+    # are not in the class anymore
     for u in old_users:
-        new_lab_list = []
-        for lab in u.labs:
-            if lab.the_class.id != class_id:
-                new_lab_list.append(lab)
-        u.classes = [c for c in u.classes if c.id != class_id]
-        u.labs = new_lab_list
+        if not(u in the_class.users):
+            u.classes = [c for c in u.classes if c.id != class_id]
+            new_lab_list = []
+            for lab in u.labs:
+                if lab.the_class.id != class_id:
+                    new_lab_list.append(lab)
+            u.labs = new_lab_list
     ds.commit()
     return ''
 
