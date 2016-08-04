@@ -7,7 +7,12 @@
 
 {% block content %}
     <p id="welcomeMsg" class="col-md-12">
-        Welcome, {{current_user.id}}!
+        Welcome,
+        {% if current_user.name != ''%}
+            {{current_user.name}}!
+        {% else %}
+            {{current_user.id}}!
+        {% endif %}
     </p>
     <a href="/student_select_lab">
         <div id="student_button" class="add col-lg-5 col-md-5 col-sm-5 mb hvr-ripple-out">

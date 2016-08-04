@@ -11,7 +11,8 @@ $(document).ready(function(){
                   console.log('Delete successfully');
                 },
           error : function(result){
-                  $('#errorMsgs').html('Fail to delete<br>'+result);
+                  err_msg = JSON.parse(result.responseText)['data'];
+                  $('#errorMsgs').html('Fail to delete<br>'+err_msg);
                   $('#errorPopup').modal("show");
                   console.log('Fail to delete');
                   console.log(result);
@@ -35,7 +36,8 @@ $(document).ready(function(){
                     console.log('Save successfully');
                   },
             error : function(result){
-                    $('#errorMsgs').html('Fail to save<br>'+result);
+                    err_msg = JSON.parse(result.responseText)['data'];
+                    $('#errorMsgs').html('Fail to save<br>'+err_msg);
                     $('#errorPopup').modal("show");
                     console.log('Fail to save');
                     console.log(result);

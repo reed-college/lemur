@@ -141,7 +141,8 @@ $(document).ready(function(){
                   console.log('submit successfully!');
                 },
           error : function(result){
-                  $('#errorMsgs').html('Fail to submit data<br>'+result);
+                    err_msg = JSON.parse(result.responseText)['data'];
+                  $('#errorMsgs').html('Fail to submit data<br>'+err_msg);
                   $('#errorPopup').modal("show");
                   console.log(result);
                   console.log('fail to submit');

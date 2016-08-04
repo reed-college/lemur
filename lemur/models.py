@@ -16,12 +16,6 @@ association_table_class_user = db.Table('association_class_user',
                                                   db.ForeignKey('Class.id')),
                                         db.Column('user_id', db.String(64),
                                                   db.ForeignKey('User.id')))
-association_table_class_lab = db.Table('association_class_lab',
-                                       db.Column('class_id', db.String(128),
-                                                 db.ForeignKey('Class.id')),
-                                       db.Column('lab_id', db.String(128),
-                                                 db.ForeignKey(
-                                                    'Lab.id')))
 association_table_user_lab = db.Table('association_user_lab',
                                       db.Column('user_id', db.String(64),
                                                 db.ForeignKey('User.id')),
@@ -49,20 +43,16 @@ class Lab(db.Model):
     id = db.Column(db.String(128), nullable=False, unique=True,
                    primary_key=True)
     name = db.Column(db.String(64), nullable=False)
-    class_name = db.Column(db.String(32), nullable=False)
-    prof_name = db.Column(db.String(32), nullable=False)
     # lab description contained in description variable
     description = db.Column(db.String(4096))
     status = db.Column(db.Enum('Activated', 'Downloadable', 'Unactivated',
                                name='status'))
-
     # one-to-many: a lab can have multiple experiments
     experiments = db.relationship('Experiment', back_populates='lab',
                                   cascade="all, delete, delete-orphan")
-    # Many-to-Many: a class can have multiple labs and a lab can have multiple
-    # classes
-    classes = db.relationship("Class", secondary=association_table_class_lab,
-                              back_populates="labs")
+    # Many-to-One: a class can have multiple labs
+    class_id = db.Column(db.String(128), db.ForeignKey('Class.id'))
+    the_class = db.relationship("Class", back_populates="labs")
     # Many-to-Many: a user can have multiple labs and a lab can have multiple
     # users
     users = db.relationship("User", secondary=association_table_user_lab,
@@ -71,17 +61,16 @@ class Lab(db.Model):
     def __repr__(self):
         # Representation of class object in string format
         tpl = ('Lab<id: {id}, name: {name}'
-               ', class_name: {class_name}, prof_name: {prof_name}'
+               ', class_id: {class_id},'
                ', description: {description}, status: {status}'
-               ', experiments: {experiments}, classes: {classes}'
+               ', experiments: {experiments}, the_class: {the_class}'
                ', users: {users}>')
         formatted = tpl.format(id=self.id, name=self.name,
-                               class_name=self.class_name,
-                               prof_name=self.prof_name,
+                               class_id=self.class_id,
                                description=self.description,
                                status=self.status,
                                experiments=[e.name for e in self.experiments],
-                               classes=[c.name for c in self.classes],
+                               the_class=self.the_class.id,
                                users=[u.name for u in self.users])
         return formatted
 
@@ -105,7 +94,7 @@ class Experiment(db.Model):
     lab_id = db.Column(db.String(128), db.ForeignKey('Lab.id'))
     lab = db.relationship("Lab", back_populates="experiments")
 
-    # one-to-many: a experiment can have multiple data
+    # One-to-Many: a experiment can have multiple data
     observations = db.relationship('Observation', back_populates='experiment',
                                    cascade="all, delete, delete-orphan")
 
@@ -160,9 +149,8 @@ class Class(db.Model):
     # students)
     users = db.relationship("User", secondary=association_table_class_user,
                             back_populates="classes")
-    # Many-to-Many: A Class can have multiple labs
-    labs = db.relationship("Lab", secondary=association_table_class_lab,
-                           back_populates="classes")
+    # One-to-Many: A Class can have multiple labs
+    labs = db.relationship("Lab", back_populates='the_class')
 
     def __repr__(self):
         tpl = ('Class<id: {id}, time: {time}, name: {name}, users: {users},'
@@ -176,9 +164,7 @@ class Class(db.Model):
 
 class User(UserMixin, db.Model):
     __tablename__ = 'User'
-    id = db.Column(db.String(64), nullable=False, unique=True,
-                   primary_key=True)
-    username = db.Column(db.String(64), nullable=False, unique=True)
+    id = db.Column(db.String(64), nullable=False, unique=True, primary_key=True)
     name = db.Column(db.String(128))
     # Many-to-One: A role can have multiple users
     role_name = db.Column(db.String(64), db.ForeignKey('Role.name'))
@@ -199,9 +185,9 @@ class User(UserMixin, db.Model):
         return self.role is not None and power in self.get_power()
 
     def __repr__(self):
-        tpl = ('User<id: {id}, username: {username},'
+        tpl = ('User<id: {id},'
                ' role_name: {role_name}, classes: {classes}, labs: {labs}>')
-        formatted = tpl.format(id=self.id, username=self.username,
+        formatted = tpl.format(id=self.id,
                                role_name=self.role_name,
                                classes=[c.id for c in self.classes],
                                labs=[l.id for l in self.labs])
@@ -218,15 +204,14 @@ login_manager.anonymous_user = AnonymousUser
 
 # Function accepts a user id and returns the user object of that id
 @login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(user_id)
+def load_user(id):
+    return User.query.get(id)
 
 
 class Role(db.Model):
     __tablename__ = 'Role'
     name = db.Column(db.String(64), nullable=False, unique=True,
                      primary_key=True)
-
     # Many-to-Many: A Role can have multiple power; a power can belong to
     # roles
     powers = db.relationship("Power", secondary=association_table_role_power,
@@ -240,7 +225,7 @@ class Role(db.Model):
     @staticmethod
     def insert_roles():
         for p in Permission.all_permissions():
-            if db.session.query(Power).filter(Power.id==p).count() == 0:
+            if db.session.query(Power).filter(Power.id == p).count() == 0:
                 db.session.add(Power(id=p))
         roles = {
             'Student': [Permission.DATA_ENTRY],
