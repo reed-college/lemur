@@ -1,5 +1,8 @@
 # This file is used to populate the database(mainly for testing)
-from lemur.utility import *
+from lemur import utility as u
+from lemur import models as m
+from lemur import (db)
+ds = db.session
 
 
 def populate_db():
@@ -9,9 +12,9 @@ def populate_db():
         # Create a real lab
         real_lab_name = '2Cortisol'
         real_lab_id = '2Cortisol:bio101_16fall'
-        if not lab_exists(real_lab_id):
+        if not u.lab_exists(real_lab_id):
             real_lab = m.Lab(id=real_lab_id, name=real_lab_name,
-                             the_class=get_class(class_id),
+                             the_class=u.get_class(class_id),
                              description=('Enter your lab instructor (C or N),'
                                           ' lab day (M,T,W,R,F), temperature'
                                           ' treatment (ICE or RT), and'
@@ -20,25 +23,25 @@ def populate_db():
                                           ' POST20 cortisol results in µg/dL.'
                                           ' DO NOT type in units.'),
                              status='Activated',
-                             users=[get_user(superadmin_id),
-                                    get_user(student_id)])
+                             users=[u.get_user(superadmin_id),
+                                    u.get_user(student_id)])
             ds.add(real_lab)
 
         experiment1_name = 'Lab Instructor'
-        experiment1_id = generate_experiment_id(real_lab_id, experiment1_name)
-        if not experiment_exists(experiment1_id):
+        experiment1_id = u.generate_experiment_id(real_lab_id, experiment1_name)
+        if not u.experiment_exists(experiment1_id):
             experiment = m.Experiment(id=experiment1_id, name=experiment1_name,
                                       description=('Enter C for Carey or N for'
                                                    ' Ned. Use only 1 letter.'),
                                       order=1, value_type='Text',
                                       value_candidates='C,N',
                                       value_range='',
-                                      lab=get_lab(real_lab_id))
+                                      lab=u.get_lab(real_lab_id))
             ds.add(experiment)
 
         experiment2_name = 'Lab day?'
-        experiment2_id = generate_experiment_id(real_lab_id, experiment2_name)
-        if not experiment_exists(experiment2_id):
+        experiment2_id = u.generate_experiment_id(real_lab_id, experiment2_name)
+        if not u.experiment_exists(experiment2_id):
             experiment = m.Experiment(id=experiment2_id, name=experiment2_name,
                                       description=('Enter M for Monday, T for'
                                                    ' Tuesday, W for Wednesday,'
@@ -48,11 +51,11 @@ def populate_db():
                                       order=2, value_type='Text',
                                       value_candidates='M,T,W,R,F',
                                       value_range='',
-                                      lab=get_lab(real_lab_id))
+                                      lab=u.get_lab(real_lab_id))
             ds.add(experiment)
         experiment3_name = 'TemperatureTreatment'
-        experiment3_id = generate_experiment_id(real_lab_id, experiment3_name)
-        if not experiment_exists(experiment3_id):
+        experiment3_id = u.generate_experiment_id(real_lab_id, experiment3_name)
+        if not u.experiment_exists(experiment3_id):
             experiment = m.Experiment(id=experiment3_id, name=experiment3_name,
                                       description=('Enter ICE for ice water or'
                                                    ' RT for room temperature'
@@ -60,12 +63,12 @@ def populate_db():
                                       order=3, value_type='Text',
                                       value_candidates='ICE,RT',
                                       value_range='',
-                                      lab=get_lab(real_lab_id))
+                                      lab=u.get_lab(real_lab_id))
             ds.add(experiment)
 
         experiment4_name = 'Psychol Treatment'
-        experiment4_id = generate_experiment_id(real_lab_id, experiment4_name)
-        if not experiment_exists(experiment4_id):
+        experiment4_id = u.generate_experiment_id(real_lab_id, experiment4_name)
+        if not u.experiment_exists(experiment4_id):
             experiment = m.Experiment(id=experiment4_id, name=experiment4_name,
                                       description=('Enter Critical for'
                                                    ' counting down with a'
@@ -75,12 +78,12 @@ def populate_db():
                                       order=4, value_type='Text',
                                       value_candidates='Critical,Helpful',
                                       value_range='',
-                                      lab=get_lab(real_lab_id))
+                                      lab=u.get_lab(real_lab_id))
             ds.add(experiment)
 
         experiment5_name = 'PRE treatment cortisol concentration'
-        experiment5_id = generate_experiment_id(real_lab_id, experiment5_name)
-        if not experiment_exists(experiment5_id):
+        experiment5_id = u.generate_experiment_id(real_lab_id, experiment5_name)
+        if not u.experiment_exists(experiment5_id):
             experiment = m.Experiment(id=experiment5_id, name=experiment5_name,
                                       description=('Enter the PRE treatment'
                                                    ' cortisol concentration'
@@ -98,12 +101,12 @@ def populate_db():
                                       order=5, value_type='Number',
                                       value_candidates='',
                                       value_range='',
-                                      lab=get_lab(real_lab_id))
+                                      lab=u.get_lab(real_lab_id))
             ds.add(experiment)
 
         experiment6_name = 'POST treatment cortisol concentration'
-        experiment6_id = generate_experiment_id(real_lab_id, experiment6_name)
-        if not experiment_exists(experiment6_id):
+        experiment6_id = u.generate_experiment_id(real_lab_id, experiment6_name)
+        if not u.experiment_exists(experiment6_id):
             experiment = m.Experiment(id=experiment6_id, name=experiment6_name,
                                       description=('Enter the POST treatment'
                                                    ' cortisol concentration'
@@ -121,12 +124,12 @@ def populate_db():
                                       order=6, value_type='Number',
                                       value_candidates='',
                                       value_range='',
-                                      lab=get_lab(real_lab_id))
+                                      lab=u.get_lab(real_lab_id))
             ds.add(experiment)
 
         experiment7_name = 'POST20 treatment cortisol concentration'
-        experiment7_id = generate_experiment_id(real_lab_id, experiment7_name)
-        if not experiment_exists(experiment7_id):
+        experiment7_id = u.generate_experiment_id(real_lab_id, experiment7_name)
+        if not u.experiment_exists(experiment7_id):
             experiment = m.Experiment(id=experiment7_id, name=experiment7_name,
                                       description=('Enter the POST20 treatment'
                                                    ' cortisol concentration'
@@ -144,7 +147,7 @@ def populate_db():
                                       order=7, value_type='Number',
                                       value_candidates='',
                                       value_range='',
-                                      lab=get_lab(real_lab_id))
+                                      lab=u.get_lab(real_lab_id))
             ds.add(experiment)
         ds.commit()
 
@@ -158,53 +161,53 @@ def populate_db():
     observation_id = 'test:bio101_16fall:q1:pip'
     m.Role.insert_roles()
     # Create a SuperAdmin, a Admin, a Student
-    if not user_exists(superadmin_id):
+    if not u.user_exists(superadmin_id):
         u = m.User(id='bob123',
                    name='bob123',
-                   role=get_role('SuperAdmin'))
+                   role=u.get_role('SuperAdmin'))
         ds.add(u)
 
-    if not user_exists(admin_id):
+    if not u.user_exists(admin_id):
         u = m.User(id='amy', name='amy',
-                   role=get_role('Admin'))
+                   role=u.get_role('Admin'))
         ds.add(u)
 
-    if not user_exists(student_id):
+    if not u.user_exists(student_id):
         u = m.User(id='pip', name='pip',
-                   role=get_role('Student'))
+                   role=u.get_role('Student'))
         ds.add(u)
 
-    if not user_exists(student2_id):
+    if not u.user_exists(student2_id):
             u = m.User(id='tim',
-                       name='tim', role=get_role('Student'))
+                       name='tim', role=u.get_role('Student'))
             ds.add(u)
     # Create a class
-    if not class_exists(class_id):
+    if not u.class_exists(class_id):
         c = m.Class(id=class_id, name='bio101', time='16fall',
-                    users=[get_user(student_id),
-                           get_user(admin_id)])
+                    users=[u.get_user(student_id),
+                           u.get_user(admin_id)])
         ds.add(c)
     ds.commit()
 
     # Create a lab with an experiment
-    if not lab_exists(lab_id):
-        lab = m.Lab(id=lab_id, name='test', the_class=get_class('bio101_16fall'), status='Activated',
-                    users=[get_user(admin_id), get_user(student_id)])
+    if not u.lab_exists(lab_id):
+        lab = m.Lab(id=lab_id, name='test', the_class=u.get_class('bio101_16fall'), status='Activated',
+                    users=[u.get_user(admin_id), u.get_user(student_id)])
         ds.add(lab)
 
-    if not experiment_exists(experiment_id):
+    if not u.u.experiment_exists(experiment_id):
         experiment = m.Experiment(id=experiment_id, name='q1',
                                   description='this is q1',
                                   order=1, value_type='Number',
                                   value_range='1.5-10.6',
-                                  lab=get_lab(lab_id))
+                                  lab=u.get_lab(lab_id))
         ds.add(experiment)
 
-    if not observation_exists(observation_id):
+    if not u.observation_exists(observation_id):
         observation = m.Observation(id=observation_id,
                                     student_name='pip',
                                     datum='N',
-                                    experiment=get_experiment(experiment_id))
+                                    experiment=u.get_experiment(experiment_id))
         ds.add(observation)
 
     create_real_lab()

@@ -7,7 +7,6 @@
 # Libraries
 # Standard library
 from functools import wraps
-from operator import attrgetter
 import linecache
 import sys
 
@@ -288,7 +287,7 @@ def serialize_lab_list(lab_list):
             class_id = lab.the_class.id
         else:
             class_id = None
-        prof_name = ','.join([u.name for u in lab.users if u.role_name != 'Student'])
+        prof_name = ','.join([u.name for u in lab.users if ((u.role_name == 'SuperAdmin') or (u.role_name == 'Admin'))])
         labs.append({'lab_id': lab.id,
                      'lab_name': lab.name,
                      'description': lab.description,
