@@ -12,6 +12,8 @@
 		<label> Guide:</label><br><br>
 		1. User Name must be a <b>unique</b> combination of number(s),letter(s) and dash(s) with length between 3 and 60 <br><br>
 		2. Name is optional; It must be a combination of number(s),letter(s) and dash(s); its length cannot exceed 60<br><br>
+		3. By clicking 'Reset ClassInfo from Iris', the database will be populated with classes and their associated professors. The professors by default will be given an Admin account. If the class already exists, its professors will be updated to the latest according to Iris.<br><br>
+		4. By clicking 'Update UserInfo from Iris', the students of a class will be updated: students who dropped will be removed and students who newly registered for a class will be added. If the student didn't exist in the database, they will be created with the role 'Student' by default. If the class got from iris doesn't exist in the current database, it will be ignored.<br><br>
 		{% if user_list|length==0 %}
 			<p> No user exists </p> 
 		{% else %}
@@ -107,7 +109,14 @@
 				<button name="submitNewAdmin" type="submit">Submit</button>
 				<button name="resetNewAdmin" type="reset">Reset</button>
 			</div>
+
 		</form>
+		    <div>
+				<button name="resetClass" id="update classes">Reset ClassInfo from Iris</button>
+			</div>
+		    <div>
+				<button name="updateUserInfo" id="update users">Update UserInfo from Iris</button>
+			</div>
 	</div>
 
     <!-- Modal(Error Popup) -->

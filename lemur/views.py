@@ -11,9 +11,10 @@ from flask import (render_template, request, redirect, url_for,
                    flash)
 from flask.ext.login import (login_user, logout_user, current_user,
                              login_required)
+import requests
 
 # Other modules
-from lemur import (app, db)
+from lemur import (app, db, student_api_url, class_api_url)
 from lemur import models as m
 from lemur.utility import *
 # Abbreviation for convenience
@@ -395,6 +396,40 @@ def _superadmin_delete_user():
     return normal_json(jsonData)
 
 
+# Update class/users info
+@app.route('/_superadmin_update_info_from_iris', methods=['POST'])
+@permission_required(m.Permission.USER_MANAGE)
+def _superadmin_update_info_from_iris():
+    jsonData = request.get_json()
+    err_msg = check_existence(jsonData, 'message')
+    if err_msg != '':
+        return err_json(err_msg)
+
+    if jsonData['message'] == 'update classes':
+        class_data = json.loads(requests.get(class_api_url).text)
+        if (len(class_data) == 0):
+            return 'empty class data'
+        err_msg = check_existence(class_data[0], 'subject', 'course_number',
+                                  'term_code', 'instructors')
+        if err_msg != '':
+            return err_json(err_msg)
+        warning_msg = populate_db_with_classes_and_professors(class_data)
+        return normal_json(warning_msg)
+    elif jsonData['message'] == 'update users':
+        registration_data = json.loads(requests.get(student_api_url).text)
+        if (len(registration_data) == 0):
+            return 'empty registration data'
+        err_msg = check_existence(registration_data[0], 'subject',
+                                  'course_number', 'term_code', 'user_name')
+        if err_msg != '':
+            return err_json(err_msg)
+        warning_msg = update_users_by_data_from_iris(registration_data)
+        return normal_json(warning_msg)
+    else:
+        err_msg = 'invalid message:{}'.format(jsonData['message'])
+        return err_json(err_msg)
+
+
 @app.route('/superadmin_create_and_manage_class', methods=['GET', 'POST'])
 @permission_required(m.Permission.LAB_MANAGE)
 def superadmin_create_and_manage_class():
@@ -410,7 +445,7 @@ def superadmin_create_and_manage_class():
 
     return render_template('superadmin_create_and_manage_class.html',
                            current_classes=current_classes,
-                           all_users=all_users,)
+                           all_users=all_users)
 
 
 # Delete students that are not in any classes after the deletion of the current
@@ -491,9 +526,4 @@ def inject_patterns():
                 pattern_for_class_time='[0-9]{2,4}[a-zA-Z]{4,7}',
                 pattern_for_class_time_hint=('Class Time is a combination',
                                              'of year and semester. e.g. ',
-                                             '16fall'),
-                pattern_for_student_name='([0-9a-zA-Z\-]*)((,[0-9a-zA-Z\-]*)*)',
-                pattern_for_student_name_hint=('student names should be in',
-                                               'the format: andrew,george',
-                                               '(student names separeted '
-                                               'by comma)'))
+                                             '16fall'))

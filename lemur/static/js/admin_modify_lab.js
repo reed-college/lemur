@@ -134,7 +134,8 @@ $(document).ready(function(){
                           console.log('Change successfully');
                     },
                     error : function(result){
-                          $('#errorMsgsPopUp').html('Fail to save change<br>'+result);
+                          err_msg = JSON.parse(result.responseText)['data'];
+                          $('#errorMsgsPopUp').html('Fail to save change<br>'+err_msg);
                           $('#errorPopup').modal("show");
                           console.log('Fail to change(lab id must be unique)');
                           console.log(result);

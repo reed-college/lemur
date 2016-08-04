@@ -7,6 +7,7 @@
 # Libraries
 # Standard library
 from functools import wraps
+from operator import attrgetter
 import linecache
 import sys
 
@@ -853,7 +854,157 @@ def change_class_users(class_id, new_users):
                 new_lab_list.append(lab)
         u.classes = [c for c in u.classes if c.id != class_id]
         u.labs = new_lab_list
+    ds.commit()
     return ''
+
+
+# --- Initialize Classes and Users by getting data from Iris ---
+
+# Convert a term code into a semester name
+# e.g. 201701 -> FALL2016
+# e.g. 201703 -> SPRING2017
+def tranlate_term_code_to_semester(term_code):
+    convert_table = {'1': 'FALL',
+                     '2': 'PAIDEIA',
+                     '3': 'SPRING',
+                     '4': 'SUMMER'}
+    term_code_list = list(term_code)
+    term_index = term_code_list[-1]
+    year = ''.join(term_code_list[:4])
+    if term_index == '1':
+        year = str(int(year) - 1)
+    if term_index in convert_table:
+        return convert_table[term_index] + year
+    return ''
+
+
+# This method will remove all the 470 classes; for any of other class,
+# combine the instructor field of all sections
+def cleanup_class_data(class_data):
+    cleaned_class_data = []
+    course_number_set = set()
+    for c in class_data:
+        if c['course_number'] != '470':
+            course_number_set.add(c['course_number'])
+    course_number_list = list(course_number_set)
+    for course_number in course_number_list:
+        the_class_list = list(filter(lambda c: c['course_number'] == course_number, class_data))
+        # the_class_list is impossible to be empty
+        the_class = the_class_list[0]
+        for c in the_class_list:
+            for instructor in c['instructors']:
+                if not (instructor in the_class['instructors']):
+                    the_class['instructors'].append(instructor)
+        cleaned_class_data.append(the_class)
+    return cleaned_class_data
+
+
+# Populate the database with classes and their corresponding professors
+# Note: This needs to be invoked before update_users_by_data_from_iris
+def populate_db_with_classes_and_professors(class_data):
+    class_data = cleanup_class_data(class_data)
+    for c in class_data:
+        class_name = c['subject'] + c['course_number']
+        class_time = tranlate_term_code_to_semester(c['term_code'])
+        class_professor_ids = c['instructors']
+        class_professors = []
+        for p in class_professor_ids:
+            if not user_exists(p):
+                ds.add(m.User(id=p, role=get_role('Admin')))
+                ds.commit()
+            the_user = get_user(p)
+            class_professors.append(the_user)
+        print(class_name, class_time)
+        if class_name and class_time:
+            class_id = generate_class_id(class_name, class_time)
+            # If the class already exists, update the professors and keep
+            # the students
+            if class_exists(class_id):
+                the_class = get_class(class_id)
+                # handle the change of class and the labs associated with it
+                old_class_professors = [u for u in the_class.users if u.role_name != 'Student']
+                for p in class_professors:
+                    if not (class_id in [c.id for c in p.classes]):
+                        p.classes.append(the_class)
+                        for lab in the_class.labs:
+                            if not (lab in p.labs):
+                                p.labs.append(lab)
+                ds.commit()
+                for p in old_class_professors:
+                    if not (p.id in class_professor_ids):
+                        p.classes = [c for c in p.classes if c.id != class_id]
+                        p.labs = [lab for lab in p.labs if lab.class_id != class_id]
+            # otherwise create a class with the professors
+            else:
+                ds.add(m.Class(id=class_id, name=class_name, time=class_time,
+                               users=class_professors))
+        else:
+            return 'class_time is not valid:{}'.format(class_time)
+    ds.commit()
+    return ''
+
+
+# Update the users in the classes according to registration info
+def update_users_by_data_from_iris(registration_data):
+    all_classes = get_all_class()
+    warning_msg = ''
+    registration_by_class = {}
+    # A registration_object looks like
+    # {"user_name":"fake1","course_id":"10256","term_code":"201501",
+    # "subject":"BIOL","course_number":"101","section":"FTN"}
+
+    # Add the students in the received data into the database
+    for registration_object in registration_data:
+        username = registration_object['user_name']
+        class_id = generate_class_id((registration_object['subject'] +
+                                     registration_object['course_number']),
+                                     tranlate_term_code_to_semester(registration_object['term_code']))
+        # If the class exists in the database, update
+        if class_exists(class_id):
+            the_class = get_class(class_id)
+            # If user already exists, add the class into the class list of the
+            # user；
+            # otherwise, create a user with the class
+            if user_exists(username):
+                the_user = get_user(username)
+                if not (class_id in [c.id for c in the_user.classes]):
+                    the_user.classes.append(the_class)
+                    for lab in the_class.labs:
+                        if not (lab in the_user.labs):
+                            the_user.labs.append(lab)
+            else:
+                the_user = m.User(id=username, classes=[the_class],
+                                  role=get_role('Student'), labs=the_class.labs)
+                ds.add(the_user)
+        # else return a warning message to notify the user
+        else:
+            warning_msg += ('class_id: ' + class_id +
+                            ' doesn\'t exist in database\n')
+
+        # for efficiency: otherwise we have to loop through
+        if class_id in registration_by_class:
+            registration_by_class[class_id].append(username)
+        else:
+            registration_by_class[class_id] = []
+
+    # Check the students of the classes in the database and update them
+    # according to the received data
+    for c in all_classes:
+        # If the class exists in the received data, compare
+        # the users of the class in database and data
+        if c.id in registration_by_class:
+            # Keep the admins/superadmins of the class
+            class_new_users = [u for u in c.users if u.role_name != 'Student']
+            # Replace the students of the class with the students in the
+            # received data
+            for student_id in registration_by_class[c.id]:
+                class_new_users.append(get_user(student_id))
+            c.users = class_new_users
+        else:
+            warning_msg += ('class_id: ' + class_id +
+                            ' doesn\'t exist in received data\n')
+    ds.commit()
+    return warning_msg
 
 
 # --- Response object generators ---

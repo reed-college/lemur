@@ -28,7 +28,8 @@ $(document).ready(function(){
                     console.log(operation+' successfully');               
                 },
           error : function(result){
-                    $('#errorMsgs').html('Fail to duplicate lab<br>'+result);
+                    err_msg = JSON.parse(result.responseText)['data'];
+                    $('#errorMsgs').html('Fail to duplicate lab<br>'+err_msg);
                     $('#errorPopup').modal("show");
                     console.log('Fail to '+operation);
                     console.log(result);
@@ -69,7 +70,8 @@ $(document).ready(function(){
                     console.log('Change status successfully');
                 },
           error : function(result){
-                    $('#errorMsgs').html('Fail to change status<br>'+result);
+                    err_msg = JSON.parse(result.responseText)['data'];
+                    $('#errorMsgs').html('Fail to change status<br>'+err_msg);
                     $('#errorPopup').modal("show");
                     console.log('Fail to change lab status');
                     console.log(result);
