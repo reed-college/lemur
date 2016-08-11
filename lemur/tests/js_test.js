@@ -25,7 +25,6 @@ QUnit.module( 'group student_select_lab' );
 QUnit.test('decomposeClassId', function(assert) {
     var classId = 'BIOL101_FALL2016';
     assert.deepEqual(decomposeClassId(classId), ['BIOL101','FALL2016']);
-    assert.notDeepEqual(decomposeClassId(classId), undefined);
     assert.notDeepEqual(decomposeClassId(classId), ['BIOL101','SPRING2016']);
 });
 QUnit.test('generateLabId', function(assert) {
@@ -34,7 +33,6 @@ QUnit.test('generateLabId', function(assert) {
 
     assert.deepEqual(generateLabId(labName, classId), labName+':'+classId);
     assert.notDeepEqual(generateLabId(labName, classId), labName+'_'+classId);
-    assert.notDeepEqual(generateLabId(labName, classId), undefined);
 });
 
 QUnit.module( 'group admin_edit_data' );
@@ -43,8 +41,7 @@ QUnit.test('decomposeClassId', function(assert) {
     var studentName = 'amyth';
 
     assert.deepEqual(generateObservationId(experimentId, studentName), experimentId+':'+studentName);
-    assert.notDeepEqual(generateObservationId(experimentId, studentName), experimentId+'_'+studentName);
-    assert.notDeepEqual(generateObservationId(experimentId, studentName), undefined);    
+    assert.notDeepEqual(generateObservationId(experimentId, studentName), experimentId+'_'+studentName);   
 });
 
 QUnit.module( 'group admin_modify_lab' );
