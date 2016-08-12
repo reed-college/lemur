@@ -60,29 +60,8 @@ python3 run.py db upgrade
 
 7. Ask Reed College CIT for the private configuaration file
 In order to run the app
-You need to create a file named ’config.cfg’ and put it into both the root directory and the tests directory(for testing setup) of the app
-Its content should look like this(all the values need to be set up)
-```
-[login_manager]
-SESSION_PROTECTION = 
-LOGIN_VIEW = 
-
-[logger]
-FILEPATH = 
-LEVEL = 
-
-[key]
-SECRET_KEY = 
-
-[app]
-DEBUG = True
-SQLALCHEMY_DATABASE_URI = 
-
-[url]
-STUDENT_API_URL = 
-CLASS_API_URL = 
-```
-
+You need to create a file named ’config.cfg’ and put it into both the ` instance ` folder and ` lemur/tests ` folder
+Its content should look like the content in `instance/config_example.cfg`(all the values need to be set up)
 8. Run the app `python3 __main__.py`
 
 
