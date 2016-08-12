@@ -42,7 +42,7 @@ Here is an example:
 psql
 create user zzy with password 'mypassword';
 create database lemur owner zzy encoding 'utf-8'; 
-create database lemur_test owner zzy encoding 'utf-8'; 
+create database travis_ci_test owner zzy encoding 'utf-8'; 
 ```
 
 4. Setup Database
@@ -83,4 +83,6 @@ python3 run.py db upgrade
 Tests for the backend code: ` nose2 ` in lemur/lemur/tests
 
 Tests for the frontend code: Use any main stream browser to open js_test.html in lemur/lemur/tests
+
+The app will be run and the backend tests will be run automatically when one pushs new changes to the app's github repo
 
