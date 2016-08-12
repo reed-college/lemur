@@ -1,5 +1,5 @@
 # Secret Key
-secret_key.cfg
+config.cfg
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
