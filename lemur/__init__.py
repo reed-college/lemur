@@ -2,6 +2,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 from configparser import ConfigParser
+import os
 
 # Third-party libraries
 from flask import Flask
@@ -9,12 +10,13 @@ from flask.ext.sqlalchemy import SQLAlchemy
 # Flask Login Manager allows for multiple users with different access
 # rights
 from flask.ext.login import LoginManager
-CONFIG_FILE = 'config.cfg'
+
+app = Flask(__name__)
+CONFIG_FILE = os.path.join(app.instance_path, 'config.cfg')
 
 
 # Instantiate the application and initializes the login manager.
-def create_app(config):
-    app = Flask(__name__)
+def create_app(app, config):
     app.config.update(SECRET_KEY=config['key']['SECRET_KEY'], SQLALCHEMY_DATABASE_URI=config['app']['SQLALCHEMY_DATABASE_URI'],
                       DEBUG=config['app']['DEBUG'])
 
@@ -23,7 +25,7 @@ def create_app(config):
     login_manager.login_view = config['login_manager']['LOGIN_VIEW']
     login_manager.init_app(app)
 
-    return (login_manager, app)
+    return login_manager
 
 
 # Log errors that occur when the app is not in debug mode
@@ -45,7 +47,7 @@ config = ConfigParser()
 config.read(CONFIG_FILE)
 student_api_url = config['url']['STUDENT_API_URL']
 class_api_url = config['url']['CLASS_API_URL']
-login_manager, app = create_app(config)
+login_manager = create_app(app, config)
 db = SQLAlchemy(app)
 
 # These imports are useful. They help to avoid cyclic import
