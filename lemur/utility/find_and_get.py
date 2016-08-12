@@ -9,8 +9,8 @@ import linecache
 from lemur import models as m
 from lemur import db
 from lemur.utility.decorators import failure_handler
-from lemur.utility.utility_generate_and_convert import (serialize_lab_list,
-                                                        change_observation_organization)
+from lemur.utility.generate_and_convert import (serialize_lab_list,
+                                                change_observation_organization)
 ds = db.session
 
 

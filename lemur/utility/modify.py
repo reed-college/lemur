@@ -5,28 +5,28 @@ sys.path.append('../..')
 # Local
 from lemur import models as m
 from lemur import (app, db)
-from lemur.utility.utility_generate_and_convert import (check_existence,
-                                                        generate_lab_id,
-                                                        generate_experiment_id,
-                                                        generate_observation_id,
-                                                        generate_class_id,
-                                                        decompose_lab_id,
-                                                        tranlate_term_code_to_semester,
-                                                        cleanup_class_data
-                                                        )
-from lemur.utility.utility_find_and_get import (lab_exists,
-                                                experiment_exists,
-                                                class_exists,
-                                                observation_exists,
-                                                user_exists,
-                                                get_lab,
-                                                get_observation,
-                                                get_user,
-                                                get_class,
-                                                get_role,
-                                                get_all_class,
-                                                get_experiments_for_lab,
-                                                find_lab_copy_id)
+from lemur.utility.generate_and_convert import (check_existence,
+                                                generate_lab_id,
+                                                generate_experiment_id,
+                                                generate_observation_id,
+                                                generate_class_id,
+                                                decompose_lab_id,
+                                                tranlate_term_code_to_semester,
+                                                cleanup_class_data
+                                                )
+from lemur.utility.find_and_get import (lab_exists,
+                                        experiment_exists,
+                                        class_exists,
+                                        observation_exists,
+                                        user_exists,
+                                        get_lab,
+                                        get_observation,
+                                        get_user,
+                                        get_class,
+                                        get_role,
+                                        get_all_class,
+                                        get_experiments_for_lab,
+                                        find_lab_copy_id)
 ds = db.session
 
 
@@ -116,10 +116,10 @@ def duplicate_lab(old_lab_id):
     old_lab = get_lab(old_lab_id)
     # A lab can only belong to one class at this point
     old_class = get_class(old_lab.the_class.id)
-    new_lab = m.Lab(
-        id=new_lab_id, name=decompose_lab_id(new_lab_id)['lab_name'],
-        description=old_lab.description, status=old_lab.status,
-        the_class=old_class, users=old_class.users)
+    new_lab = m.Lab(id=new_lab_id,
+                    name=decompose_lab_id(new_lab_id)['lab_name'],
+                    description=old_lab.description, status=old_lab.status,
+                    the_class=old_class, users=old_class.users)
 
     new_experiments = []
     for e in old_lab.experiments:

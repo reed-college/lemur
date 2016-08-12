@@ -6,18 +6,17 @@ sys.path.append('..')
 from lemur import models as m
 from lemur import (db)
 ds = db.session
-from lemur.utility.utility_generate_and_convert import generate_experiment_id
-from lemur.utility.utility_find_and_get import (lab_exists,
-                                                experiment_exists,
-                                                observation_exists,
-                                                user_exists,
-                                                class_exists,
-                                                get_lab,
-                                                get_experiment,
-                                                get_class,
-                                                get_user,
-                                                get_role
-                                                )
+from lemur.utility.generate_and_convert import generate_experiment_id
+from lemur.utility.find_and_get import (lab_exists,
+                                        experiment_exists,
+                                        observation_exists,
+                                        user_exists,
+                                        class_exists,
+                                        get_lab,
+                                        get_experiment,
+                                        get_class,
+                                        get_user,
+                                        get_role)
 
 
 def populate_db():
