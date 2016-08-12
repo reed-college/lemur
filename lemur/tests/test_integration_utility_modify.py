@@ -14,38 +14,37 @@ from lemur import app, db
 from lemur import models as m
 from db_scripts.db_populate import populate_db
 import helper_random as r
-from lemur.utility.utility_generate_and_convert import (check_existence,
+from lemur.utility.generate_and_convert import (check_existence,
                                                         generate_lab_id,
                                                         generate_experiment_id,
                                                         generate_observation_id,
                                                         generate_class_id,
                                                         tranlate_term_code_to_semester)
-from lemur.utility.utility_find_and_get import (lab_exists,
-                                                user_exists,
-                                                class_exists,
-                                                get_user,
-                                                get_role,
-                                                get_power,
-                                                get_class,
-                                                find_all_observations_for_labs,
-                                                find_observation_number_for_experiment)
+from lemur.utility.find_and_get import (lab_exists,
+                                        user_exists,
+                                        class_exists,
+                                        get_user,
+                                        get_role,
+                                        get_power,
+                                        get_class,
+                                        find_all_observations_for_labs,
+                                        find_observation_number_for_experiment)
 
-from lemur.utility.utility_modify import (delete_lab,
-                                          modify_lab,
-                                          duplicate_lab,
-                                          change_lab_status,
-                                          delete_observation,
-                                          add_observation,
-                                          add_observations_sent_by_students,
-                                          add_user,
-                                          change_user_info,
-                                          delete_user,
-                                          add_class,
-                                          delete_class,
-                                          change_class_users,
-                                          populate_db_with_classes_and_professors,
-                                          update_users_by_data_from_iris
-                                          )
+from lemur.utility.modify import (delete_lab,
+                                  modify_lab,
+                                  duplicate_lab,
+                                  change_lab_status,
+                                  delete_observation,
+                                  add_observation,
+                                  add_observations_sent_by_students,
+                                  add_user,
+                                  change_user_info,
+                                  delete_user,
+                                  add_class,
+                                  delete_class,
+                                  change_class_users,
+                                  populate_db_with_classes_and_professors,
+                                  update_users_by_data_from_iris)
 ds = db.session
 
 

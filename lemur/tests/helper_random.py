@@ -9,12 +9,12 @@ from string import ascii_lowercase, ascii_uppercase, digits
 
 # Local
 from lemur import models as m
-from lemur.utility.utility_generate_and_convert import (generate_lab_id,
-                                                        generate_experiment_id,
-                                                        generate_observation_id,
-                                                        generate_class_id)
-from lemur.utility.utility_find_and_get import (get_power,
-                                                get_role)
+from lemur.utility.generate_and_convert import (generate_lab_id,
+                                                generate_experiment_id,
+                                                generate_observation_id,
+                                                generate_class_id)
+from lemur.utility.find_and_get import (get_power,
+                                        get_role)
 
 
 # --- Some helper functions used to add randomness into our tests ---
@@ -66,7 +66,7 @@ def rand_experiment_id():
 
 
 # generate a random value for classTime attribute in Class class
-def rand_classtime(classtime_list=['16fall', '17spring', '17fall']):
+def rand_classtime(classtime_list=['FALL2016', 'SPRING2017', 'FALL2017']):
     return classtime_list[randint(0, len(classtime_list)-1)]
 
 
@@ -117,6 +117,29 @@ def rand_student_names(number=5):
         s += (username+',')
     s = s.rstrip(',')
     return s
+
+
+def rand_observations_group_by_experiment_name():
+    observations_group_by_experiment_name = []
+    lab_id = rand_lab_id()
+    student_num = rand_round()
+    student_name_list = [randlength_word() for _ in range(student_num)]
+    for i in range(rand_round()):
+        experiment_name = randlength_word()
+        experiment_id = generate_experiment_id(lab_id, experiment_name)
+        experiment = {'experiment_id': experiment_id, 'experiment_name': experiment_name,'observations':[]}
+        for i in range(student_num):
+            student_name = student_name_list[i]
+            observation_id = generate_observation_id(experiment_id, student_name)
+            observation_datum = randlength_word()
+            observation = {'observation_id': observation_id,
+                           'student_name': student_name,
+                           'observation_data': observation_datum,
+                           'lab_id': lab_id,
+                           'experiment_id': experiment_id}
+            experiment['observations'].append(observation)
+        observations_group_by_experiment_name.append(experiment)
+    return observations_group_by_experiment_name
 
 
 # - A list of helper functions for creating a random object in database -
