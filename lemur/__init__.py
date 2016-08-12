@@ -14,6 +14,9 @@ from flask.ext.login import LoginManager
 app = Flask(__name__)
 CONFIG_FILE = os.path.join(app.instance_path, 'config.cfg')
 
+if (not os.path.isfile(CONFIG_FILE)):
+    CONFIG_FILE = os.path.join(app.instance_path, 'config_example.cfg')
+
 
 # Instantiate the application and initializes the login manager.
 def create_app(app, config):
