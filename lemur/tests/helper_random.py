@@ -26,7 +26,7 @@ def randlength_word(min_len=5, max_len=10):
 
 
 # generate a random lab status
-def rand_lab_status(status=['Activated', 'Unactivated', 'Downloadable']):
+def rand_lab_status(status=('Activated', 'Unactivated', 'Downloadable')):
     return status[randint(0, len(status)-1)]
 
 
@@ -36,7 +36,7 @@ def rand_order(min=1, max=100):
 
 
 # generate a random value type
-def rand_value_type(value_types=['Text', 'Number']):
+def rand_value_type(value_types=('Text', 'Number')):
     return value_types[randint(0, len(value_types)-1)]
 
 
