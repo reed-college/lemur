@@ -8,7 +8,7 @@
 
 {% block content %}
 	<div class="table-wrapper">
-		<div class="title"> <h2> Class Information </h2></div>
+		<div class="title"> <h2> Manage Class </h2></div>
 		<b>Guide:</b><br><br>
 		1. Class Name must be a combination of number(s),letter(s) and dash(s), with length between 3 and 60 <br><br>
 		2. Student names should be in the format: andrew,george(student names separeted by comma)<br><br>
@@ -102,7 +102,7 @@
 			</div>
 			<div>
 				<label>Students: </label>
-				<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="students" multiple data-actions-box="true" data-live-search="true" title="Choose students" required>
+				<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="students" multiple data-actions-box="true" data-live-search="true" title="Choose students">
 				    {% for u in all_users %}
 					    {% if u.role_name == "Student" %}
 							<option value="{{u.id}}">{{u.id}}</option>
@@ -114,7 +114,7 @@
 			<button name="submitNewAdmin" type="submit">Submit</button>
 			<button name="resetNewAdmin" type="reset">Reset</button>
 		</form>
-	</div>
+	</div> <!-- end of table-wrapper -->
 
     <!-- Modal(Error Popup) -->
 	<div class="modal fade" id="errorPopup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">

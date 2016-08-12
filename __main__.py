@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-from myapp import app
-
+# This file is used to start the app
+from lemur import app
 if __name__ == '__main__':
     app.run()

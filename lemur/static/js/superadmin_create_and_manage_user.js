@@ -1,4 +1,4 @@
-$(document).ready(function(){  
+$(document).ready(function(){ 
     $('button[name=delete]').click(function(){
         var userIdToBeRemoved = $(this).closest('tr').attr('id');
         $.ajax({
@@ -11,7 +11,8 @@ $(document).ready(function(){
                   console.log('Delete successfully');
                 },
           error : function(result){
-                    $('#errorMsgs').html('Fail to delete<br>'+result);
+                    err_msg = JSON.parse(result.responseText)['data'];
+                    $('#errorMsgs').html('Fail to delete<br>'+err_msg);
                     $('#errorPopup').modal("show");
                     console.log('Fail to delete');
                     console.log(result)
@@ -20,7 +21,6 @@ $(document).ready(function(){
         $(this).closest('tr').remove();
         location.reload();
     });   
-    
     $('button[name=save]').click(function(){
           var username = $(this).closest('tr').attr('id');
           var role = $(this).closest('tr').find('select[name=role]').val();
@@ -35,12 +35,39 @@ $(document).ready(function(){
                     console.log('Save successfully');
                   },
             error : function(result){
-                      $('#errorMsgs').html('Fail to save<br>'+result);
-                      $('#errorPopup').modal("show");
+                      err_msg = JSON.parse(result.responseText)['data'];
+                      $('#errorMsgs').html('Fail to save<br>'+err_msg);
+                      $('#errorPopup').modal('show');
                       console.log('Fail to save');
                       console.log(result);
                   }
           });   
           location.reload();      
-    });   
+    });  
+    $('button[name=updateUserInfo]').add($('button[name=resetClass]')).click(function(){
+          message = $(this).attr('id'); 
+          $.ajax({
+            type: 'POST',
+            contentType: 'application/json',
+            dataType: 'json',
+            url: '/_superadmin_update_info_from_iris',
+            data: JSON.stringify({'message': message}),
+            success: function(result){
+                      warning_msg = JSON.parse(result.responseText)['data'];
+                      console.log('Send data to server successfully:' + message);
+                      if (warning_msg != ''){
+                          $('#errorMsgs').html('Warning Message:<br>'+warning_msg);
+                          $('#errorPopup').modal('show');
+                      }
+                  },
+            error : function(result){
+                      err_msg = JSON.parse(result.responseText)['data'];
+                      $('#errorMsgs').html('Fail to send data to server<br>'+err_msg);
+                      $('#errorPopup').modal('show');
+                      console.log('Fail to send data to server:' + message);
+                      console.log(result);
+                  }
+          });
+    });
+
 });

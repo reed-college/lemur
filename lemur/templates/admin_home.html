@@ -7,11 +7,11 @@
 
 {% block content %}
     <p id="welcomeMsg" class="col-md-12"> Welcome,
-    {% if current_user.is_authenticated %}
-    {{current_user.id}}!
-    {% else %}
-    student!
-    {% endif %} 
+        {% if current_user.name != ''%}
+            {{current_user.name}}!
+        {% else %}
+            {{current_user.id}}!
+        {% endif %}
     </p>
     <a href="/admin_create_and_manage_lab">
         <div class="add col-lg-5 col-md-5 col-sm-5 mb hvr-ripple-out">

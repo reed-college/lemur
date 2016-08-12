@@ -1,6 +1,13 @@
 
 $(document).ready(function(){
-    //Modify an existing lab
+    // Toggle the accordion
+    $(function(){
+        $( "#accordion" ).accordion({
+            collapsible: true
+        });
+    });
+
+    // Modify an existing lab
     $('.modifyLab').click(function(){
         var labId = $(this).closest('tr').data('labid');
         window.location.replace('/admin_modify_lab/'+labId);        
@@ -13,11 +20,11 @@ $(document).ready(function(){
         $(this).closest('tr').find('#deleteConfirm').modal("show");
     });
 
-    //Duplicate/Delete a lab
+    // Duplicate/Delete a lab
     $('.duplicateLab').add($('button[name=confirm]')).click(function(){
         var operation = $(this).data('operation');
         var labId = $(this).closest('tr').data('labid');
-        //Communicate the name of the lab to be duplicated with python via Ajax 
+        // Communicate the name of the lab to be duplicated with python via Ajax 
         $.ajax({
           type: 'POST',
           contentType: 'application/json',
@@ -28,7 +35,8 @@ $(document).ready(function(){
                     console.log(operation+' successfully');               
                 },
           error : function(result){
-                    $('#errorMsgs').html('Fail to duplicate lab<br>'+result);
+                    err_msg = JSON.parse(result.responseText)['data'];
+                    $('#errorMsgs').html('Fail to duplicate lab<br>'+err_msg);
                     $('#errorPopup').modal("show");
                     console.log('Fail to '+operation);
                     console.log(result);
@@ -69,7 +77,8 @@ $(document).ready(function(){
                     console.log('Change status successfully');
                 },
           error : function(result){
-                    $('#errorMsgs').html('Fail to change status<br>'+result);
+                    err_msg = JSON.parse(result.responseText)['data'];
+                    $('#errorMsgs').html('Fail to change status<br>'+err_msg);
                     $('#errorPopup').modal("show");
                     console.log('Fail to change lab status');
                     console.log(result);

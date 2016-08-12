@@ -1,7 +1,4 @@
 $(document).ready(function(){    
-    function generateObservationId(experimentId,studentName){
-        return experimentId+':'+studentName;
-    }
     $('button[name=saveAll]').click(function(){
         //Collect all the data in the table
         oldObservationIdsList = []
@@ -27,7 +24,8 @@ $(document).ready(function(){
                     console.log('Change successfully');
                 },
           error : function(result){
-                    $('#errorMsgs').html('Fail to save change<br>'+result);
+                    err_msg = JSON.parse(result.responseText)['data'];
+                    $('#errorMsgs').html('Fail to save change<br>'+err_msg);
                     $('#errorPopup').modal("show");
                     console.log('Fail to change');
                     console.log(result);
@@ -57,7 +55,8 @@ $(document).ready(function(){
                   console.log('Delete successfully');
                 },
           error : function(result){
-                    $('#errorMsgs').html('Fail to delete<br>'+result);
+                    err_msg = JSON.parse(result.responseText)['data'];
+                    $('#errorMsgs').html('Fail to delete<br>'+err_msg);
                     $('#errorPopup').modal("show");
                     console.log('Fail to delete');
                     console.log(result);
@@ -79,8 +78,6 @@ $(document).ready(function(){
               ' are not downloadable.<br>Please change its status to downloadable on'+
               ' <b>Add a New Lab page<b>');
             $("#errorPage").modal("show");
-        }
-        
+        } 
     });
-
 });
