@@ -116,10 +116,10 @@ def duplicate_lab(old_lab_id):
     old_lab = get_lab(old_lab_id)
     # A lab can only belong to one class at this point
     old_class = get_class(old_lab.the_class.id)
-    new_lab = m.Lab(
-        id=new_lab_id, name=decompose_lab_id(new_lab_id)['lab_name'],
-        description=old_lab.description, status=old_lab.status,
-        the_class=old_class, users=old_class.users)
+    new_lab = m.Lab(id=new_lab_id,
+                    name=decompose_lab_id(new_lab_id)['lab_name'],
+                    description=old_lab.description, status=old_lab.status,
+                    the_class=old_class, users=old_class.users)
 
     new_experiments = []
     for e in old_lab.experiments:

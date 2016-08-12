@@ -15,11 +15,11 @@ from lemur import models as m
 from db_scripts.db_populate import populate_db
 import helper_random as r
 from lemur.utility.generate_and_convert import (check_existence,
-                                                        generate_lab_id,
-                                                        generate_experiment_id,
-                                                        generate_observation_id,
-                                                        generate_class_id,
-                                                        tranlate_term_code_to_semester)
+                                                generate_lab_id,
+                                                generate_experiment_id,
+                                                generate_observation_id,
+                                                generate_class_id,
+                                                tranlate_term_code_to_semester)
 from lemur.utility.find_and_get import (lab_exists,
                                         user_exists,
                                         class_exists,
