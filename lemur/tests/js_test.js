@@ -25,14 +25,12 @@ QUnit.module( 'group student_select_lab' );
 QUnit.test('decomposeClassId', function(assert) {
     var classId = 'BIOL101_FALL2016';
     assert.deepEqual(decomposeClassId(classId), ['BIOL101','FALL2016']);
-    assert.notDeepEqual(decomposeClassId(classId), ['BIOL101','SPRING2016']);
 });
 QUnit.test('generateLabId', function(assert) {
     var labName = 'Cortisol2_Carey_Thursday';
     var classId = 'BIOL101_FALL2016';
 
     assert.deepEqual(generateLabId(labName, classId), labName+':'+classId);
-    assert.notDeepEqual(generateLabId(labName, classId), labName+'_'+classId);
 });
 
 QUnit.module( 'group admin_edit_data' );
@@ -40,8 +38,7 @@ QUnit.test('decomposeClassId', function(assert) {
     var experimentId = 'Cortisol2_Carey_Thursday:BIOL101_FALL2016:Cortisol Concentration';
     var studentName = 'amyth';
 
-    assert.deepEqual(generateObservationId(experimentId, studentName), experimentId+':'+studentName);
-    assert.notDeepEqual(generateObservationId(experimentId, studentName), experimentId+'_'+studentName);   
+    assert.deepEqual(generateObservationId(experimentId, studentName), experimentId+':'+studentName);  
 });
 
 QUnit.module( 'group admin_modify_lab' );

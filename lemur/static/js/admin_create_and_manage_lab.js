@@ -1,6 +1,13 @@
 
 $(document).ready(function(){
-    //Modify an existing lab
+    // Toggle the accordion
+    $(function(){
+        $( "#accordion" ).accordion({
+            collapsible: true
+        });
+    });
+
+    // Modify an existing lab
     $('.modifyLab').click(function(){
         var labId = $(this).closest('tr').data('labid');
         window.location.replace('/admin_modify_lab/'+labId);        
@@ -13,11 +20,11 @@ $(document).ready(function(){
         $(this).closest('tr').find('#deleteConfirm').modal("show");
     });
 
-    //Duplicate/Delete a lab
+    // Duplicate/Delete a lab
     $('.duplicateLab').add($('button[name=confirm]')).click(function(){
         var operation = $(this).data('operation');
         var labId = $(this).closest('tr').data('labid');
-        //Communicate the name of the lab to be duplicated with python via Ajax 
+        // Communicate the name of the lab to be duplicated with python via Ajax 
         $.ajax({
           type: 'POST',
           contentType: 'application/json',

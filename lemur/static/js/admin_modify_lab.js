@@ -1,21 +1,3 @@
-// Show Value Range/Value Type field according to user's choice of value Type field
-function ShowFieldByChoice(){
-    var selects = document.getElementsByClassName('valueType');
-    for (var i = 0; i<selects.length; i++){
-        var s = selects[i];
-        var selectValue = s.getElementsByClassName('selectpicker')[0].value;
-        var divText =  s.getElementsByClassName('valueCandidates')[0];
-        var divValue =  s.getElementsByClassName('valueRange')[0];
-        if (selectValue == 'Text') {
-             divText.style.display = 'block';
-             divValue.style.display = 'none';
-        }
-        else {
-            divText.style.display = 'none';
-            divValue.style.display = 'block';
-        }  
-    }
-}
 //Create a class to store the info of each row
 function Experiment(name,description,order,valueType,valueRange,valueCandidates) {
     this.name = name;

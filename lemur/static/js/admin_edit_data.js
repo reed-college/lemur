@@ -1,7 +1,4 @@
 $(document).ready(function(){    
-    function generateObservationId(experimentId,studentName){
-        return experimentId+':'+studentName;
-    }
     $('button[name=saveAll]').click(function(){
         //Collect all the data in the table
         oldObservationIdsList = []
@@ -81,8 +78,6 @@ $(document).ready(function(){
               ' are not downloadable.<br>Please change its status to downloadable on'+
               ' <b>Add a New Lab page<b>');
             $("#errorPage").modal("show");
-        }
-        
+        } 
     });
-
 });

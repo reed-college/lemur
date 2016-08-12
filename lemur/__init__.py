@@ -10,13 +10,12 @@ from flask.ext.sqlalchemy import SQLAlchemy
 # rights
 from flask.ext.login import LoginManager
 CONFIG_FILE = 'config.cfg'
-KEY_FILE = 'secret_key.cfg'
 
 
 # Instantiate the application and initializes the login manager.
-def create_app(secret_key, config):
+def create_app(config):
     app = Flask(__name__)
-    app.config.update(SECRET_KEY=secret_key['key']['SECRET_KEY'], SQLALCHEMY_DATABASE_URI=config['app']['SQLALCHEMY_DATABASE_URI'],
+    app.config.update(SECRET_KEY=config['key']['SECRET_KEY'], SQLALCHEMY_DATABASE_URI=config['app']['SQLALCHEMY_DATABASE_URI'],
                       DEBUG=config['app']['DEBUG'])
 
     login_manager = LoginManager()
@@ -43,12 +42,10 @@ def log_errors(app, config):
 
 # Read configuration
 config = ConfigParser()
-secret_key = ConfigParser()
 config.read(CONFIG_FILE)
-secret_key.read(KEY_FILE)
-student_api_url = secret_key['key']['STUDENT_API_URL']
-class_api_url = secret_key['key']['CLASS_API_URL']
-login_manager, app = create_app(secret_key, config)
+student_api_url = config['url']['STUDENT_API_URL']
+class_api_url = config['url']['CLASS_API_URL']
+login_manager, app = create_app(config)
 db = SQLAlchemy(app)
 
 # These imports are useful. They help to avoid cyclic import

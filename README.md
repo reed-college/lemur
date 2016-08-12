@@ -59,15 +59,28 @@ python3 run.py db upgrade
 ` 'python3 db_populate_real.py' `
 
 7. Ask Reed College CIT for the private configuaration file
-In order to run the latest version
-You need to create a file named ’secret_key.cfg’ and put it into the root directory of the app
-Its content should look like this
+In order to run the app
+You need to create a file named ’config.cfg’ and put it into both the root directory and the tests directory(for testing setup) of the app
+Its content should look like this(all the values need to be set up)
 ```
-Secret Key file
+[login_manager]
+SESSION_PROTECTION = 
+LOGIN_VIEW = 
+
+[logger]
+FILEPATH = 
+LEVEL = 
+
 [key]
-SECRET_KEY = AAA
-STUDENT_API_URL = BBB
-CLASS_API_URL = CCC
+SECRET_KEY = 
+
+[app]
+DEBUG = True
+SQLALCHEMY_DATABASE_URI = 
+
+[url]
+STUDENT_API_URL = 
+CLASS_API_URL = 
 ```
 
 8. Run the app `python3 __main__.py`
@@ -87,5 +100,8 @@ Warning: Not all changes are well supported by database migration(especially the
 python3 run.py db migrate
 python3 run.py db upgrade
 ```
-### 4: Unit Testing
-This will carry on a relatively comprehensive unit tests for the backend code. ` python3 unit_test.py `
+### 4: Testing
+Tests for the backend code: ` python3 tests_script.py ` in lemur/lemur/tests
+
+Tests for the frontend code: Use any main stream browser to open js_test.html in lemur/lemur/tests
+

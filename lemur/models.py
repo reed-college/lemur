@@ -71,7 +71,7 @@ class Lab(db.Model):
                                status=self.status,
                                experiments=[e.name for e in self.experiments],
                                the_class=self.the_class.id,
-                               users=[u.name for u in self.users])
+                               users=[u.id for u in self.users])
         return formatted
 
 
