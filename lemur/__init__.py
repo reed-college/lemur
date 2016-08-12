@@ -55,4 +55,5 @@ db = SQLAlchemy(app)
 
 # These imports are useful. They help to avoid cyclic import
 from lemur import views, models
-log_errors(app, config)
+if config['app']['DEBUG'] is True:
+    log_errors(app, config)
