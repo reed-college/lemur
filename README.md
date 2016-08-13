@@ -1,4 +1,4 @@
-# lemur
+# lemur ![alt text](https://travis-ci.org/reed-college/lemur.svg?branch=master)
 Bio data collector
 
 ## Part1 App General Description
