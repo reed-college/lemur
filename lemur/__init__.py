@@ -14,6 +14,9 @@ from flask.ext.login import LoginManager
 app = Flask(__name__)
 CONFIG_FILE = os.path.join(app.instance_path, 'config.cfg')
 
+if (not os.path.isfile(CONFIG_FILE)):
+    CONFIG_FILE = os.path.join(app.instance_path, 'config_example.cfg')
+
 
 # Instantiate the application and initializes the login manager.
 def create_app(app, config):
@@ -49,7 +52,9 @@ student_api_url = config['url']['STUDENT_API_URL']
 class_api_url = config['url']['CLASS_API_URL']
 login_manager = create_app(app, config)
 db = SQLAlchemy(app)
+test_db_uri = config['app']['SQLALCHEMY_DATABASE_TEST_URI']
 
 # These imports are useful. They help to avoid cyclic import
 from lemur import views, models
-log_errors(app, config)
+if config['app']['DEBUG'] is True:
+    log_errors(app, config)

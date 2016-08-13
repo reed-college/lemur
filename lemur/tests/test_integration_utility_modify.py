@@ -10,7 +10,7 @@ from random import randint
 from werkzeug.datastructures import MultiDict
 
 # Local
-from lemur import app, db
+from lemur import (app, db, test_db_uri)
 from lemur import models as m
 from db_scripts.db_populate import populate_db
 import helper_random as r
@@ -58,7 +58,7 @@ class IntegrationTestUtilityModify(unittest.TestCase):
         # The database used for this suit of tests is not the one used by the
         # app. Before we run this test, we need to create a local database
         # called lemur_test
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://localhost/lemur_test'
+        app.config['SQLALCHEMY_DATABASE_URI'] = test_db_uri
         self.app = app.test_client()
         # Create all the tables
         db.create_all()
@@ -251,7 +251,8 @@ class IntegrationTestUtilityModify(unittest.TestCase):
                       ]
         populate_db_with_classes_and_professors(class_data)
         # Pick a random professor and a random class to test their existence
-        random_index = randint(0, len(class_data)-1)
+
+        random_index = randint(0, len(class_data)-2)
         professor_id = class_data[random_index]['instructors'][0]
         self.assertTrue(user_exists(professor_id))
         class_name = class_data[random_index]['subject'] + class_data[random_index]['course_number']

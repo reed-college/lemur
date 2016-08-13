@@ -8,16 +8,16 @@ import unittest
 
 # Local
 print(sys.path)
-from lemur import (app, db)
+from lemur import (app, db, test_db_uri)
 from lemur import models as m
 import helper_random as r
-from lemur.utility.utility_generate_and_convert import (serialize_lab_list,
+from lemur.utility.generate_and_convert import (serialize_lab_list,
                                                         serialize_experiment_list,
                                                         serialize_user_list,
                                                         serialize_class_list,
                                                         change_observation_organization
                                                         )
-from lemur.utility.utility_find_and_get import (get_lab,
+from lemur.utility.find_and_get import (get_lab,
                                                 get_experiment,
                                                 get_user,
                                                 get_role,
@@ -42,7 +42,7 @@ class IntegrationTestUtilityGenerateAndConvert(unittest.TestCase):
         # The database used for this suit of tests is not the one used by the
         # app. Before we run this test, we need to create a local database
         # called lemur_test
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://localhost/lemur_test'
+        app.config['SQLALCHEMY_DATABASE_URI'] = test_db_uri
         self.app = app.test_client()
         # Create all the tables
         db.create_all()

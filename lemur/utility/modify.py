@@ -386,7 +386,6 @@ def populate_db_with_classes_and_professors(class_data):
                 ds.commit()
             the_user = get_user(p)
             class_professors.append(the_user)
-        print(class_name, class_time)
         if class_name and class_time:
             class_id = generate_class_id(class_name, class_time)
             # If the class already exists, update the professors and keep
@@ -418,7 +417,6 @@ def populate_db_with_classes_and_professors(class_data):
 
 # Update the users in the classes according to registration info
 def update_users_by_data_from_iris(registration_data):
-    print(registration_data)
     all_classes = get_all_class()
     warning_msg = ''
     registration_by_class = {}
