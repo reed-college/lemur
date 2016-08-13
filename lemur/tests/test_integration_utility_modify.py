@@ -251,7 +251,8 @@ class IntegrationTestUtilityModify(unittest.TestCase):
                       ]
         populate_db_with_classes_and_professors(class_data)
         # Pick a random professor and a random class to test their existence
-        random_index = randint(0, len(class_data)-1)
+
+        random_index = randint(0, len(class_data)-2)
         professor_id = class_data[random_index]['instructors'][0]
         self.assertTrue(user_exists(professor_id))
         class_name = class_data[random_index]['subject'] + class_data[random_index]['course_number']
