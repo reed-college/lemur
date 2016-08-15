@@ -6,8 +6,8 @@ sys.path.append('..')
 from lemur import models as m
 from lemur import (db)
 ds = db.session
-from lemur.utility.generate_and_convert import generate_experiment_id
-from lemur.utility.find_and_get import (lab_exists,
+from lemur.utility_generate_and_convert import generate_experiment_id
+from lemur.utility_find_and_get import (lab_exists,
                                         experiment_exists,
                                         observation_exists,
                                         user_exists,

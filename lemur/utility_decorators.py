@@ -1,6 +1,3 @@
-# This file consists of all the customized decorators
-import sys
-sys.path.append('..')
 # Libraries
 # Standard library
 from functools import wraps

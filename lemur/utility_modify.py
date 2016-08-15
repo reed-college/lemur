@@ -1,20 +1,16 @@
-# This file consists of functions that add/delete/modify objects in db
-import sys
-sys.path.append('../..')
 # Libraries
 # Local
 from lemur import models as m
 from lemur import (app, db)
-from lemur.utility.generate_and_convert import (check_existence,
+from lemur.utility_generate_and_convert import (check_existence,
                                                 generate_lab_id,
                                                 generate_experiment_id,
                                                 generate_observation_id,
                                                 generate_class_id,
                                                 decompose_lab_id,
                                                 tranlate_term_code_to_semester,
-                                                cleanup_class_data
-                                                )
-from lemur.utility.find_and_get import (lab_exists,
+                                                cleanup_class_data)
+from lemur.utility_find_and_get import (lab_exists,
                                         experiment_exists,
                                         class_exists,
                                         observation_exists,
@@ -434,7 +430,7 @@ def update_users_by_data_from_iris(registration_data):
         if class_exists(class_id):
             the_class = get_class(class_id)
             # If user already exists, add the class into the class list of the
-            # user；
+            # user;
             # otherwise, create a user with the class
             if user_exists(username):
                 the_user = get_user(username)

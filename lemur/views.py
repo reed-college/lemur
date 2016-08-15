@@ -16,8 +16,8 @@ import requests
 # Other modules
 from lemur import (app, db, student_api_url, class_api_url)
 from lemur import models as m
-from lemur.utility.decorators import permission_required
-from lemur.utility.generate_and_convert import (check_existence,
+from lemur.utility_decorators import permission_required
+from lemur.utility_generate_and_convert import (check_existence,
                                                 serialize_lab_list,
                                                 serialize_experiment_list,
                                                 serialize_user_list,
@@ -27,7 +27,7 @@ from lemur.utility.generate_and_convert import (check_existence,
                                                 normal_json,
                                                 err_json,
                                                 err_html)
-from lemur.utility.find_and_get import (lab_exists,
+from lemur.utility_find_and_get import (lab_exists,
                                         get_lab,
                                         get_experiment,
                                         get_user,
@@ -41,7 +41,7 @@ from lemur.utility.find_and_get import (lab_exists,
                                         find_lab_list_for_user,
                                         find_all_labs,
                                         find_all_observations_for_labs)
-from lemur.utility.modify import (delete_lab,
+from lemur.utility_modify import (delete_lab,
                                   modify_lab,
                                   duplicate_lab,
                                   change_lab_status,

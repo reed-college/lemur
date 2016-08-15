@@ -10,11 +10,11 @@ from random import randint
 from lemur import (app, db, test_db_uri)
 from lemur import models as m
 import helper_random as r
-from lemur.utility.generate_and_convert import (generate_lab_id,
+from lemur.utility_generate_and_convert import (generate_lab_id,
                                                 generate_experiment_id,
                                                 generate_observation_id,
                                                 generate_class_id)
-from lemur.utility.find_and_get import (lab_exists,
+from lemur.utility_find_and_get import (lab_exists,
                                         experiment_exists,
                                         observation_exists,
                                         user_exists,

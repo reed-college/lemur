@@ -1,7 +1,3 @@
-# This file consists of functions that generate messages/strings
-# and convert data into another format
-import sys
-sys.path.append('..')
 # Libraries
 # Third-party libraries
 from flask import make_response, render_template, jsonify

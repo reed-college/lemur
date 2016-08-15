@@ -14,13 +14,13 @@ from lemur import (app, db, test_db_uri)
 from lemur import models as m
 from db_scripts.db_populate import populate_db
 import helper_random as r
-from lemur.utility.generate_and_convert import (check_existence,
+from lemur.utility_generate_and_convert import (check_existence,
                                                 generate_lab_id,
                                                 generate_experiment_id,
                                                 generate_observation_id,
                                                 generate_class_id,
                                                 tranlate_term_code_to_semester)
-from lemur.utility.find_and_get import (lab_exists,
+from lemur.utility_find_and_get import (lab_exists,
                                         user_exists,
                                         class_exists,
                                         get_user,
@@ -30,7 +30,7 @@ from lemur.utility.find_and_get import (lab_exists,
                                         find_all_observations_for_labs,
                                         find_observation_number_for_experiment)
 
-from lemur.utility.modify import (delete_lab,
+from lemur.utility_modify import (delete_lab,
                                   modify_lab,
                                   duplicate_lab,
                                   change_lab_status,

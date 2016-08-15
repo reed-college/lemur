@@ -5,7 +5,7 @@ sys.path.append('../..')
 from unittest.mock import MagicMock
 from lemur import models as m
 import helper_random as r
-from lemur.utility.generate_and_convert import (generate_lab_id,
+from lemur.utility_generate_and_convert import (generate_lab_id,
                                                 generate_experiment_id,
                                                 generate_observation_id,
                                                 generate_class_id)
