@@ -239,8 +239,11 @@ def add_user(user_info):
             else:
                 return 'the class with id:{} doesn\'t exist.'.format(class_id)
     if not user_exists(user_info['username']):
+        name = None
+        if 'name' in user_info:
+            name = user_info['name']
         new_user = m.User(id=user_info['username'],
-                          name=user_info['name'],
+                          name=name,
                           role=user_role,
                           classes=classes,
                           labs=labs)
@@ -256,11 +259,12 @@ def change_user_info(username, role, class_ids):
     user = get_user(username)
     classes = []
     labs = []
-    for c in class_ids:
-        the_class = get_class(c)
-        classes.append(the_class)
-        for lab in the_class.labs:
-            labs.append(lab)
+    if class_ids:
+        for c in class_ids:
+            the_class = get_class(c)
+            classes.append(the_class)
+            for lab in the_class.labs:
+                labs.append(lab)
     user.role = get_role(role)
     user.classes = classes
     user.labs = labs
@@ -277,8 +281,8 @@ def delete_user(username):
 # add a class into the database according to class_info
 def add_class(class_info):
     # Check the correctness of data format
-    err_msg = check_existence(class_info, 'professors', 'students',
-                              'className', 'classTime')
+    # Note: students is optional i.e. it can be undefined
+    err_msg = check_existence(class_info, 'className', 'classTime')
     if err_msg != '':
         return err_msg
     users = []
@@ -288,23 +292,24 @@ def add_class(class_info):
         class_info['className'], class_info['classTime'])
 
     if not class_exists(new_class_id):
-        for p in class_info.getlist('professors'):
-            if not user_exists(p):
-                err_msg = 'The professor with id:{} doesn\'t exist.'.format(p)
-                return err_msg
-            else:
-                usernames.append(p)
-
-        for s in class_info.getlist('students'):
-            if not user_exists(s):
-                err_msg = 'The student with id:{} doesn\'t exist.'.format(p)
-                return err_msg
-            elif get_user(s).role_name != 'Student':
-                err_msg = s+(' already exists and is not a student.'
-                             'You should not put their name into student name')
-                return err_msg
-            else:
-                usernames.append(s)
+        if 'professors' in class_info:
+            for p in class_info.getlist('professors'):
+                if not user_exists(p):
+                    err_msg = 'The professor with id:{} doesn\'t exist.'.format(p)
+                    return err_msg
+                else:
+                    usernames.append(p)
+        if 'students' in class_info:
+            for s in class_info.getlist('students'):
+                if not user_exists(s):
+                    err_msg = 'The student with id:{} doesn\'t exist.'.format(p)
+                    return err_msg
+                elif get_user(s).role_name != 'Student':
+                    err_msg = s+(' already exists and is not a student.'
+                                 'You should not put their name into student name')
+                    return err_msg
+                else:
+                    usernames.append(s)
         for username in usernames:
             users.append(get_user(username))
         new_class = m.Class(id=new_class_id,
@@ -355,7 +360,7 @@ def change_class_users(class_id, new_users):
     # Delete the class and the associated labs from old users who
     # are not in the class anymore
     for u in old_users:
-        if not(u in the_class.users):
+        if not(u.id in str(new_users)):
             u.classes = [c for c in u.classes if c.id != class_id]
             new_lab_list = []
             for lab in u.labs:

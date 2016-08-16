@@ -506,12 +506,15 @@ def _superadmin_delete_class():
 def _superadmin_modify_class():
     # get data from post request and check the correctness of data format
     jsonData = request.get_json()
-    err_msg = check_existence(jsonData, 'classId', 'studentUserNames',
-                              'professorUserNames')
+    err_msg = check_existence(jsonData, 'classId', 'studentUserNames', 'professorUserNames')
     if err_msg != '':
         return err_json(err_msg)
-    err_msg = change_class_users(jsonData['classId'],
-                                 jsonData['studentUserNames']+jsonData['professorUserNames'])
+    new_usernames = []
+    if jsonData['studentUserNames'] is not None:
+        new_usernames += jsonData['studentUserNames']
+    if jsonData['professorUserNames'] is not None:
+        new_usernames += jsonData['professorUserNames']
+    err_msg = change_class_users(jsonData['classId'], new_usernames)
     if err_msg != '':
         return err_json(err_msg)
     return normal_json(jsonData)
@@ -562,7 +565,7 @@ def inject_patterns():
                                          '-[0-9]{1,10}[.]?[0-9]{0,10}'),
                 pattern_for_value_range_hint=('valueRange should be'
                                               'in the format:0.3-6.5'),
-                pattern_for_class_time='[0-9]{2,4}[a-zA-Z]{4,7}',
+                pattern_for_class_time='[a-zA-Z]{4,7}[0-9]{2,4}',
                 pattern_for_class_time_hint=('Class Time is a combination',
-                                             'of year and semester. e.g. ',
-                                             '16fall'))
+                                             'of semester and year. e.g. ',
+                                             'FALL2016'))

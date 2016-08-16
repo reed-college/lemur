@@ -29,19 +29,13 @@ $(document).ready(function(){
           type: 'POST',
           contentType: 'application/json',
           dataType: 'json',
-          url: 'http://127.0.0.1:5000/_admin_'+operation,
+          url: '/_admin_'+operation,
           data: JSON.stringify({'labId':labId}),
           success: function(result){
                     console.log(operation+' successfully');               
                 },
           error : function(result){
-                    err_msg = JSON.parse(result.responseText)['data'];
-                    $('#errorMsgs').html('Fail to duplicate lab<br>'+err_msg);
-                    $('#errorPopup').modal("show");
-                    console.log('Fail to '+operation);
-                    console.log(result);
-                    console.log('url: '+'http://127.0.0.1:5000/_admin_'+operation);
-                    console.log('labId: '+labId);
+                    errorReport(operation, result);
                 }
         });
         if (operation=='delete_lab'){
@@ -56,34 +50,20 @@ $(document).ready(function(){
     $('.makeDownloadOnly').add($('.activateLab')).add($('.deactivateLab')).click(function(){
         var labId = $(this).closest('tr').data('labid');
         var statusClassName = $(this).attr('class')
-        var newStatus = 'Activated';
-        if (statusClassName=='makeDownloadOnly'){
-            newStatus = 'Downloadable';
-        }
-        else if (statusClassName=='activateLab'){
-            newStatus = 'Activated';
-        }
-        else if (statusClassName=='deactivateLab'){
-            newStatus = 'Unactivated';
-        }
+        var newStatus = translateOperationToStatus(statusClassName);
+        
         //Communicate the name of the lab to be duplicated with python via Ajax 
         $.ajax({
           type: 'POST',
           contentType: 'application/json',
           dataType: 'json',
-          url: 'http://127.0.0.1:5000/_admin_change_lab_status/'+newStatus,
+          url: '/_admin_change_lab_status/'+newStatus,
           data: JSON.stringify({'labId':labId}),
           success: function(result){
-                    console.log('Change status successfully');
+                    console.log('Change lab status successfully');
                 },
           error : function(result){
-                    err_msg = JSON.parse(result.responseText)['data'];
-                    $('#errorMsgs').html('Fail to change status<br>'+err_msg);
-                    $('#errorPopup').modal("show");
-                    console.log('Fail to change lab status');
-                    console.log(result);
-                    console.log('url: '+'http://127.0.0.1:5000/_admin_change_status/'+newStatus);
-                    console.log('labid: '+labId);
+                    errorReport('change lab status', result);
                 }
         });
         location.reload();   
