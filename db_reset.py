@@ -11,7 +11,7 @@ def reset_database():
     os.system('python3 run.py db init')
     os.system('python3 run.py db migrate')
     os.system('python3 run.py db upgrade')
-    os.system('python3 db_scripts/db_populate_real.py')
+    os.system('python3 db_populate_real.py')
 
 if __name__ == '__main__':
     reset_database()

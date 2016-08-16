@@ -1,10 +1,7 @@
-# This file is used to populate the database(for real use)
-import sys
-sys.path.append('..')
 # Libraries
 # Local
 from lemur import models as m
-from lemur import (db)
+from lemur import db
 ds = db.session
 from lemur.utility_generate_and_convert import generate_experiment_id
 from lemur.utility_find_and_get import (lab_exists,
@@ -25,7 +22,7 @@ def populate_db():
     def create_real_lab():
         # Create a real lab
         real_lab_name = '2Cortisol'
-        real_lab_id = '2Cortisol:BIOL101_FALL2016'
+        real_lab_id = '2Cortisol:bio101_16fall'
         if not lab_exists(real_lab_id):
             real_lab = m.Lab(id=real_lab_id, name=real_lab_name,
                              the_class=get_class(class_id),
@@ -37,7 +34,8 @@ def populate_db():
                                           ' POST20 cortisol results in µg/dL.'
                                           ' DO NOT type in units.'),
                              status='Activated',
-                             users=[get_user(superadmin_id)])
+                             users=[get_user(superadmin_id),
+                                    get_user(student_id)])
             ds.add(real_lab)
 
         experiment1_name = 'Lab Instructor'
@@ -164,22 +162,76 @@ def populate_db():
             ds.add(experiment)
         ds.commit()
 
-    superadmin_id = 'boothr'
-    class_id = 'BIOL101_FALL2016'
+    superadmin_id = 'bob123'
+    admin_id = 'amy'
+    student_id = 'pip'
+    student2_id = 'tim'
+    lab_id = 'test:bio101_16fall'
+    class_id = 'bio101_16fall'
+    experiment_id = 'test:bio101_16fall:q1'
+    observation_id = 'test:bio101_16fall:q1:pip'
     m.Role.insert_roles()
     # Create a SuperAdmin, a Admin, a Student
     if not user_exists(superadmin_id):
-        user = m.User(id='boothr',
-                      name='Carey Booth',
+        user = m.User(id='bob123',
+                      name='bob123',
                       role=get_role('SuperAdmin'))
         ds.add(user)
+
+    if not user_exists(admin_id):
+        user = m.User(id='amy', name='amy',
+                      role=get_role('Admin'))
+        ds.add(user)
+
+    if not user_exists(student_id):
+        user = m.User(id='pip', name='pip',
+                      role=get_role('Student'))
+        ds.add(user)
+
+    if not user_exists(student2_id):
+            user = m.User(id='tim',
+                          name='tim', role=get_role('Student'))
+            ds.add(user)
     # Create a class
     if not class_exists(class_id):
-        c = m.Class(id=class_id, name='BIOL101', time='FALL2016',
-                    users=[get_user(superadmin_id)])
+        c = m.Class(id=class_id, name='bio101', time='16fall',
+                    users=[get_user(student_id),
+                           get_user(admin_id)])
         ds.add(c)
     ds.commit()
+
+    # Create a lab with an experiment
+    if not lab_exists(lab_id):
+        lab = m.Lab(id=lab_id, name='test', the_class=get_class('bio101_16fall'), status='Activated',
+                    users=[get_user(admin_id), get_user(student_id)])
+        ds.add(lab)
+
+    if not experiment_exists(experiment_id):
+        experiment = m.Experiment(id=experiment_id, name='q1',
+                                  description='this is q1',
+                                  order=1, value_type='Number',
+                                  value_range='1.5-10.6',
+                                  lab=get_lab(lab_id))
+        ds.add(experiment)
+
+    if not observation_exists(observation_id):
+        observation = m.Observation(id=observation_id,
+                                    student_name='pip',
+                                    datum='N',
+                                    experiment=get_experiment(experiment_id))
+        ds.add(observation)
+
     create_real_lab()
+    built_in_ids = {'superadmin_id': superadmin_id,
+                    'admin_id': admin_id,
+                    'student_id': student_id,
+                    'student2_id': student2_id,
+                    'lab_id': lab_id,
+                    'experiment_id': experiment_id,
+                    'observation_id': observation_id,
+                    'class_id': class_id}
+    # Return ids for testing
+    return built_in_ids
 
 
 if __name__ == "__main__":

@@ -15,7 +15,7 @@ from werkzeug.datastructures import MultiDict
 # Local
 from lemur import (app, db, test_db_uri)
 from lemur import models as m
-from db_scripts.db_populate import populate_db
+from db_populate import populate_db
 import helper_random as r
 from lemur.utility_generate_and_convert import (generate_lab_id,
                                                 generate_experiment_id,

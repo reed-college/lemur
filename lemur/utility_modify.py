@@ -369,6 +369,8 @@ def change_class_users(class_id, new_users):
 # --- Initialize Classes and Users by getting data from Iris ---
 # Populate the database with classes and their corresponding professors
 # Note: This needs to be invoked before update_users_by_data_from_iris
+# The existing professors will not be deleted even if they don't teach
+# any class
 def populate_db_with_classes_and_professors(class_data):
     class_data = cleanup_class_data(class_data)
     for c in class_data:
