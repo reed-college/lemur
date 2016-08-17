@@ -308,7 +308,7 @@ function errorReport(operation, result){
     console.log(result);
     errorMsg = '';
     result.responseText
-    if (IsJsonString(result.responseText)){
+    if (result.responseText != undefined && IsJsonString(result.responseText)){
         errorMsg = JSON.parse(result.responseText)['data'];
     }
     else{
@@ -323,14 +323,14 @@ function errorReport(operation, result){
 function warningReport(operation, result){
     console.log(result);
     warningMsg = '';
-    if (IsJsonString(result.responseText)){
+    if (result.responseText != undefined && IsJsonString(result.responseText)){
         warningMsg = JSON.parse(result.responseText)['data'];
     }
     else{
         warningMsg = result.statusText;
     }
     if (warningMsg != ''){
-        $('#errorMsgs').html('Warning Message:<br>'+warningMsg);
+        $('#errorMsgs').html('The update is successful.<br>A warning occurs:<br>'+warningMsg);
         $('#errorPopup').modal('show');
     }
 }
