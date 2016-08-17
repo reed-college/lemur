@@ -48,7 +48,7 @@ $(document).ready(function(){
             data: JSON.stringify({'message': message}),
             success: function(result){
                       console.log('Send data to server successfully:' + message);
-                      warningReport(operation, result);
+                      warningReport(message, result);
                   },
             error : function(result){
                       errorReport('send data to server', result);

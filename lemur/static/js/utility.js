@@ -299,7 +299,7 @@ function errorReport(operation, result){
     console.log(result);
     errorMsg = '';
     if (result.status == 400){
-        errorMsg = result.statusText
+        errorMsg = result.statusText;
     }
     else if (result.responseText != undefined) {
         errorMsg = JSON.parse(result.responseText)['data'];
