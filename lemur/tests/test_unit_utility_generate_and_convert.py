@@ -21,6 +21,7 @@ from lemur.utility_generate_and_convert import (check_existence,
                                                 generate_experiment_id,
                                                 generate_observation_id,
                                                 generate_class_id,
+                                                generate_user_name,
                                                 decompose_lab_id,
                                                 decompose_class_id,
                                                 serialize_lab_list,
@@ -101,6 +102,11 @@ class UnitTestUtilityGenerateAndConvert(unittest.TestCase):
         expected_class_id = class_name+'_'+class_time
         self.assertEqual(generate_class_id(class_name, class_time),
                          expected_class_id)
+
+    def test_generate_user_name(self):
+        first_name = r.randlength_word()
+        last_name = r.randlength_word()
+        self.assertEqual(first_name+' '+last_name, generate_user_name(first_name, last_name))
 
     def test_decompose_lab_id(self):
         lab_name = r.randlength_word()
@@ -189,10 +195,12 @@ class UnitTestUtilityGenerateAndConvert(unittest.TestCase):
 
     def test_cleanup_class_data(self):
         # A snippet from real data
-        class_data = [{'course_id': '11069', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '331', 'section': 'F', 'section_type': 'Lecture', 'instructors': ['prof1']},
-                      {'course_id': '10236', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '101', 'section': 'F22', 'section_type': 'Lab', 'instructors': ['prof2']},
-                      {'course_id': '10447', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '101', 'section': 'F01', 'section_type': 'Lab Lecture', 'instructors': ['prof3', 'prof4', 'prof5']},
-                      {'course_id': '10010', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '470', 'section': 'YJS', 'section_type': 'Ind. study', 'instructors': ['prof6']}
+        class_data = [{'course_id': '11069', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '331', 'section': 'F', 'section_type': 'Lecture', 'instructors': [{"username": "prof1", "last_name": "Prof", "first_name": "One"}]},
+                      {'course_id': '10236', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '101', 'section': 'F22', 'section_type': 'Lab', 'instructors': [{"username": "prof2", "last_name": "Prof", "first_name": "Two"}]},
+                      {'course_id': '10447', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '101', 'section': 'F01', 'section_type': 'Lab Lecture', 'instructors': [{"username": "prof3", "last_name": "Prof", "first_name": "Three"},
+                                                                                                                                                                                {"username": "prof4", "last_name": "Prof", "first_name": "Four"},
+                                                                                                                                                                                {"username": "prof5", "last_name": "Prof", "first_name": "Five"}]},
+                      {'course_id': '10010', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '470', 'section': 'YJS', 'section_type': 'Ind. study', 'instructors': [{"username": "prof6", "last_name": "Prof", "first_name": "Six"}]}
                       ]
         cleaned_class_data = cleanup_class_data(class_data)
         course_numbers = [c['course_number'] for c in cleaned_class_data]

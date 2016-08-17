@@ -43,6 +43,10 @@ def generate_class_id(class_name, class_time):
     return class_name+'_'+class_time
 
 
+def generate_user_name(first_name, last_name):
+    return first_name+' '+last_name
+
+
 def decompose_lab_id(lab_id):
     return {'lab_name': lab_id.split(':')[0],
             'class_id': lab_id.split(':')[1]}
@@ -185,7 +189,7 @@ def tranlate_term_code_to_semester(term_code):
     return ''
 
 
-# This method will remove all the 470 classes; for any of other class,
+# This method will remove all the 470 classes; for any of other classes,
 # combine the instructor field of all sections
 def cleanup_class_data(class_data):
     cleaned_class_data = []
@@ -195,12 +199,15 @@ def cleanup_class_data(class_data):
             course_number_set.add(c['course_number'])
     course_number_list = list(course_number_set)
     for course_number in course_number_list:
+        # Get all the sections that have the same course number
         the_class_list = list(filter(lambda c: c['course_number'] == course_number, class_data))
-        # the_class_list is impossible to be empty
+        # since the_class_list is impossible to be empty, we put all the
+        # instructors' info into the first course dictionary
         the_class = the_class_list[0]
+        class_instructor_usernames = [instructor['username'] for instructor in the_class['instructors']]
         for c in the_class_list:
             for instructor in c['instructors']:
-                if not (instructor in the_class['instructors']):
+                if not (instructor['username'] in class_instructor_usernames):
                     the_class['instructors'].append(instructor)
         cleaned_class_data.append(the_class)
     return cleaned_class_data

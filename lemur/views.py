@@ -55,7 +55,7 @@ from lemur.utility_modify import (delete_lab,
                                   delete_class,
                                   change_class_users,
                                   populate_db_with_classes_and_professors,
-                                  update_users_by_data_from_iris)
+                                  update_students_by_data_from_iris)
 # Abbreviation for convenience
 ds = db.session
 
@@ -459,10 +459,11 @@ def _superadmin_update_info_from_iris():
         if (len(registration_data) == 0):
             return 'empty registration data'
         err_msg = check_existence(registration_data[0], 'subject',
-                                  'course_number', 'term_code', 'user_name')
+                                  'course_number', 'term_code', 'user_name',
+                                  'first_name', 'last_name')
         if err_msg != '':
             return err_json(err_msg)
-        warning_msg = update_users_by_data_from_iris(registration_data)
+        warning_msg = update_students_by_data_from_iris(registration_data)
         return normal_json(warning_msg)
     else:
         err_msg = 'invalid message:{}'.format(jsonData['message'])

@@ -7,6 +7,7 @@ from lemur.utility_generate_and_convert import (check_existence,
                                                 generate_experiment_id,
                                                 generate_observation_id,
                                                 generate_class_id,
+                                                generate_user_name,
                                                 decompose_lab_id,
                                                 tranlate_term_code_to_semester,
                                                 cleanup_class_data)
@@ -381,13 +382,15 @@ def populate_db_with_classes_and_professors(class_data):
     for c in class_data:
         class_name = c['subject'] + c['course_number']
         class_time = tranlate_term_code_to_semester(c['term_code'])
-        class_professor_ids = c['instructors']
+        class_professor_info_list = c['instructors']
+        class_professor_ids = [p['username'] for p in class_professor_info_list]
         class_professors = []
-        for p in class_professor_ids:
-            if not user_exists(p):
-                ds.add(m.User(id=p, role=get_role('Admin')))
+        for p in class_professor_info_list:
+            if not user_exists(p['username']):
+                name = generate_user_name(p['first_name'], p['last_name'])
+                ds.add(m.User(id=p['username'], name=name, role=get_role('Admin')))
                 ds.commit()
-            the_user = get_user(p)
+            the_user = get_user(p['username'])
             class_professors.append(the_user)
         if class_name and class_time:
             class_id = generate_class_id(class_name, class_time)
@@ -396,7 +399,7 @@ def populate_db_with_classes_and_professors(class_data):
             if class_exists(class_id):
                 the_class = get_class(class_id)
                 # handle the change of class and the labs associated with it
-                old_class_professors = [u for u in the_class.users if u.role_name != 'Student']
+                old_class_professors = [u for u in the_class.users if ((u.role_name == 'Admin') or (u.role_name == 'SuperAdmin'))]
                 for p in class_professors:
                     if not (class_id in [c.id for c in p.classes]):
                         p.classes.append(the_class)
@@ -419,7 +422,7 @@ def populate_db_with_classes_and_professors(class_data):
 
 
 # Update the users in the classes according to registration info
-def update_users_by_data_from_iris(registration_data):
+def update_students_by_data_from_iris(registration_data):
     all_classes = get_all_class()
     warning_msg = ''
     registration_by_class = {}
@@ -430,6 +433,7 @@ def update_users_by_data_from_iris(registration_data):
     # Add the students in the received data into the database
     for registration_object in registration_data:
         username = registration_object['user_name']
+        name = generate_user_name(registration_object['first_name'], registration_object['last_name'])
         class_id = generate_class_id((registration_object['subject'] +
                                      registration_object['course_number']),
                                      tranlate_term_code_to_semester(registration_object['term_code']))
@@ -447,7 +451,7 @@ def update_users_by_data_from_iris(registration_data):
                         if not (lab in the_user.labs):
                             the_user.labs.append(lab)
             else:
-                the_user = m.User(id=username, classes=[the_class],
+                the_user = m.User(id=username, name=name, classes=[the_class],
                                   role=get_role('Student'), labs=the_class.labs)
                 ds.add(the_user)
         # else return a warning message to notify the user
@@ -468,7 +472,7 @@ def update_users_by_data_from_iris(registration_data):
         # the users of the class in database and data
         if c.id in registration_by_class:
             # Keep the admins/superadmins of the class
-            class_new_users = [u for u in c.users if u.role_name != 'Student']
+            class_new_users = [u for u in c.users if ((u.role_name == 'Admin') or (u.role_name == 'SuperAdmin'))]
             # Replace the students of the class with the students in the
             # received data
             for student_id in registration_by_class[c.id]:
