@@ -20,7 +20,6 @@ $(document).ready(function(){
         // Append new question to the form without refreshing the page/sending request to server
         $('div[name=formBody]').append(generateNewQuestion(newIndexStr));
         $('.selectpicker').selectpicker('render');
-
     });
         
     //Delete an existing experiment by specifying the question number
@@ -59,13 +58,18 @@ $(document).ready(function(){
                     data: JSON.stringify(labData),
                     success: function(result){
                           console.log('Change lab successfully');
+                          setTimeout(function() { 
+                              window.location.href = '/admin_create_and_manage_lab'; 
+                          }, 2000);
                     },
                     error : function(result){
                           errorReport('change lab', result);
                     }
                   });
                 // Redirect to the main page of setup lab and data access
-                window.location.replace('/admin_create_and_manage_lab');
+                setTimeout(function() { 
+                    window.location.href = '/admin_create_and_manage_lab'; 
+                }, 2000);
             }
         }
     });
