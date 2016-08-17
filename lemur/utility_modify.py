@@ -42,7 +42,7 @@ def modify_lab(lab_json):
     the_class = None
     class_users = []
     experiments_for_lab = []
-    lab_status = 'Activated'
+    lab_status = 'Unactivated'
     lab_id = None
 
     err_msg = check_existence(lab_json, 'labName', 'classId', 'labDescription',

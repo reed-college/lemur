@@ -41,9 +41,7 @@ $(document).ready(function(){
         if (operation=='delete_lab'){
             $(this).closest('tr').remove();
         }
-
         location.reload();
-
     });
 
     //Change a lab's status
