@@ -13,11 +13,11 @@
 {% endblock %}
 
 {% block content %}
+    <div class="table-wrapper">
 	{% if (lab_list|length)==0 %}
-		<div class="title"><h2>No Lab exists</h2></div>
+		<div class="title">No Lab exists</div>
 	{% else %}
-		<div class="title"><h2>Lab List</h2></div>
-		<div class="table-wrapper">
+		<div class="title">Lab List</div>
 			<table class="table sortable">
 			    <thead>
 					<tr>
@@ -43,8 +43,7 @@
 			<div class="selectors">
 				<a href="/student_home"><button>Go Back</button></a>
 			    <button name="goToLab">Go to Lab</button>
-				<div class="temporaryMessage" id="errMsgNoLabChoosed">You need to select one lab</div>
 			</div>
-		</div>
 	{% endif %}
+	</div>
 {% endblock %}

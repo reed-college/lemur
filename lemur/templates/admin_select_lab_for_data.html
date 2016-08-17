@@ -12,12 +12,13 @@
 
 {% block content %}
 	<div class="table-wrapper">
-	    <div class="col-lg-12 col-md-12 col-sm-12 mb">
+	    <div>
 			<div class="title"> Select Lab For Data </div>
 			<label> Guide:</label><br><br>
 			1. Select at least one lab.<br><br>
 			2. To select multiple labs, you need to make sure that these labs have exactly the same questions. Otherwise, an error will be shown.<br><br>
 		</div>
+		<div>
 		{% if (lab_list|length)==0 %}
 			<div class="title">No Lab exists</div>
 		{% else %}
@@ -47,6 +48,7 @@
 			</table>
 			<button name="goToLab">Go to lab</button>
 		{% endif %}
+		</div>
 	</div>
 {% endblock %}
 
