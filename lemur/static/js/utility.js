@@ -227,6 +227,11 @@ function checkExperimentRepetition(experiments){
     return repetitions;
 }
 
+// Redirect to another page
+function redirectTo(url){
+    window.location.replace(url);
+}
+
 // --- Functions in student_select_lab.js ---
 // Find the lab selected
 function findLabSelected(radios){
