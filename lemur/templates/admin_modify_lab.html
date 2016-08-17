@@ -28,7 +28,7 @@
         <form id="labForm" data-postaddress="{{post_address}}">
             <div name="formBody" id="formBody">
                 <input type="text" name="oldLabId" value="{{labinfo.lab_id}}"" class="invisible">
-                <div class="col-lg-6 col-md-6 col-sm-6 mb">
+                <div class="col-lg-12 col-md-12 col-sm-12 mb">
                     <div>
                         <label>Lab Name*: </label>
                         <input type="text" name="labName" value="{{labinfo.lab_name}}"" pattern="{{pattern_for_name}}" title="{{pattern_for_name_hint}}" required>
@@ -51,7 +51,7 @@
                     </div>
                 </div>
                 {% for experiment in labinfo.experiments %}
-                    <div class="col-lg-6 col-md-6 col-sm-6 mb experiment" name="{{loop.index}}" id="question">
+                    <div class="col-lg-12 col-md-12 col-sm-12 mb experiment" name="{{loop.index}}" id="question">
                         <h4>Question{{loop.index}}:</h4>
                         <div>
                             <label>Name*: </label>
@@ -90,7 +90,6 @@
         </form>
         <div>
             <button name="resetLab">Reset</button>
-            <button name="saveChange">Save Change</button>
         </div>
         <div>
             <button name="addExperiment">Add a new question</button>
@@ -99,7 +98,8 @@
             <button name="deleteExperiment">Delete a question</button>(Question Number)<input type="number" min="1" step="1" name="questionDeleted">
         </div>
         <div>
-            <a href="/admin_create_and_manage_lab"><button>Return</button></a>
+            <button name="saveChange">Save Change</button>
+            <a href="/admin_create_and_manage_lab"><button>Go back</button></a>
         </div>
     </div>
     <!-- Modal(checking and confirmation page) -->

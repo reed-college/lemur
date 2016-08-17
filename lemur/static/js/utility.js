@@ -17,7 +17,7 @@ function checkInputStudent(observation,valueType,valueRange,valueCandidates){
         if (!isInArray(observation,valueCandidates_arr)){
             wrongInput = true;
             if (observation == ''){ observation = NaN;}
-            errMsg = observation + ' is not in the value candidates: ' + valueCandidates; 
+            errMsg = observation + ' is not among the value candidates: ' + valueCandidates; 
         }        
     }
     else if (valueType=='Number' && valueRange.length>0){
@@ -31,7 +31,7 @@ function checkInputStudent(observation,valueType,valueRange,valueCandidates){
         }
         else if (observation < min || observation > max){
             wrongInput = true;
-            errMsg = observation + ' is not in the value range: ' + valueRange;
+            errMsg = observation + ' is not within the value range: ' + valueRange;
         }
     }
     return {'wrongInput':wrongInput,'errMsg':errMsg};

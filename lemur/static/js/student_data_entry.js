@@ -11,15 +11,15 @@ $(document).ready(function(){
         var feedback = '';
         CollectAndCheckStudentInput(errMsgs, feedback);
         if (errMsgs.length == 0){
-            feedback = '<b>Congratulation! You input data looks great!</b><br>';
+            feedback = '<b>Congratulations! Your input data look great!</b><br>';
         }
         else{
-            feedback = '<b>Your input data has the following problem(s)</b>:<br>';
+            feedback = '<b>Your input data have the following problem(s)</b>:<br>';
             for (var i = 0; i < errMsgs.length; i++){
                 feedback += ((i+1)+'.&nbsp;\t'+errMsgs[i]+'<br>');
             }
         }
-        feedback += '<b>Clcik confirm to submit or go back to change your input.</b>';
+        feedback += '<b>Click Confirm to submit or Go back to change your input.</b>';
         $('#errorMsgs').html(feedback);
 
     });

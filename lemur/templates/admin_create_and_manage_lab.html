@@ -25,11 +25,11 @@
 	        	<h3>Create a new lab:</h3>
 	        	<div>
 					<form method=post action="/admin_create_and_manage_lab">
-					    <div class="col-lg-6 col-md-6 col-sm-6 mb">
+					    <div class="col-lg-12 col-md-12 col-sm-12 mb">
 							<label>Lab Name*: </label>
 							<input type="text" name="labName" pattern="{{pattern_for_name}}" title="{{patter_for_name_hint}}" required >
 						</div>
-						<div class="col-lg-6 col-md-6 col-sm-6 mb">
+						<div class="col-lg-12 col-md-12 col-sm-12 mb">
 							<label>Class*: </label>
 							<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="classId" data-live-search="true" title="Choose A Class" required>
 							    {% for c in class_ids %}
@@ -38,15 +38,15 @@
 							</select>
 						</div>
 
-						<div class="col-lg-6 col-md-6 col-sm-6 mb">
+						<div class="col-lg-12 col-md-12 col-sm-12 mb">
 							<label>Lab Instruction: </label><br>
 							<textarea class="longInput" cols="30" rows="5" name="labDescription" pattern=".{,4000}" title="no more than 4000 characters"></textarea>
 						</div>
-						<div class="col-lg-6 col-md-6 col-sm-6 mb">
+						<div class="col-lg-12 col-md-12 col-sm-12 mb">
 							<label>Number of Lab Questions*: </label>
 							<input type="number" name="labQuestions" min="1" max="100" step="1" required title="1 to 100 questions">
 						</div>
-							<div class="col-lg-6 col-md-6 col-sm-6 mb">
+							<div class="col-lg-12 col-md-12 col-sm-12 mb">
 							<button name="submitLab" type="submit">submit</button>
 							<button name="resetLab" type="reset">reset</button>
 						</div>
