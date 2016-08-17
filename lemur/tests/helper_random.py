@@ -9,11 +9,11 @@ from string import ascii_lowercase, ascii_uppercase, digits
 
 # Local
 from lemur import models as m
-from lemur.utility.generate_and_convert import (generate_lab_id,
+from lemur.utility_generate_and_convert import (generate_lab_id,
                                                 generate_experiment_id,
                                                 generate_observation_id,
                                                 generate_class_id)
-from lemur.utility.find_and_get import (get_power,
+from lemur.utility_find_and_get import (get_power,
                                         get_role)
 
 

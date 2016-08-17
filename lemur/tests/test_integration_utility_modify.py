@@ -12,15 +12,15 @@ from werkzeug.datastructures import MultiDict
 # Local
 from lemur import (app, db, test_db_uri)
 from lemur import models as m
-from db_scripts.db_populate import populate_db
+from db_populate import populate_db
 import helper_random as r
-from lemur.utility.generate_and_convert import (check_existence,
+from lemur.utility_generate_and_convert import (check_existence,
                                                 generate_lab_id,
                                                 generate_experiment_id,
                                                 generate_observation_id,
                                                 generate_class_id,
                                                 tranlate_term_code_to_semester)
-from lemur.utility.find_and_get import (lab_exists,
+from lemur.utility_find_and_get import (lab_exists,
                                         user_exists,
                                         class_exists,
                                         get_user,
@@ -30,7 +30,7 @@ from lemur.utility.find_and_get import (lab_exists,
                                         find_all_observations_for_labs,
                                         find_observation_number_for_experiment)
 
-from lemur.utility.modify import (delete_lab,
+from lemur.utility_modify import (delete_lab,
                                   modify_lab,
                                   duplicate_lab,
                                   change_lab_status,
@@ -44,7 +44,7 @@ from lemur.utility.modify import (delete_lab,
                                   delete_class,
                                   change_class_users,
                                   populate_db_with_classes_and_professors,
-                                  update_users_by_data_from_iris)
+                                  update_students_by_data_from_iris)
 ds = db.session
 
 
@@ -244,30 +244,32 @@ class IntegrationTestUtilityModify(unittest.TestCase):
 
     def test_populate_db_with_classes_and_professors(self):
         # A snippet from real data
-        class_data = [{'course_id': '11069', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '331', 'section': 'F', 'section_type': 'Lecture', 'instructors': ['prof1']},
-                      {'course_id': '10236', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '101', 'section': 'F22', 'section_type': 'Lab', 'instructors': ['prof2']},
-                      {'course_id': '10447', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '101', 'section': 'F01', 'section_type': 'Lab Lecture', 'instructors': ['prof3', 'prof4', 'prof5']},
-                      {'course_id': '10010', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '470', 'section': 'YJS', 'section_type': 'Ind. study', 'instructors': ['prof6']}
+        class_data = [{'course_id': '11069', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '331', 'section': 'F', 'section_type': 'Lecture', 'instructors': [{"username": "prof1", "last_name": "Prof", "first_name": "One"}]},
+                      {'course_id': '10236', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '101', 'section': 'F22', 'section_type': 'Lab', 'instructors': [{"username": "prof2", "last_name": "Prof", "first_name": "Two"}]},
+                      {'course_id': '10447', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '101', 'section': 'F01', 'section_type': 'Lab Lecture', 'instructors': [{"username": "prof3", "last_name": "Prof", "first_name": "Three"},
+                                                                                                                                                                                {"username": "prof4", "last_name": "Prof", "first_name": "Four"},
+                                                                                                                                                                                {"username": "prof5", "last_name": "Prof", "first_name": "Five"}]},
+                      {'course_id': '10010', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '470', 'section': 'YJS', 'section_type': 'Ind. study', 'instructors': [{"username": "prof6", "last_name": "Prof", "first_name": "Six"}]}
                       ]
         populate_db_with_classes_and_professors(class_data)
         # Pick a random professor and a random class to test their existence
 
         random_index = randint(0, len(class_data)-2)
-        professor_id = class_data[random_index]['instructors'][0]
+        professor_id = class_data[random_index]['instructors'][0]["username"]
         self.assertTrue(user_exists(professor_id))
         class_name = class_data[random_index]['subject'] + class_data[random_index]['course_number']
         class_time = tranlate_term_code_to_semester(class_data[random_index]['term_code'])
         class_id = generate_class_id(class_name, class_time)
         self.assertTrue(class_exists(class_id))
 
-    def test_update_users_by_data_from_iris(self):
-        registration_data = [{"user_name": "fake1", "course_id": "10508", "term_code": "201701", "subject": "BIOL", "course_number": "356", "section": "FL1"},
-                             {"user_name": "fake2", "course_id": "11055", "term_code": "201701", "subject": "BIOL", "course_number": "351", "section": "FL1"},
-                             {"user_name": "fake3", "course_id": "11055", "term_code": "201701", "subject": "BIOL", "course_number": "351", "section": "FL1"},
-                             {"user_name": "fake4", "course_id": "10369", "term_code": "201701", "subject": "BIOL", "course_number": "342", "section": "FL1"}
+    def test_update_students_by_data_from_iris(self):
+        registration_data = [{"user_name": "fake1", "last_name": "Fake", "first_name": "One", "course_id": "10508", "term_code": "201701", "subject": "BIOL", "course_number": "356", "section": "FL1"},
+                             {"user_name": "fake2", "last_name": "Fake", "first_name": "Two", "course_id": "11055", "term_code": "201701", "subject": "BIOL", "course_number": "351", "section": "FL1"},
+                             {"user_name": "fake3", "last_name": "Fake", "first_name": "Three", "course_id": "11055", "term_code": "201701", "subject": "BIOL", "course_number": "351", "section": "FL1"},
+                             {"user_name": "fake4", "last_name": "Fake", "first_name": "Four", "course_id": "10369", "term_code": "201701", "subject": "BIOL", "course_number": "342", "section": "FL1"}
                              ]
         # The classes don't exist in db so the users shouldn't be added
-        err_msg = update_users_by_data_from_iris(registration_data)
+        err_msg = update_students_by_data_from_iris(registration_data)
         self.assertNotEqual('', err_msg)
 
 if __name__ == '__main__':

@@ -1,6 +1,3 @@
-# This file consists of functions that find/get objects from db
-import sys
-sys.path.append('..')
 # Libraries
 # Standard library
 import linecache
@@ -8,8 +5,8 @@ import linecache
 # Local
 from lemur import models as m
 from lemur import db
-from lemur.utility.decorators import failure_handler
-from lemur.utility.generate_and_convert import (serialize_lab_list,
+from lemur.utility_decorators import failure_handler
+from lemur.utility_generate_and_convert import (serialize_lab_list,
                                                 change_observation_organization)
 ds = db.session
 

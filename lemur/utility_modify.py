@@ -1,20 +1,17 @@
-# This file consists of functions that add/delete/modify objects in db
-import sys
-sys.path.append('../..')
 # Libraries
 # Local
 from lemur import models as m
 from lemur import (app, db)
-from lemur.utility.generate_and_convert import (check_existence,
+from lemur.utility_generate_and_convert import (check_existence,
                                                 generate_lab_id,
                                                 generate_experiment_id,
                                                 generate_observation_id,
                                                 generate_class_id,
+                                                generate_user_name,
                                                 decompose_lab_id,
                                                 tranlate_term_code_to_semester,
-                                                cleanup_class_data
-                                                )
-from lemur.utility.find_and_get import (lab_exists,
+                                                cleanup_class_data)
+from lemur.utility_find_and_get import (lab_exists,
                                         experiment_exists,
                                         class_exists,
                                         observation_exists,
@@ -243,8 +240,11 @@ def add_user(user_info):
             else:
                 return 'the class with id:{} doesn\'t exist.'.format(class_id)
     if not user_exists(user_info['username']):
+        name = None
+        if 'name' in user_info:
+            name = user_info['name']
         new_user = m.User(id=user_info['username'],
-                          name=user_info['name'],
+                          name=name,
                           role=user_role,
                           classes=classes,
                           labs=labs)
@@ -260,11 +260,12 @@ def change_user_info(username, role, class_ids):
     user = get_user(username)
     classes = []
     labs = []
-    for c in class_ids:
-        the_class = get_class(c)
-        classes.append(the_class)
-        for lab in the_class.labs:
-            labs.append(lab)
+    if class_ids:
+        for c in class_ids:
+            the_class = get_class(c)
+            classes.append(the_class)
+            for lab in the_class.labs:
+                labs.append(lab)
     user.role = get_role(role)
     user.classes = classes
     user.labs = labs
@@ -281,8 +282,8 @@ def delete_user(username):
 # add a class into the database according to class_info
 def add_class(class_info):
     # Check the correctness of data format
-    err_msg = check_existence(class_info, 'professors', 'students',
-                              'className', 'classTime')
+    # Note: students is optional i.e. it can be undefined
+    err_msg = check_existence(class_info, 'className', 'classTime')
     if err_msg != '':
         return err_msg
     users = []
@@ -292,23 +293,24 @@ def add_class(class_info):
         class_info['className'], class_info['classTime'])
 
     if not class_exists(new_class_id):
-        for p in class_info.getlist('professors'):
-            if not user_exists(p):
-                err_msg = 'The professor with id:{} doesn\'t exist.'.format(p)
-                return err_msg
-            else:
-                usernames.append(p)
-
-        for s in class_info.getlist('students'):
-            if not user_exists(s):
-                err_msg = 'The student with id:{} doesn\'t exist.'.format(p)
-                return err_msg
-            elif get_user(s).role_name != 'Student':
-                err_msg = s+(' already exists and is not a student.'
-                             'You should not put their name into student name')
-                return err_msg
-            else:
-                usernames.append(s)
+        if 'professors' in class_info:
+            for p in class_info.getlist('professors'):
+                if not user_exists(p):
+                    err_msg = 'The professor with id:{} doesn\'t exist.'.format(p)
+                    return err_msg
+                else:
+                    usernames.append(p)
+        if 'students' in class_info:
+            for s in class_info.getlist('students'):
+                if not user_exists(s):
+                    err_msg = 'The student with id:{} doesn\'t exist.'.format(p)
+                    return err_msg
+                elif get_user(s).role_name != 'Student':
+                    err_msg = s+(' already exists and is not a student.'
+                                 'You should not put their name into student name')
+                    return err_msg
+                else:
+                    usernames.append(s)
         for username in usernames:
             users.append(get_user(username))
         new_class = m.Class(id=new_class_id,
@@ -359,7 +361,7 @@ def change_class_users(class_id, new_users):
     # Delete the class and the associated labs from old users who
     # are not in the class anymore
     for u in old_users:
-        if not(u in the_class.users):
+        if not(u.id in str(new_users)):
             u.classes = [c for c in u.classes if c.id != class_id]
             new_lab_list = []
             for lab in u.labs:
@@ -373,18 +375,22 @@ def change_class_users(class_id, new_users):
 # --- Initialize Classes and Users by getting data from Iris ---
 # Populate the database with classes and their corresponding professors
 # Note: This needs to be invoked before update_users_by_data_from_iris
+# The existing professors will not be deleted even if they don't teach
+# any class
 def populate_db_with_classes_and_professors(class_data):
     class_data = cleanup_class_data(class_data)
     for c in class_data:
         class_name = c['subject'] + c['course_number']
         class_time = tranlate_term_code_to_semester(c['term_code'])
-        class_professor_ids = c['instructors']
+        class_professor_info_list = c['instructors']
+        class_professor_ids = [p['username'] for p in class_professor_info_list]
         class_professors = []
-        for p in class_professor_ids:
-            if not user_exists(p):
-                ds.add(m.User(id=p, role=get_role('Admin')))
+        for p in class_professor_info_list:
+            if not user_exists(p['username']):
+                name = generate_user_name(p['first_name'], p['last_name'])
+                ds.add(m.User(id=p['username'], name=name, role=get_role('Admin')))
                 ds.commit()
-            the_user = get_user(p)
+            the_user = get_user(p['username'])
             class_professors.append(the_user)
         if class_name and class_time:
             class_id = generate_class_id(class_name, class_time)
@@ -393,7 +399,7 @@ def populate_db_with_classes_and_professors(class_data):
             if class_exists(class_id):
                 the_class = get_class(class_id)
                 # handle the change of class and the labs associated with it
-                old_class_professors = [u for u in the_class.users if u.role_name != 'Student']
+                old_class_professors = [u for u in the_class.users if ((u.role_name == 'Admin') or (u.role_name == 'SuperAdmin'))]
                 for p in class_professors:
                     if not (class_id in [c.id for c in p.classes]):
                         p.classes.append(the_class)
@@ -416,7 +422,7 @@ def populate_db_with_classes_and_professors(class_data):
 
 
 # Update the users in the classes according to registration info
-def update_users_by_data_from_iris(registration_data):
+def update_students_by_data_from_iris(registration_data):
     all_classes = get_all_class()
     warning_msg = ''
     registration_by_class = {}
@@ -427,6 +433,7 @@ def update_users_by_data_from_iris(registration_data):
     # Add the students in the received data into the database
     for registration_object in registration_data:
         username = registration_object['user_name']
+        name = generate_user_name(registration_object['first_name'], registration_object['last_name'])
         class_id = generate_class_id((registration_object['subject'] +
                                      registration_object['course_number']),
                                      tranlate_term_code_to_semester(registration_object['term_code']))
@@ -434,7 +441,7 @@ def update_users_by_data_from_iris(registration_data):
         if class_exists(class_id):
             the_class = get_class(class_id)
             # If user already exists, add the class into the class list of the
-            # user；
+            # user;
             # otherwise, create a user with the class
             if user_exists(username):
                 the_user = get_user(username)
@@ -444,7 +451,7 @@ def update_users_by_data_from_iris(registration_data):
                         if not (lab in the_user.labs):
                             the_user.labs.append(lab)
             else:
-                the_user = m.User(id=username, classes=[the_class],
+                the_user = m.User(id=username, name=name, classes=[the_class],
                                   role=get_role('Student'), labs=the_class.labs)
                 ds.add(the_user)
         # else return a warning message to notify the user
@@ -465,7 +472,7 @@ def update_users_by_data_from_iris(registration_data):
         # the users of the class in database and data
         if c.id in registration_by_class:
             # Keep the admins/superadmins of the class
-            class_new_users = [u for u in c.users if u.role_name != 'Student']
+            class_new_users = [u for u in c.users if ((u.role_name == 'Admin') or (u.role_name == 'SuperAdmin'))]
             # Replace the students of the class with the students in the
             # received data
             for student_id in registration_by_class[c.id]:

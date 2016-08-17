@@ -1,13 +1,12 @@
-# This file consists of all the customized decorators
-import sys
-sys.path.append('..')
 # Libraries
 # Standard library
-from functools import wraps
+from functools import wraps, update_wrapper
 import linecache
+from datetime import timedelta
 
 # Third-party libraries
-from flask import render_template, jsonify, redirect, url_for
+from flask import (render_template, jsonify, redirect, url_for, make_response,
+                   request, current_app)
 from flask.ext.login import current_user
 
 # Local

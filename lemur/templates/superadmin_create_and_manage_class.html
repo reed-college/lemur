@@ -10,8 +10,8 @@
 	<div class="table-wrapper">
 		<div class="title"> <h2> Manage Class </h2></div>
 		<b>Guide:</b><br><br>
-		1. Class Name must be a combination of number(s),letter(s) and dash(s), with length between 3 and 60 <br><br>
-		2. Student names should be in the format: andrew,george(student names separeted by comma)<br><br>
+		1. Class Name should be a combination of number(s),letter(s) and dash(s), with length between 3 and 60 <br><br>
+		2. Class Time should be in the format: FALL2016 <br><br>
 		<b>Warning:</b><br><br>
 		1.If you delete the a class, all the associated labs will be deleted as well<br><br>
 		{% if current_classes|length==0 %}
@@ -38,7 +38,7 @@
 					      		<td>{{class["name"]}}</td>
 					      		<td>{{class["time"]}}</td>
 					      		<td>
-								<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="professors" multiple data-actions-box="true" data-live-search="true" title="Choose professors" required>
+								<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="professors" multiple data-actions-box="true" data-live-search="true" title="Choose professors">
 								    {% for u in all_users %}
 									    {% if u.role_name != "Student" %}
 										    {% if u.id in class["professors"] %}
@@ -51,7 +51,7 @@
 								</select>
 					      		</td>
 					      		<td>
-						      		<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="students" multiple data-actions-box="true" data-live-search="true" title="Choose students" required>
+						      		<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="students" multiple data-actions-box="true" data-live-search="true" title="Choose students">
 									    {% for u in all_users %}
 										    {% if u.role_name == "Student" %}
 											    {% if u.id in class["students"] %}
@@ -83,12 +83,12 @@
 				<input type="text" name="className" pattern="{{pattern_for_name}}" title="{{pattern_for_name_hint}}" required>
 			</div>
 			<div>
-				<label>Class Time: </label>
+				<label>Class Time*: </label>
 				<input type="text" name="classTime" pattern="{{pattern_for_class_time}}" title="{{pattern_for_class_time_hint}}" required>
 			</div>
 			<div>
-				<label>Professor Name*: </label>
-				<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="professors" multiple data-actions-box="true" data-live-search="true" title="Choose professors" required>
+				<label>Professor Name: </label>
+				<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="professors" multiple data-actions-box="true" data-live-search="true" title="Choose professors">
 				    {% for u in all_users %}
 					    {% if u.role_name != "Student" %}
 						    {% if p==current_user.id %}
@@ -133,6 +133,5 @@
 	        </div>
 	    </div>
 	</div>
-
 
 {% endblock %}

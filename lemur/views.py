@@ -16,8 +16,8 @@ import requests
 # Other modules
 from lemur import (app, db, student_api_url, class_api_url)
 from lemur import models as m
-from lemur.utility.decorators import permission_required
-from lemur.utility.generate_and_convert import (check_existence,
+from lemur.utility_decorators import permission_required
+from lemur.utility_generate_and_convert import (check_existence,
                                                 serialize_lab_list,
                                                 serialize_experiment_list,
                                                 serialize_user_list,
@@ -27,7 +27,7 @@ from lemur.utility.generate_and_convert import (check_existence,
                                                 normal_json,
                                                 err_json,
                                                 err_html)
-from lemur.utility.find_and_get import (lab_exists,
+from lemur.utility_find_and_get import (lab_exists,
                                         get_lab,
                                         get_experiment,
                                         get_user,
@@ -41,7 +41,7 @@ from lemur.utility.find_and_get import (lab_exists,
                                         find_lab_list_for_user,
                                         find_all_labs,
                                         find_all_observations_for_labs)
-from lemur.utility.modify import (delete_lab,
+from lemur.utility_modify import (delete_lab,
                                   modify_lab,
                                   duplicate_lab,
                                   change_lab_status,
@@ -55,7 +55,7 @@ from lemur.utility.modify import (delete_lab,
                                   delete_class,
                                   change_class_users,
                                   populate_db_with_classes_and_professors,
-                                  update_users_by_data_from_iris)
+                                  update_students_by_data_from_iris)
 # Abbreviation for convenience
 ds = db.session
 
@@ -459,10 +459,11 @@ def _superadmin_update_info_from_iris():
         if (len(registration_data) == 0):
             return 'empty registration data'
         err_msg = check_existence(registration_data[0], 'subject',
-                                  'course_number', 'term_code', 'user_name')
+                                  'course_number', 'term_code', 'user_name',
+                                  'first_name', 'last_name')
         if err_msg != '':
             return err_json(err_msg)
-        warning_msg = update_users_by_data_from_iris(registration_data)
+        warning_msg = update_students_by_data_from_iris(registration_data)
         return normal_json(warning_msg)
     else:
         err_msg = 'invalid message:{}'.format(jsonData['message'])
@@ -506,12 +507,15 @@ def _superadmin_delete_class():
 def _superadmin_modify_class():
     # get data from post request and check the correctness of data format
     jsonData = request.get_json()
-    err_msg = check_existence(jsonData, 'classId', 'studentUserNames',
-                              'professorUserNames')
+    err_msg = check_existence(jsonData, 'classId', 'studentUserNames', 'professorUserNames')
     if err_msg != '':
         return err_json(err_msg)
-    err_msg = change_class_users(jsonData['classId'],
-                                 jsonData['studentUserNames']+jsonData['professorUserNames'])
+    new_usernames = []
+    if jsonData['studentUserNames'] is not None:
+        new_usernames += jsonData['studentUserNames']
+    if jsonData['professorUserNames'] is not None:
+        new_usernames += jsonData['professorUserNames']
+    err_msg = change_class_users(jsonData['classId'], new_usernames)
     if err_msg != '':
         return err_json(err_msg)
     return normal_json(jsonData)
@@ -562,7 +566,7 @@ def inject_patterns():
                                          '-[0-9]{1,10}[.]?[0-9]{0,10}'),
                 pattern_for_value_range_hint=('valueRange should be'
                                               'in the format:0.3-6.5'),
-                pattern_for_class_time='[0-9]{2,4}[a-zA-Z]{4,7}',
+                pattern_for_class_time='[a-zA-Z]{4,7}[0-9]{2,4}',
                 pattern_for_class_time_hint=('Class Time is a combination',
-                                             'of year and semester. e.g. ',
-                                             '16fall'))
+                                             'of semester and year. e.g. ',
+                                             'FALL2016'))

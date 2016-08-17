@@ -55,7 +55,7 @@
 									</select>
 				               </td>
 					      		<td>
-						      		<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="classIds" multiple data-actions-box="true" data-live-search="true" title="Choose Classes" required>
+						      		<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="classIds" multiple data-actions-box="true" data-live-search="true" title="Choose Classes">
 								    {% for c in class_ids %}    
 									    {% if c in u["classes"] %}
 										    <option value="{{c}}" selected>{{c}}</option>

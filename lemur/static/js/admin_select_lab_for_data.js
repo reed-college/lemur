@@ -2,12 +2,8 @@
 $(document).ready(function(){
     $('button[name=goToLab]').click(function(){
         var labIds = [];
-        var checkBoxes = document.getElementsByTagName('input')
-        for (var i = 0; i < checkBoxes.length; i++) {
-            if (checkBoxes[i].type == 'checkbox' && checkBoxes[i].checked) {
-                labIds.push($(checkBoxes[i]).data('labid'));   
-            }
-        }
+        var checkBoxes = document.getElementsByTagName('input');
+        findLabsSelected(labIds, checkBoxes);
         if (labIds.length==0){
             $('#errMsgNoLabchoosed').show().delay(1000).fadeOut();
         }
