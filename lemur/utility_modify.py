@@ -433,6 +433,10 @@ def update_students_by_data_from_iris(registration_data):
     # Add the students in the received data into the database
     for registration_object in registration_data:
         username = registration_object['user_name']
+        # Since username is our key for User object, it cannot be empty
+        # If that happens, we skip the current user
+        if username == 'null' or username == '' or username == None:
+            continue
         name = generate_user_name(registration_object['first_name'], registration_object['last_name'])
         class_id = generate_class_id((registration_object['subject'] +
                                      registration_object['course_number']),

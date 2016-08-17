@@ -266,11 +266,10 @@ class IntegrationTestUtilityModify(unittest.TestCase):
         registration_data = [{"user_name": "fake1", "last_name": "Fake", "first_name": "One", "course_id": "10508", "term_code": "201701", "subject": "BIOL", "course_number": "356", "section": "FL1"},
                              {"user_name": "fake2", "last_name": "Fake", "first_name": "Two", "course_id": "11055", "term_code": "201701", "subject": "BIOL", "course_number": "351", "section": "FL1"},
                              {"user_name": "fake3", "last_name": "Fake", "first_name": "Three", "course_id": "11055", "term_code": "201701", "subject": "BIOL", "course_number": "351", "section": "FL1"},
-                             {"user_name": "fake4", "last_name": "Fake", "first_name": "Four", "course_id": "10369", "term_code": "201701", "subject": "BIOL", "course_number": "342", "section": "FL1"}
+                             {"user_name": "null", "last_name": "Fake", "first_name": "Four", "course_id": "10369", "term_code": "201701", "subject": "BIOL", "course_number": "342", "section": "FL1"}
                              ]
         # The classes don't exist in db so the users shouldn't be added
         err_msg = update_students_by_data_from_iris(registration_data)
         self.assertNotEqual('', err_msg)
-
 if __name__ == '__main__':
     unittest.main()
