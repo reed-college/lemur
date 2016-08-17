@@ -14,68 +14,73 @@
 		2. Class Time should be in the format: FALL2016 <br><br>
 		<b>Warning:</b><br><br>
 		1.If you delete the a class, all the associated labs will be deleted as well<br><br>
-		{% if current_classes|length==0 %}
-			<h1> No class exists </h1> 
-		{% else %}
-			<form id="existingClasses">
-				<table class="table sortable">
-				    <thead>
-				    	<tr>
-					      <th>Index</th>
-					      <th>Class name</th>
-					      <th>Time</th>
-			              <th>Professors</th>
-			              <th>Students</th>
-			              <th>Labs</th>
-			              <th></th>
-			              <th></th>
-				    	</tr>
-				    </thead>
-				    <tbody>
-				    	{% for class in current_classes %}
-					    	<tr id={{class["id"]}}>
-					    	    <td>{{loop.index}}</th>
-					      		<td>{{class["name"]}}</td>
-					      		<td>{{class["time"]}}</td>
-					      		<td>
-								<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="professors" multiple data-actions-box="true" data-live-search="true" title="Choose professors">
-								    {% for u in all_users %}
-									    {% if u.role_name != "Student" %}
-										    {% if u.id in class["professors"] %}
-											    <option value="{{u.id}}" selected="selected">{{u.id}}</option>
-											{% else %}
-											    <option value="{{u.id}}">{{u.id}}</option>
-											{% endif %}
-										{% endif %}
-									{% endfor %}
-								</select>
-					      		</td>
-					      		<td>
-						      		<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="students" multiple data-actions-box="true" data-live-search="true" title="Choose students">
-									    {% for u in all_users %}
-										    {% if u.role_name == "Student" %}
-											    {% if u.id in class["students"] %}
-												    <option value="{{u.id}}" selected="selected">{{u.id}}</option>
-												{% else %}
-												    <option value="{{u.id}}">{{u.id}}</option>
+		<div id="accordion">
+		    <h3>Class List:</h3>
+		    <div>
+				{% if current_classes|length==0 %}
+					<h1> No class exists </h1> 
+				{% else %}
+					<form id="existingClasses">
+						<table class="table sortable">
+						    <thead>
+						    	<tr>
+							      <th>Index</th>
+							      <th>Class name</th>
+							      <th>Time</th>
+					              <th>Professors</th>
+					              <th>Students</th>
+					              <th>Labs</th>
+					              <th></th>
+					              <th></th>
+						    	</tr>
+						    </thead>
+						    <tbody>
+						    	{% for class in current_classes %}
+							    	<tr id={{class["id"]}}>
+							    	    <td>{{loop.index}}</th>
+							      		<td>{{class["name"]}}</td>
+							      		<td>{{class["time"]}}</td>
+							      		<td>
+										<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="professors" multiple data-actions-box="true" data-live-search="true" title="Choose professors">
+										    {% for u in all_users %}
+											    {% if u.role_name != "Student" %}
+												    {% if u.id in class["professors"] %}
+													    <option value="{{u.id}}" selected="selected">{{u.id}}</option>
+													{% else %}
+													    <option value="{{u.id}}">{{u.id}}</option>
+													{% endif %}
 												{% endif %}
-											{% endif %}
-										{% endfor %}
-									</select>
-					      		</td>	
-					      		<td>
-						      		{% for l in class["labs"] %}
-							      		{{l}}<br>
-						      		{% endfor %}
-					      		</td>		
-					      		<td><button name=save>Save</button></td>    
-							    <td><button name=delete>Delete</button></td>
-					    	</tr>
-				    	{% endfor %}    	
-				    </tbody>
-				</table>
-			</form>
-		{% endif%}
+											{% endfor %}
+										</select>
+							      		</td>
+							      		<td>
+								      		<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="students" multiple data-actions-box="true" data-live-search="true" title="Choose students">
+											    {% for u in all_users %}
+												    {% if u.role_name == "Student" %}
+													    {% if u.id in class["students"] %}
+														    <option value="{{u.id}}" selected="selected">{{u.id}}</option>
+														{% else %}
+														    <option value="{{u.id}}">{{u.id}}</option>
+														{% endif %}
+													{% endif %}
+												{% endfor %}
+											</select>
+							      		</td>	
+							      		<td>
+								      		{% for l in class["labs"] %}
+									      		{{l}}<br>
+								      		{% endfor %}
+							      		</td>		
+							      		<td><button name=save>Save</button></td>    
+									    <td><button name=delete>Delete</button></td>
+							    	</tr>
+						    	{% endfor %}    	
+						    </tbody>
+						</table>
+					</form>
+				{% endif%}
+			</div>
+		</div>
 		<form method=post action="/superadmin_create_and_manage_class">
 		    <h4><b>Add a new class:</b></h4>
 		    <div>

@@ -14,70 +14,75 @@
 		2. Name is optional; It must be a combination of number(s),letter(s) and dash(s); its length cannot exceed 60<br><br>
 		3. By clicking 'Reset ClassInfo from Iris', the database will be populated with classes and their associated professors. The professors by default will be given an Admin account. If the class already exists, its professors will be updated to the latest according to Iris.<br><br>
 		4. By clicking 'Update UserInfo from Iris', the students of a class will be updated: students who dropped will be removed and students who newly registered for a class will be added. If the student didn't exist in the database, they will be created with the role 'Student' by default. If the class got from iris doesn't exist in the current database, it will be ignored.<br><br>
-		{% if user_list|length==0 %}
-			<p> No user exists </p> 
-		{% else %}
-			<form id="existingUsers">
-				<table class="table sortable">
-				    <thead>
-				    	<tr>
-					      <th>Index</th>
-					      <th>Username/ID</th>
-					      <th>Name</th>
-					      <th>Role</th>
-			              <th>Classes</th>
-			              <th>Labs</th>
-			              <th></th>
-			              <th></th>
-				    	</tr>
-				    </thead>
-				    <tbody>
-				    	{% for u in user_list %}
-					    	<tr id="{{u["username"]}}"">
-					      		<td>{{loop.index}}</th>
-					      		<td>{{u["username"]}}</td>
-					      		<td>{{u["name"]}}</td>
-					      		<td>
-						      		<select class="selectpicker" id="roleSelector" data-style="btn-inverse" data-width="auto" name="role" title="Choose Role" required>
-						      		    {% if u["role_name"] == "SuperAdmin" %}
-										    <option value="SuperAdmin" selected>SuperAdmin</option>
-											<option value="Admin">Admin</option>
-											<option value="Student">Student</option>
-										{% elif u["role_name"] == "Admin" %}
-										    <option value="SuperAdmin">SuperAdmin</option>
-											<option value="Admin" selected>Admin</option>
-											<option value="Student">Student</option>
-										{% else %}
-										    <option value="SuperAdmin">SuperAdmin</option>
-											<option value="Admin">Admin</option>
-											<option value="Student" selected>Student</option>
-										{% endif %}
-									</select>
-				               </td>
-					      		<td>
-						      		<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="classIds" multiple data-actions-box="true" data-live-search="true" title="Choose Classes">
-								    {% for c in class_ids %}    
-									    {% if c in u["classes"] %}
-										    <option value="{{c}}" selected>{{c}}</option>
-										{% else %}
-										    <option value="{{c}}">{{c}}</option>
-										{% endif %}
-									{% endfor %}
-									</select>
-					      		</td>
-					      		<td>
-						      		{% for l in u["labs"] %}
-						      		    {{l}}<br>
-						      		{% endfor %}
-					      		</td>   
-					      		<td><button name=save>Save</button></td>
-							    <td><button name=delete>Delete</button></td>
-					    	</tr>
-				    	{% endfor %}    	
-				    </tbody>
-				</table>
-			</form> 
-		{% endif%}
+		<div id="accordion">
+		    <h3>User List:</h3>
+		    <div>
+				{% if user_list|length==0 %}
+					<p> No user exists </p> 
+				{% else %}
+					<form id="existingUsers">
+						<table class="table sortable">
+						    <thead>
+						    	<tr>
+							      <th>Index</th>
+							      <th>Username/ID</th>
+							      <th>Name</th>
+							      <th>Role</th>
+					              <th>Classes</th>
+					              <th>Labs</th>
+					              <th></th>
+					              <th></th>
+						    	</tr>
+						    </thead>
+						    <tbody>
+						    	{% for u in user_list %}
+							    	<tr id="{{u["username"]}}"">
+							      		<td>{{loop.index}}</th>
+							      		<td>{{u["username"]}}</td>
+							      		<td>{{u["name"]}}</td>
+							      		<td>
+								      		<select class="selectpicker" id="roleSelector" data-style="btn-inverse" data-width="auto" name="role" title="Choose Role" required>
+								      		    {% if u["role_name"] == "SuperAdmin" %}
+												    <option value="SuperAdmin" selected>SuperAdmin</option>
+													<option value="Admin">Admin</option>
+													<option value="Student">Student</option>
+												{% elif u["role_name"] == "Admin" %}
+												    <option value="SuperAdmin">SuperAdmin</option>
+													<option value="Admin" selected>Admin</option>
+													<option value="Student">Student</option>
+												{% else %}
+												    <option value="SuperAdmin">SuperAdmin</option>
+													<option value="Admin">Admin</option>
+													<option value="Student" selected>Student</option>
+												{% endif %}
+											</select>
+						               </td>
+							      		<td>
+								      		<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="classIds" multiple data-actions-box="true" data-live-search="true" title="Choose Classes">
+										    {% for c in class_ids %}    
+											    {% if c in u["classes"] %}
+												    <option value="{{c}}" selected>{{c}}</option>
+												{% else %}
+												    <option value="{{c}}">{{c}}</option>
+												{% endif %}
+											{% endfor %}
+											</select>
+							      		</td>
+							      		<td>
+								      		{% for l in u["labs"] %}
+								      		    {{l}}<br>
+								      		{% endfor %}
+							      		</td>   
+							      		<td><button name=save>Save</button></td>
+									    <td><button name=delete>Delete</button></td>
+							    	</tr>
+						    	{% endfor %}    	
+						    </tbody>
+						</table>
+					</form> 
+				{% endif%}
+			</div>
+		</div>
 		<form method=post action="/superadmin_create_and_manage_user">
 		    <h4><b>Add a new user:</b></h4>
 		    <div>

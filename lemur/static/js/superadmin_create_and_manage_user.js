@@ -1,4 +1,10 @@
 $(document).ready(function(){ 
+    // Toggle the accordion
+    $(function(){
+        $( "#accordion" ).accordion({
+            collapsible: true
+        });
+    });
     $('button[name=delete]').click(function(){
         var userIdToBeRemoved = $(this).closest('tr').attr('id');
         $.ajax({
