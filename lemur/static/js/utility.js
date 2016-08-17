@@ -334,7 +334,7 @@ function warningReport(operation, result){
     else{
         warningMsg = result.statusText;
     }
-    if (warningMsg != ''){
+    if (warningMsg != '' && warningMsg != undefined){
         $('#errorMsgs').html('The update is successful.<br>A warning occurs:<br>'+warningMsg);
         $('#errorPopup').modal('show');
     }

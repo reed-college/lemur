@@ -422,7 +422,7 @@ def populate_db_with_classes_and_professors(class_data):
 
 
 # Update the users in the classes according to registration info
-def update_students_by_data_from_iris(registration_data):
+def update_students_by_data_from_iris(class_id_list, registration_data):
     all_classes = get_all_class()
     warning_msg = ''
     registration_by_class = {}
@@ -433,14 +433,18 @@ def update_students_by_data_from_iris(registration_data):
     # Add the students in the received data into the database
     for registration_object in registration_data:
         username = registration_object['user_name']
+        invalid_list = [None, 'undefined', 'null', '']
         # Since username is our key for User object, it cannot be empty
         # If that happens, we skip the current user
-        if username == 'null' or username == '' or username == None:
+        if username not in invalid_list:
             continue
         name = generate_user_name(registration_object['first_name'], registration_object['last_name'])
         class_id = generate_class_id((registration_object['subject'] +
                                      registration_object['course_number']),
                                      tranlate_term_code_to_semester(registration_object['term_code']))
+        # only students who registered courses in the list will be updated
+        if class_id not in class_id_list:
+            continue
         # If the class exists in the database, update
         if class_exists(class_id):
             the_class = get_class(class_id)

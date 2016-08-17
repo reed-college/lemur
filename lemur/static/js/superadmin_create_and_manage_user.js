@@ -45,15 +45,16 @@ $(document).ready(function(){
     });  
 
     $('button[name=updateUserInfo]').add($('button[name=resetClass]')).click(function(){
-          message = $(this).attr('id'); 
+          var message = $(this).attr('id'); 
+          var classIds = $(this).closest('div').find('select[name=classIdsForUpdate]').val();
           $.ajax({
             type: 'POST',
             contentType: 'application/json',
             dataType: 'json',
             url: '/_superadmin_update_info_from_iris',
-            data: JSON.stringify({'message': message}),
+            data: JSON.stringify({'message': message, 'classIds': classIds}),
             success: function(result){
-                      console.log('Send data to server successfully:' + message);
+                      console.log('Send data to server successfully:' + message + ', ' + classIds);
                       warningReport(message, result);
                   },
             error : function(result){

@@ -455,6 +455,10 @@ def _superadmin_update_info_from_iris():
         warning_msg = populate_db_with_classes_and_professors(class_data)
         return normal_json(warning_msg)
     elif jsonData['message'] == 'update users':
+        class_id_list = []
+        invalid_list = [None, 'undefined', 'null', '']
+        if check_existence(jsonData, 'classIds') and jsonData['classIds'] not in invalid_list :
+            class_id_list = jsonData['classIds']
         registration_data = json.loads(requests.get(student_api_url).text)
         if (len(registration_data) == 0):
             return 'empty registration data'
@@ -463,7 +467,7 @@ def _superadmin_update_info_from_iris():
                                   'first_name', 'last_name')
         if err_msg != '':
             return err_json(err_msg)
-        warning_msg = update_students_by_data_from_iris(registration_data)
+        warning_msg = update_students_by_data_from_iris(class_id_list, registration_data)
         return normal_json(warning_msg)
     else:
         err_msg = 'invalid message:{}'.format(jsonData['message'])
