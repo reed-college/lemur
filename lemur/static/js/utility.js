@@ -293,16 +293,26 @@ function getObservationIdsToBeRemoved(ObservationsToBeRemoved){
 }
 
 // --- Functions in general ---
+// Check whether a string is in JSON format
+function IsJsonString(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
 // The function will be invoked when an ajax request fails.
 // It reports error by popping up a window and shows the error message returned from server
 function errorReport(operation, result){
     console.log(result);
     errorMsg = '';
-    if (result.status == 400){
-        errorMsg = result.statusText;
-    }
-    else if (result.responseText != undefined) {
+    result.responseText
+    if (IsJsonString(result.responseText)){
         errorMsg = JSON.parse(result.responseText)['data'];
+    }
+    else{
+        errorMsg = result.statusText;
     }
     $('#errorMsgsPopUp').html('Fail to '+operation+'<br>errorMsg: '+errorMsg+'<br>result: '+result);
     $('#errorPopup').modal("show");
@@ -313,9 +323,12 @@ function errorReport(operation, result){
 function warningReport(operation, result){
     console.log(result);
     warningMsg = '';
-    if (result.responseText != undefined) {
+    if (IsJsonString(result.responseText)){
         warningMsg = JSON.parse(result.responseText)['data'];
-    }  
+    }
+    else{
+        warningMsg = result.statusText;
+    }
     if (warningMsg != ''){
         $('#errorMsgs').html('Warning Message:<br>'+warningMsg);
         $('#errorPopup').modal('show');

@@ -128,8 +128,8 @@ button:hover:before, button:focus:before, button:active:before {
     position: relative;
 }
 #profile-img {
-	height: 30%;
-	width: 30%;
+    height: 30%;
+    width: 30%;
 }
 .card-container.card {
     max-width: 350px;
@@ -263,8 +263,9 @@ p {
 /* Page Title */
 .title{
     text-align: center;
-    font-size: 20px;
-    padding-top: 40px;
+    font-size: 30px;
+    padding-top: 10px;
+    padding-bottom: 30px;
 }
 
 /* Wrapper for the Content on a Page*/

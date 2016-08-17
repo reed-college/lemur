@@ -1,7 +1,7 @@
 {% if current_user.is_authenticated and current_user.role_name=="SuperAdmin" %}
-	{% extends "superadmin_home.html" %}
+    {% extends "superadmin_home.html" %}
 {% else %}
-	{% extends "admin_home.html" %}
+    {% extends "admin_home.html" %}
 {% endif %}
 
 {% block head %}
@@ -11,43 +11,45 @@
 {% endblock %}
 
 {% block content %}
-	<div class="table-wrapper">
-	    <div class="col-lg-12 col-md-12 col-sm-12 mb">
-			<div class="title"> Select Lab For Data </div>
-			<label> Guide:</label><br><br>
-			1. Select at least one lab.<br><br>
-			2. To select multiple labs, you need to make sure that these labs have exactly the same questions. Otherwise, an error will be shown.<br><br>
-		</div>
-		{% if (lab_list|length)==0 %}
-			<div class="title">No Lab exists</div>
-		{% else %}
-			<table class="table">
-				<thead>
-				    <tr>
-					    <th class="tg-yw4l">Lab Index</th>
-					    <th class="tg-yw4l">Lab Name</th>
-					    <th class="tg-yw4l">Class ID</th>
-					    <th class="tg-yw4l">Lab Status</th>
-					    <th class="tg-yw4l">Number of data available</th>	
-					    <th class="tg-yw4l">Choose</th>  
-		    		</tr>
-		  		</thead>
-		  		<tbody>
-				{% for lab in lab_list %}
-					<tr>
-					    <th class="tg-yw4l">{{loop.index}}</th>
-					    <td class="tg-yw4l">{{lab.lab_name}}</td>
-					    <td class="tg-yw4l">{{lab.class_id}}</td>
-					    <th class="tg-yw4l">{{lab.lab_status}}</th>
-					    <td class="tg-yw4l">{{lab.data_num}}</td>
-					    <td class="tg-yw4l"><input type="checkbox" data-labid="{{lab.lab_id}}"></td>
-					</tr>
-				{% endfor %}
-				</tbody>	
-			</table>
-			<button name="goToLab">Go to lab</button>
-		{% endif %}
-	</div>
+    <div class="table-wrapper">
+        <div>
+            <div class="title"> Select Lab For Data </div>
+            <label> Guide:</label><br><br>
+            1. Select at least one lab.<br><br>
+            2. To select multiple labs, you need to make sure that these labs have exactly the same questions. Otherwise, an error will be shown.<br><br>
+        </div>
+        <div>
+        {% if (lab_list|length)==0 %}
+            <div class="title">No Lab exists</div>
+        {% else %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th class="tg-yw4l">Lab Index</th>
+                        <th class="tg-yw4l">Lab Name</th>
+                        <th class="tg-yw4l">Class ID</th>
+                        <th class="tg-yw4l">Lab Status</th>
+                        <th class="tg-yw4l">Number of data available</th>    
+                        <th class="tg-yw4l">Choose</th>  
+                    </tr>
+                  </thead>
+                  <tbody>
+                {% for lab in lab_list %}
+                    <tr>
+                        <th class="tg-yw4l">{{loop.index}}</th>
+                        <td class="tg-yw4l">{{lab.lab_name}}</td>
+                        <td class="tg-yw4l">{{lab.class_id}}</td>
+                        <th class="tg-yw4l">{{lab.lab_status}}</th>
+                        <td class="tg-yw4l">{{lab.data_num}}</td>
+                        <td class="tg-yw4l"><input type="checkbox" data-labid="{{lab.lab_id}}"></td>
+                    </tr>
+                {% endfor %}
+                </tbody>    
+            </table>
+            <button name="goToLab">Go to lab</button>
+        {% endif %}
+        </div>
+    </div>
 {% endblock %}
 
 
