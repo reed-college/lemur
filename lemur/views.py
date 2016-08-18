@@ -61,6 +61,17 @@ ds = db.session
 
 
 # --- Common Side ---
+# The app will be redirected to the user's main page
+# if the user is not logged in, the user will be redirected to the login page
+@app.route('/')
+def main_page():
+    if current_user.is_authenticated:
+        user_home = {'SuperAdmin': 'superadmin_home',
+                     'Admin': 'admin_home',
+                     'Student': 'student_home'}
+        return redirect(url_for(user_home[current_user.role_name]))
+    return redirect(url_for('login'))
+
 # Login page that will check user id and allow user access to the
 # allowed pages
 # It will be replaced by reed login page in the end
@@ -80,7 +91,6 @@ def login():
                          'Admin': 'admin_home',
                          'Student': 'student_home'}
             return redirect(url_for(user_home[user.role_name]))
-            flash('Invalid username')
     return render_template('login.html')
 
 
