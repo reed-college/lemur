@@ -424,11 +424,13 @@ def populate_db_with_classes_and_professors(class_data):
 # Update the users in the classes according to registration info
 def update_students_by_data_from_iris(class_id_list, registration_data):
     all_classes = get_all_class()
+    selected_classes = [c for c in all_classes if c.id in class_id_list]
     warning_msg = ''
     registration_by_class = {}
     # A registration_object looks like
     # {"user_name":"fake1","course_id":"10256","term_code":"201501",
-    # "subject":"BIOL","course_number":"101","section":"FTN"}
+    # "subject":"BIOL","course_number":"101","section":"FTN",
+    # "first_name":"Fake", "last_name":"One"}
 
     # Add the students in the received data into the database
     for registration_object in registration_data:
@@ -438,7 +440,8 @@ def update_students_by_data_from_iris(class_id_list, registration_data):
         # If that happens, we skip the current user
         if username not in invalid_list:
             continue
-        name = generate_user_name(registration_object['first_name'], registration_object['last_name'])
+        name = generate_user_name(registration_object['first_name'],
+                                  registration_object['last_name'])
         class_id = generate_class_id((registration_object['subject'] +
                                      registration_object['course_number']),
                                      tranlate_term_code_to_semester(registration_object['term_code']))
@@ -468,6 +471,7 @@ def update_students_by_data_from_iris(class_id_list, registration_data):
                             ' doesn\'t exist in database\n')
 
         # for efficiency: otherwise we have to loop through
+        # registration_data many times
         if class_id in registration_by_class:
             registration_by_class[class_id].append(username)
         else:
@@ -475,7 +479,7 @@ def update_students_by_data_from_iris(class_id_list, registration_data):
 
     # Check the students of the classes in the database and update them
     # according to the received data
-    for c in all_classes:
+    for c in selected_classes:
         # If the class exists in the received data, compare
         # the users of the class in database and data
         if c.id in registration_by_class:

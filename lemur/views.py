@@ -468,7 +468,7 @@ def _superadmin_update_info_from_iris():
     elif jsonData['message'] == 'update users':
         class_id_list = []
         invalid_list = [None, 'undefined', 'null', '']
-        if check_existence(jsonData, 'classIds') and jsonData['classIds'] not in invalid_list :
+        if check_existence(jsonData, 'classIds') and jsonData['classIds'] not in invalid_list:
             class_id_list = jsonData['classIds']
         registration_data = json.loads(requests.get(student_api_url).text)
         if (len(registration_data) == 0):
