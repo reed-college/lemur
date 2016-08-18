@@ -163,7 +163,7 @@ function Experiment(name,description,order,valueType,valueRange,valueCandidates)
 
 // newIndexStr represents the default number/order of the newly generated question
 function generateNewQuestion(newIndexStr){
-    newQuestion =  '<div class="col-lg-6 col-md-6 col-sm-6 mb experiment" name="'+newIndexStr+'" id="question">'+
+    newQuestion =  '<div class="col-lg-12 col-md-12 col-sm-12 mb experiment" name="'+newIndexStr+'" id="question">'+
                        '<h4>Question'+newIndexStr+':</h4>'+
                        '<label> Name*: </label>'+
                        '<input type="text" name="experimentName" pattern="'+PATTERN_FOR_NAME+'" title="'+PATTERN_FOR_NAME_HINT+'" required>'+
