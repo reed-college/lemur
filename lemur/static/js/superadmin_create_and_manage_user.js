@@ -46,7 +46,8 @@ $(document).ready(function(){
 
     $('button[name=updateUserInfo]').add($('button[name=resetClass]')).click(function(){
           var message = $(this).attr('id'); 
-          var classIds = $(this).closest('div').find('select[name=classIdsForUpdate]').val();
+          var classIds_str = $(this).closest('div').find('select[name=classIdsForUpdate]').val();
+          var class_Ids = classIds_str.split(',');
           $.ajax({
             type: 'POST',
             contentType: 'application/json',

@@ -438,7 +438,7 @@ def update_students_by_data_from_iris(class_id_list, registration_data):
         invalid_list = [None, 'undefined', 'null', '']
         # Since username is our key for User object, it cannot be empty
         # If that happens, we skip the current user
-        if username not in invalid_list:
+        if username in invalid_list:
             continue
         name = generate_user_name(registration_object['first_name'],
                                   registration_object['last_name'])

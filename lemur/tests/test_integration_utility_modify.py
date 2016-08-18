@@ -4,6 +4,7 @@ sys.path.append('../..')
 # Libraries
 # Standard library
 import unittest
+import json
 from random import randint
 
 # Third-party libraries
@@ -263,6 +264,8 @@ class IntegrationTestUtilityModify(unittest.TestCase):
         self.assertTrue(class_exists(class_id))
 
     def test_update_students_by_data_from_iris(self):
+        ds.add(m.Class(id='BIOL351_FALL2016', name='BIOL351', time='FALL2016'))
+        ds.commit()
         registration_data = [{"user_name": "fake1", "last_name": "Fake", "first_name": "One", "course_id": "10508", "term_code": "201701", "subject": "BIOL", "course_number": "356", "section": "FL1"},
                              {"user_name": "fake2", "last_name": "Fake", "first_name": "Two", "course_id": "11055", "term_code": "201701", "subject": "BIOL", "course_number": "351", "section": "FL1"},
                              {"user_name": "fake3", "last_name": "Fake", "first_name": "Three", "course_id": "11055", "term_code": "201701", "subject": "BIOL", "course_number": "351", "section": "FL1"},
@@ -272,5 +275,7 @@ class IntegrationTestUtilityModify(unittest.TestCase):
         # The classes don't exist in db so the users shouldn't be added
         err_msg = update_students_by_data_from_iris(class_id_list, registration_data)
         self.assertNotEqual('', err_msg)
+        self.assertTrue(user_exists("fake2"))
+
 if __name__ == '__main__':
     unittest.main()
