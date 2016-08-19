@@ -451,6 +451,8 @@ def _superadmin_delete_user():
 @permission_required(m.Permission.USER_MANAGE)
 def _superadmin_update_info_from_iris():
     jsonData = request.get_json()
+    class_id_list = []
+    warning_msg = ''
     err_msg = check_existence(jsonData, 'message')
     if err_msg != '':
         return err_json(err_msg)
@@ -463,12 +465,10 @@ def _superadmin_update_info_from_iris():
                                   'term_code', 'instructors')
         if err_msg != '':
             return err_json(err_msg)
-        warning_msg = populate_db_with_classes_and_professors(class_data)
+        warning_msg += populate_db_with_classes_and_professors(class_data)
         return normal_json(warning_msg)
     elif jsonData['message'] == 'update users':
-        class_id_list = []
-        if check_existence(jsonData, 'classIds'):
-            class_id_list = json.loads(jsonData['classIds'])
+        class_id_list = [str(c) for c in jsonData['classIds']]
         registration_data = json.loads(requests.get(student_api_url).text)
         if (len(registration_data) == 0):
             return 'empty registration data'
@@ -477,7 +477,7 @@ def _superadmin_update_info_from_iris():
                                   'first_name', 'last_name')
         if err_msg != '':
             return err_json(err_msg)
-        warning_msg = update_students_by_data_from_iris(class_id_list, registration_data)
+        warning_msg += update_students_by_data_from_iris(class_id_list, registration_data)
         return normal_json(warning_msg)
     else:
         err_msg = 'invalid message:{}'.format(jsonData['message'])

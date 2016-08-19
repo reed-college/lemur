@@ -425,8 +425,8 @@ def populate_db_with_classes_and_professors(class_data):
 def update_students_by_data_from_iris(class_id_list, registration_data):
     all_classes = get_all_class()
     selected_classes = [c for c in all_classes if c.id in class_id_list]
-    warning_msg = ''
     registration_by_class = {}
+    warning_msg = ''
     # A registration_object looks like
     # {"user_name":"fake1","course_id":"10256","term_code":"201501",
     # "subject":"BIOL","course_number":"101","section":"FTN",
@@ -494,4 +494,5 @@ def update_students_by_data_from_iris(class_id_list, registration_data):
             warning_msg += ('class_id: ' + class_id +
                             ' doesn\'t exist in received data\n')
     ds.commit()
+    all_user = ds.query(m.User).all()
     return warning_msg
