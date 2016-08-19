@@ -10,11 +10,55 @@
 	<div class="table-wrapper">
 		<div class="title"> <h2> Manage Class </h2></div>
 		<b>Guide:</b><br><br>
-		1. Class Name should be a combination of number(s),letter(s) and dash(s), with length between 3 and 60 <br><br>
-		2. Class Time should be in the format: FALL2016 <br><br>
+		1.Create a new class by filling in the fields, selecting the class' professor(s) and student(s).<br><br>
+		2.Add/delete students/professors to a class by selecting/deselecting their names in the dropdown in the class's row in the class list table. Click the “Save” button to save the change you made.<br><br>
+		3.Delete a class by clicking the delete button at the end of the class's row in the class list table.<br><br>
+		4. Class Name should be a combination of number(s),letter(s) and dash(s), with length between 3 and 60 <br><br>
+		5. Class Time should be in the format: FALL2016 <br><br>
 		<b>Warning:</b><br><br>
 		1.If you delete the a class, all the associated labs will be deleted as well<br><br>
 		<div id="accordion">
+		    <h3>Add a new class:</h3>
+		    <div>
+				<form method=post action="/superadmin_create_and_manage_class">
+				    
+				    <div>
+						<label>Class Name*: </label>
+						<input type="text" name="className" pattern="{{pattern_for_name}}" title="{{pattern_for_name_hint}}" required>
+					</div>
+					<div>
+						<label>Class Time*: </label>
+						<input type="text" name="classTime" pattern="{{pattern_for_class_time}}" title="{{pattern_for_class_time_hint}}" required>
+					</div>
+					<div>
+						<label>Professor Name: </label>
+						<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="professors" multiple data-actions-box="true" data-live-search="true" title="Choose professors">
+						    {% for u in all_users %}
+							    {% if u.role_name != "Student" %}
+								    {% if p==current_user.id %}
+									    <option value="{{u.id}}" selected="selected">{{u.id}}</option>
+									{% else %}
+									    <option value="{{u.id}}">{{u.id}}</option>
+									{% endif %}
+								{% endif %}
+							{% endfor %}
+						</select>
+					</div>
+					<div>
+						<label>Students: </label>
+						<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="students" multiple data-actions-box="true" data-live-search="true" title="Choose students">
+						    {% for u in all_users %}
+							    {% if u.role_name == "Student" %}
+									<option value="{{u.id}}">{{u.id}}</option>
+								{% endif %}
+							{% endfor %}
+						</select>
+					</div>
+					<br>
+					<button name="submitNewAdmin" type="submit">Submit</button>
+					<button name="resetNewAdmin" type="reset">Reset</button>
+				</form>
+		    </div>
 		    <h3>Class List:</h3>
 		    <div>
 				{% if current_classes|length==0 %}
@@ -81,44 +125,7 @@
 				{% endif%}
 			</div>
 		</div>
-		<form method=post action="/superadmin_create_and_manage_class">
-		    <h4><b>Add a new class:</b></h4>
-		    <div>
-				<label>Class Name*: </label>
-				<input type="text" name="className" pattern="{{pattern_for_name}}" title="{{pattern_for_name_hint}}" required>
-			</div>
-			<div>
-				<label>Class Time*: </label>
-				<input type="text" name="classTime" pattern="{{pattern_for_class_time}}" title="{{pattern_for_class_time_hint}}" required>
-			</div>
-			<div>
-				<label>Professor Name: </label>
-				<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="professors" multiple data-actions-box="true" data-live-search="true" title="Choose professors">
-				    {% for u in all_users %}
-					    {% if u.role_name != "Student" %}
-						    {% if p==current_user.id %}
-							    <option value="{{u.id}}" selected="selected">{{u.id}}</option>
-							{% else %}
-							    <option value="{{u.id}}">{{u.id}}</option>
-							{% endif %}
-						{% endif %}
-					{% endfor %}
-				</select>
-			</div>
-			<div>
-				<label>Students: </label>
-				<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="students" multiple data-actions-box="true" data-live-search="true" title="Choose students">
-				    {% for u in all_users %}
-					    {% if u.role_name == "Student" %}
-							<option value="{{u.id}}">{{u.id}}</option>
-						{% endif %}
-					{% endfor %}
-				</select>
-			</div>
-			<br>
-			<button name="submitNewAdmin" type="submit">Submit</button>
-			<button name="resetNewAdmin" type="reset">Reset</button>
-		</form>
+		
 	</div> <!-- end of table-wrapper -->
 
     <!-- Modal(Error Popup) -->

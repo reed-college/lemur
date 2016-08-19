@@ -11,6 +11,10 @@
 {% endblock %}
 
 {% block content %}
+    <div>
+        <label> Guide:</label><br><br>
+	    1.To download data, please click save all first and make sure the labs, which these data belong to are downloadable(You can make it downloadable on the create/manage lab page).<br><br>
+	</div>
 	{% if observations|length==0 %}
 		<div class="title"> No data available for this lab </div>
 	{% elif err_msg!="" %}
@@ -18,8 +22,6 @@
 	{% else %}
 		<div class="title"> Available Labs </div>
 		<div class="table-wrapper">
-		    <label> Guide:</label><br><br>
-		    1.To download data, please click save all first and make sure the labs, which these data belong to are downloadable.<br><br>
 			<table class="table sortable" id="{{lab_ids}}" data-undownloadable="{{undownloadable_labs}}" name={{observations|length}}>
 			    <thead>
 			    	<tr>

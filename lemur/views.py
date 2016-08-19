@@ -566,7 +566,8 @@ def inject_patterns():
                 pattern_for_name_hint=('must be a combination of some of the'
                                        ' following: number(s), question mark,'
                                        ' letter(s), hyphen(s) and white'
-                                       ' space(s) with length between 1 and 60'
+                                       ' space(s) with length between 1 and 60.'
+                                       ' e.g. Cortisol-Carey-Tuesday'
                                        ),
                 pattern_for_experiment_description='.{,500}',
                 pattern_for_experiment_description_hint=('no more than 500'
