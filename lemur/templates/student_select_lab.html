@@ -14,36 +14,38 @@
 
 {% block content %}
     <div class="table-wrapper">
-    {% if (lab_list|length)==0 %}
-        <div class="title">No Lab exists</div>
-    {% else %}
-        <div class="title">Lab List</div>
-            <table class="table sortable">
-                <thead>
-                    <tr>
-                        <th>Index</th>
-                        <th>Lab Name</th>
-                        <th>Class ID</th>
-                        <th>Questions</th>
-                        <th>Choose</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for i in range(lab_list|length) %}
-                    <tr>
-                        <td>{{ loop.index }}</td>
-                        <td>{{ lab_list[i].lab_name }}</td>
-                        <td>{{ lab_list[i].class_id }}</td>
-                        <td>{{ lab_list[i].experiments+1 }}</td>
-                        <td><input type="radio" name="labName" data-labname="{{lab_list[i].lab_name}}"  data-classid="{{lab_list[i].class_id }}" > </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <div class="selectors">
-                <a href="/student_home"><button>Go Back</button></a>
-                <button name="goToLab">Go to Lab</button>
-            </div>
-    {% endif %}
+        <b>Guide:</b><br><br>
+        Select the appropriate lab and fill in the fields with your data. Be careful: if you select a wrong lab, your data will not be collected to the correct lab.<br><br>
+        {% if (lab_list|length)==0 %}
+            <div class="title">No available lab exists</div>
+        {% else %}
+            <div class="title">Lab List</div>
+                <table class="table sortable">
+                    <thead>
+                        <tr>
+                            <th>Index</th>
+                            <th>Lab Name</th>
+                            <th>Class ID</th>
+                            <th>Questions</th>
+                            <th>Choose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in range(lab_list|length) %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ lab_list[i].lab_name }}</td>
+                            <td>{{ lab_list[i].class_id }}</td>
+                            <td>{{ lab_list[i].experiments+1 }}</td>
+                            <td><input type="radio" name="labName" data-labname="{{lab_list[i].lab_name}}"  data-classid="{{lab_list[i].class_id }}" > </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="selectors">
+                    <a href="/student_home"><button>Go Back</button></a>
+                    <button name="goToLab">Go to Lab</button>
+                </div>
+        {% endif %}
     </div>
 {% endblock %}
