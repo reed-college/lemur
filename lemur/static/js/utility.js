@@ -24,14 +24,14 @@ function checkInputStudent(observation,valueType,valueRange,valueCandidates){
         valueRangeArray = valueRange.split('-');
         var min = parseFloat(valueRangeArray[0]);
         var max = parseFloat(valueRangeArray[1]);
-        var observation = parseFloat(observation);
-        if (!isNumeric(observation)){
+        var observationFloat = parseFloat(observation);
+        if (!isNumeric(observationFloat)){
             wrongInput = true;
             errMsg = observation + ' is not a number.';
         }
-        else if (observation < min || observation > max){
+        else if (observationFloat < min || observationFloat > max){
             wrongInput = true;
-            errMsg = observation + ' is not within the value range: ' + valueRange;
+            errMsg = observationFloat + ' is not within the value range: ' + valueRange;
         }
     }
     return {'wrongInput':wrongInput,'errMsg':errMsg};
