@@ -33,7 +33,9 @@ $(document).ready(function(){
           url: '/_admin_'+operation,
           data: JSON.stringify({'labId':labId}),
           success: function(result){
-                    console.log(operation+' successfully');               
+                    console.log(operation+' successfully');
+                    setTimeout(location.reload.bind(location), 50);
+               
                 },
           error : function(result){
                     errorReport(operation, result);
@@ -42,7 +44,6 @@ $(document).ready(function(){
         if (operation=='delete_lab'){
             $(this).closest('tr').remove();
         }
-        setTimeout(location.reload.bind(location), 1000);
     });
 
     //Change a lab's status

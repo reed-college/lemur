@@ -58,16 +58,14 @@ $(document).ready(function(){
                     data: JSON.stringify(labData),
                     success: function(result){
                           console.log('Change lab successfully');
+                          setTimeout(function() { 
+                               redirectTo('/admin_create_and_manage_lab');
+                          }, 50);
                     },
                     error : function(result){
                           errorReport('change lab', result);
                     }
                   });
-                // Redirect to the main page of setup lab and data access
-                console.log('wait to redirect');
-                setTimeout(function() { 
-                    redirectTo('/admin_create_and_manage_lab');
-                }, 1000);
             }
         }
     });
