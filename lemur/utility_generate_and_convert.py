@@ -219,7 +219,7 @@ def format_download(observations_by_student, experiment_names, lab_ids):
     # Add two additional columns besides experiment names
     experiment_names = ['Student Name', 'Lab ID'] + experiment_names
 
-    dt = '\t\t'
+    dt = '\t'
     nl = '\n'
     csv = dt.join(experiment_names)+nl
     for student in observations_by_student:
