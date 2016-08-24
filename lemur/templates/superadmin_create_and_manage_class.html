@@ -32,7 +32,7 @@
 					</div>
 					<div>
 						<label>Professor Name: </label>
-						<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="professors" multiple data-actions-box="true" data-live-search="true" title="Choose professors">
+						<select class="selectpicker" data-style="btn-inverse" data-width="auto" data-dropup-auto="false" name="professors" multiple data-actions-box="true" data-live-search="true" title="Choose professors">
 						    {% for u in all_users %}
 							    {% if u.role_name != "Student" %}
 								    {% if p==current_user.id %}
@@ -46,7 +46,7 @@
 					</div>
 					<div>
 						<label>Students: </label>
-						<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="students" multiple data-actions-box="true" data-live-search="true" title="Choose students">
+						<select class="selectpicker" data-style="btn-inverse" data-width="auto" data-dropup-auto="false" name="students" multiple data-actions-box="true" data-live-search="true" title="Choose students">
 						    {% for u in all_users %}
 							    {% if u.role_name == "Student" %}
 									<option value="{{u.id}}">{{u.id}}</option>

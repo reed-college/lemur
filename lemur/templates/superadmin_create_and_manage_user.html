@@ -32,7 +32,7 @@
 					</div>
 					<div>
 					    <label>Role*: </label>
-						<select class="selectpicker" name="role" id="roleSelector" data-style="btn-inverse" data-width="auto" name="role" title="Choose Role" required>
+						<select class="selectpicker" name="role" id="roleSelector" data-style="btn-inverse" data-width="auto" data-dropup-auto="false" name="role" title="Choose Role" required>
 						    <option value="SuperAdmin">SuperAdmin</option>
 							<option value="Admin">Admin</option>
 							<option value="Student">Student</option>
@@ -40,7 +40,7 @@
 					</div>
 					<div id="classSelector">
 					    <label>Classes: </label>
-						<select class="selectpicker" name="classIds" data-style="btn-inverse" data-width="auto"  multiple data-actions-box="true" data-live-search="true" title="Choose Classes">
+						<select class="selectpicker" name="classIds" data-style="btn-inverse" data-width="auto" data-dropup-auto="false" multiple data-actions-box="true" data-live-search="true" title="Choose Classes">
 						    {% for c in class_ids %}
 							    <option value="{{c}}">{{c}}</option>
 							{% endfor %}
