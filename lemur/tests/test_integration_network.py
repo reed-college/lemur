@@ -89,7 +89,7 @@ class IntegrationTestNetwork(unittest.TestCase):
 
     # Log out the user and redirect to a corresponding page
     def logout(self):
-        return self.app.get('/logout', follow_redirects=True)
+        return self.app.get('/logout')
 
     # Decode a response object and return its data in the beutiful soup format
     def decode(self, response, format='utf-8'):
@@ -106,8 +106,7 @@ class IntegrationTestNetwork(unittest.TestCase):
         self.assertIn(superadmin.id,
                       soup.find('p', {'id': 'welcomeMsg'}).text)
         rv = self.logout()
-        soup = self.decode(rv)
-        self.assertEqual('Login', soup.title.text)
+        self.assertEqual(rv.status_code, 302)
 
     def test_student_home(self):
         student = get_user(self.built_in_ids['student_id'])
