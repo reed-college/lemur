@@ -64,35 +64,18 @@ ds = db.session
 # The app will be redirected to the user's main page
 # if the user is not logged in, the user will be redirected to the login page
 @app.route('/')
-def main_page():
-    if current_user.is_authenticated:
+def login():
+    user = get_user(request.environ['REMOTE_USER'])
+    # check existence of the use
+    if user is not None:
+        # If the username is valid, redirect the user to
+        # the corresponding homepage
+        login_user(user, True)
         user_home = {'SuperAdmin': 'superadmin_home',
                      'Admin': 'admin_home',
                      'Student': 'student_home'}
-        return redirect(url_for(user_home[current_user.role_name]))
-    return redirect(url_for('login'))
-
-
-# Login page that will check user id and allow user access to the
-# allowed pages
-# It will be replaced by reed login page in the end
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        err_msg = check_existence(request.form, 'username')
-        if err_msg != '':
-            return render_template('login.html')
-        user = get_user(request.form['username'])
-        # check existence of the use
-        if user is not None:
-            # If the username is valid, redirect the user to
-            # the corresponding homepage
-            login_user(user, True)
-            user_home = {'SuperAdmin': 'superadmin_home',
-                         'Admin': 'admin_home',
-                         'Student': 'student_home'}
-            return redirect(url_for(user_home[user.role_name]))
-    return render_template('login.html')
+        return redirect(url_for(user_home[user.role_name]))
+    return 'You are not allowed to access this app, please contact Carey Booth(boothr@reed.edu) for details.'
 
 
 # Log out the user and redirect to the login page
@@ -100,7 +83,8 @@ def login():
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('login'))
+    request.environ['REMOTE_USER'] = None
+    return redirect('https://weblogin.reed.edu/cgi-bin/logout-now.cgi')
 
 
 # Homepages

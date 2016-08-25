@@ -85,8 +85,8 @@ class IntegrationTestNetwork(unittest.TestCase):
     # ---- Other helper functions ---
     # Log in the user and redirect to a corresponding page
     def login(self, username):
-        return self.app.post('/login', data=dict(
-               username=username), follow_redirects=True)
+        self.app.request.environ['REMOTE_USER'] = username
+        return self.app.get('/', follow_redirects=True)
 
     # Log out the user and redirect to a corresponding page
     def logout(self):
