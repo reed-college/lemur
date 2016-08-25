@@ -60,7 +60,7 @@
 				</div>
 			    <div>
 					<button name="updateUserInfo" id="update users">Update UserInfo from Iris</button>
-					<select class="selectpicker" name="classIdsForUpdate" data-style="btn-inverse" data-width="auto"  multiple data-actions-box="true" data-live-search="true" title="Choose Classes to sync with">
+					<select class="selectpicker" name="classIdsForUpdate" data-style="btn-inverse" data-width="auto" data-dropup-auto="false" multiple data-actions-box="true" data-live-search="true" title="Choose Classes to sync with">
 					    {% for c in class_ids %}
 						    <option value="{{c}}">{{c}}</option>
 						{% endfor %}
