@@ -65,7 +65,15 @@ ds = db.session
 # if the user is not logged in, the user will be redirected to the login page
 @app.route('/')
 def login():
-    user = get_user(request.environ['REMOTE_USER'])
+    if 'REMOTE_USER' in request.environ:
+        user = get_user(request.environ['REMOTE_USER'])
+    # if not on the server
+    else:
+        all_users = get_all_user()
+        if len(all_users) > 0:
+            user = all_users[0]
+        else:
+            return 'No user available in db'
     # check existence of the use
     if user is not None:
         # If the username is valid, redirect the user to
