@@ -25,6 +25,7 @@ def initialize_db():
     m.Role.insert_roles()
     add_user('boothr','Carey Booth','SuperAdmin')
     add_user('zhongzi','Ziyuan Zhong','SuperAdmin')
+    add_user('howelle','Erin Howell','SuperAdmin')
 
 
 initialize_db()
