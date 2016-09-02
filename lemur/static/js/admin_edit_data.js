@@ -2,7 +2,7 @@ $(document).ready(function(){
     $('button[name=saveAll]').click(function(){
         //Collect all the data in the table
         var allInput = document.getElementsByTagName('input');
-        var observationData = collectObservationData(allInput);
+        var observationData = extractObservationData(allInput);
         $.ajax({
           type: 'POST',
           contentType: 'application/json',
@@ -11,18 +11,19 @@ $(document).ready(function(){
           data: JSON.stringify(observationData),
           success: function(result){
                     console.log('Change data successfully');
+                    setTimeout(location.reload.bind(location), 100);
                 },
           error : function(result){
                     errorReport('save data', result);
                 }
         });
-        location.reload();
     });
 
     $('button[name=confirm]').click(function(){
         var trId = $(this).closest('tr').attr('id');
         var ObservationsToBeRemoved = document.getElementById(trId).getElementsByTagName('input');
         var observationIdsToBeRemoved = getObservationIdsToBeRemoved(ObservationsToBeRemoved);
+        console.log(observationIdsToBeRemoved);
         $.ajax({
           type: 'POST',
           contentType: 'application/json',
@@ -31,13 +32,13 @@ $(document).ready(function(){
           data: JSON.stringify({'observationIdsToBeRemoved':observationIdsToBeRemoved}),
           success: function(result){
                     console.log('Delete data successfully');
+                    $(this).closest('tr').remove();
+                    setTimeout(location.reload.bind(location), 100);   
                 },
           error : function(result){
                     errorReport('delete data', result);
                 }
         });
-        $(this).closest('tr').remove();
-        location.reload();
     });     
     
     $('button[name=download]').click(function(){

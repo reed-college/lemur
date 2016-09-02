@@ -295,6 +295,7 @@ function getObservationIdsToBeRemoved(ObservationsToBeRemoved){
         for (var i=1;i<ObservationsToBeRemoved.length;i++){
             observationIdsToBeRemoved.push($(ObservationsToBeRemoved[i]).data('observationid'));
         }
+        return observationIdsToBeRemoved;
 }
 
 // --- Functions in general ---
