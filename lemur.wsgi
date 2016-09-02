@@ -24,9 +24,10 @@ def initialize_db():
     db.create_all()
     m.Role.insert_roles()
     add_user('boothr','Carey Booth','SuperAdmin')
+    add_user('nknight','Ned Knight','SuperAdmin')
     add_user('zhongzi','Ziyuan Zhong','SuperAdmin')
     add_user('howelle','Erin Howell','SuperAdmin')
-
+    add_user('adhikara','Akrish Adhikari','SuperAdmin')
 
 initialize_db()
 
