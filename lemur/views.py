@@ -230,14 +230,14 @@ def _admin_receive_setup_labs_data():
 @app.route('/admin_modify_lab/<lab_id>')
 @permission_required(m.Permission.LAB_SETUP)
 def admin_modify_lab(lab_id):
+    # check the existence of the lab before modifying it
+    if not lab_exists(lab_id):
+        err_msg = ('The lab with id {0} doesn\'t exist.'
+                   'All the existing labs are: {1}'.format(lab_id, ', '.join([lab.id for lab in get_all_lab()])))
+        return err_html(err_msg)
     # Collect the info of the current lab and send them to the template
     experiments_query = get_experiments_for_lab(lab_id)
     lab_query = get_lab(lab_id)
-    # check the existence of the lab before modifying it
-    if not lab_exists(lab_id):
-        err_msg = ('The lab doesn\'t exist.'
-                   'All the existing labs are: {}'.format(', '.join([lab.id for lab in get_all_lab()])))
-        return err_html(err_msg)
     # get info to send to template
     class_ids = get_class_id_list(current_user)
     experiments = serialize_experiment_list(experiments_query)
@@ -554,11 +554,14 @@ def inject_permissions():
 # Make the requirments to the format of input fields global
 @app.context_processor
 def inject_patterns():
-    return dict(pattern_for_name='[-a-zA-Z0-9?,\s]{1,60}',
+    return dict(pattern_for_name='[-a-zA-Z0-9,\s]{1,60}',
                 pattern_for_name_hint=('must be a combination of some of the'
-                                       ' following: number(s), question mark,'
-                                       ' letter(s), hyphen(s), comma(s), and white'
-                                       ' space(s) with length between 1 and 60.'
+                                       ' following: number(s),'
+                                       ' letter(s), hyphen(s), comma(s), and'
+                                       ' white space(s) with length between 1'
+                                       ' and 60.(Note: question mark, dot mark'
+                                       ' and other symbols'
+                                       ' are not allowed)'
                                        ' e.g. Cortisol-Carey-Tuesday'
                                        ),
                 pattern_for_experiment_description='.{,500}',
@@ -572,7 +575,7 @@ def inject_patterns():
                 pattern_for_value_range=('[0-9]{1,10}[.]?[0-9]{0,10}'
                                          '-[0-9]{1,10}[.]?[0-9]{0,10}'),
                 pattern_for_value_range_hint=('valueRange should be'
-                                              'in the format:0.3-6.5'),
+                                              'in the format:0.3-6.5 or 3-6'),
                 pattern_for_class_time='[a-zA-Z]{4,7}[0-9]{2,4}',
                 pattern_for_class_time_hint=('Class Time is a combination',
                                              'of semester and year. e.g. ',
