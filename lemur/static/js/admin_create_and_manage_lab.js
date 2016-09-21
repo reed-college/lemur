@@ -41,6 +41,7 @@ $(document).ready(function(){
                     errorReport(operation, result);
                 }
         });
+        setTimeout(location.reload.bind(location), 100);
         if (operation=='delete_lab'){
             $(this).closest('tr').remove();
         }
@@ -67,7 +68,7 @@ $(document).ready(function(){
                     errorReport('change lab status', result);
                 }
         });
-        location.reload();   
+        setTimeout(location.reload.bind(location), 100);  
     });
 
 });
