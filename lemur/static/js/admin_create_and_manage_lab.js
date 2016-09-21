@@ -34,7 +34,7 @@ $(document).ready(function(){
           data: JSON.stringify({'labId':labId}),
           success: function(result){
                     console.log(operation+' successfully');
-                    setTimeout(location.reload.bind(location), 50);
+                    setTimeout(location.reload.bind(location), 100);
                
                 },
           error : function(result){
@@ -61,6 +61,7 @@ $(document).ready(function(){
           data: JSON.stringify({'labId':labId}),
           success: function(result){
                     console.log('Change lab status successfully');
+                    setTimeout(location.reload.bind(location), 100);
                 },
           error : function(result){
                     errorReport('change lab status', result);
