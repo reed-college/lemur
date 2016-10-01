@@ -554,7 +554,7 @@ def inject_permissions():
 # Make the requirments to the format of input fields global
 @app.context_processor
 def inject_patterns():
-    return dict(pattern_for_name='[-a-zA-Z0-9,µ\s]{1,60}',
+    return dict(pattern_for_name='[-a-zA-Z0-9,'+u'\u00B5'+'\s]{1,60}',
                 pattern_for_name_hint=('must be a combination of some of the'
                                        ' following: number(s),'
                                        ' letter(s), hyphen(s), comma(s), and'
