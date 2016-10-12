@@ -1,5 +1,5 @@
 # lemur ![alt text](https://travis-ci.org/reed-college/lemur.svg?branch=master)
-Bio data collector
+This is a data collector for collecting biology data. It's run on reed.lemur.edu(a subdomain of Reed College). It can only be accessed by Reed faculty/staff/students who have registered biology classes. However, you are welcome to mirror the code and host it on another server and use it whatever way you like.
 
 
 ## Part1 App Description
