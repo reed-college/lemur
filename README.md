@@ -1,5 +1,5 @@
 # lemur ![alt text](https://travis-ci.org/reed-college/lemur.svg?branch=master)
-Bio data collector
+This is a data collector for collecting biology data. It's run on reed.lemur.edu(a subdomain of Reed College). It can only be accessed by Reed faculty/staff/students who have registered biology classes. However, you are welcome to mirror the code and host it on another server and use it whatever way you like.
 
 
 ## Part1 App Description
@@ -108,3 +108,19 @@ Admins have access to the student data-entry page so they can review what studen
 ### Student Guide: 
 
 Navigate to the app page and click “Enter Data for Lab” to see labs available for data collection. Select the appropriate lab and fill in the fields with your data. If you have multiple trials select “Add a new data entry” at the bottom of the page to create fields for your trials. Use the reset button to clear all fields or click submit to check/submit your data. A pop-up will show up to tell you whether your data looks good(according to the criteria of that entry set up by the lab instrutor). You can communicate with the instructor about the stange data you get; however, you can still submit the strange data forcefully.
+
+## Part 5 Sample Pages
+SuperAdmin Homepage
+<img width="1308" alt="superadmin_homepage" src="https://cloud.githubusercontent.com/assets/12670254/19320854/d2bf815c-9067-11e6-8a4d-e7f383446747.png">
+
+Admin Manage Lab Page
+<img width="1297" alt="admin_create_lab_page" src="https://cloud.githubusercontent.com/assets/12670254/19320856/d71e021e-9067-11e6-9adc-2ecb8a1f0f38.png">
+
+Admin Edit Lab Page
+<img width="1296" alt="admin_edit_lab_page" src="https://cloud.githubusercontent.com/assets/12670254/19320860/dd3ceb24-9067-11e6-8719-f865929d904f.png">
+
+Student Data Entry Page
+<img width="1312" alt="student_enter_data_page" src="https://cloud.githubusercontent.com/assets/12670254/19320865/df7d0068-9067-11e6-894b-7adba9eb7563.png">
+
+Admin Data Collection Page
+<img width="1314" alt="admin_data_collection_page" src="https://cloud.githubusercontent.com/assets/12670254/19320867/e07f920a-9067-11e6-9ce9-cf1df2036ec6.png">
