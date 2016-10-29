@@ -43,7 +43,7 @@
 							        <td sorttable_customkey="{{s["observations"][i]["observation_data"]}}"><input class="data" data-observationid="{{s["observations"][i]["observation_id"]}}" data-rowid="{{s["observations"][i]["experiment_id"]}}" value="{{s["observations"][i]["observation_data"]}}"></td>
 							    {% endfor %}		
 							    <td>
-								    <button name=delete data-toggle="modal" data-target="#deleteConfirm"> Delete </button>
+								    <button class="deleteData"> Delete </button>
 			                        <div class="modal fade" id="deleteConfirm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 									    <div class="modal-dialog" role="document">
 									        <div class="modal-content">
