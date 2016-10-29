@@ -18,12 +18,17 @@ $(document).ready(function(){
                 }
         });
     });
+    // The reason that we use javascript to show the modal rather than html is that this enables us
+    // to show the modal that is closest to the delete button such that the modal is within the tr
+    // that we want to delete
+    $('.deleteData').click(function(){
+        $(this).closest('tr').find('#deleteConfirm').modal("show");
+    });
 
     $('button[name=confirm]').click(function(){
         var trId = $(this).closest('tr').attr('id');
         var ObservationsToBeRemoved = document.getElementById(trId).getElementsByTagName('input');
         var observationIdsToBeRemoved = getObservationIdsToBeRemoved(ObservationsToBeRemoved);
-        console.log(observationIdsToBeRemoved);
         $.ajax({
           type: 'POST',
           contentType: 'application/json',
