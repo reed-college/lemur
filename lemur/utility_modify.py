@@ -169,26 +169,26 @@ def add_observation(new_observations_list):
                                   'experimentId', 'observationId')
         if err_msg != '':
             return err_msg
-    count = len(new_observations_list)
-    i = 0
-    while i < count:
-        d = new_observations_list[i]
+
+    for d in new_observations_list:
         # Check if the observation name already repetes among all the
-        # observations to be added into the database
-        if [ob['observationId'] for ob in new_observations_list].count(d['observationId']) > 1:
-            new_observations_list = (new_observations_list[0:i] +
-                                     new_observations_list[i+1:len(new_observations_list)])
-            warning_msg = ('repeated observation id:{} in this lab so this ' +
-                           'modified entry will not be saved'.format(d['observationId']))
-            count -= 1
-            continue
+        # observations to be added into the database and rename it if necessary
+        index = 1
+        tmp_student_name = d['studentName']
+        tmp_observation_id = d['observationId']
+        while observation_exists(tmp_observation_id):
+            tmp_student_name = d['studentName'] + '('+str(index)+')'
+            tmp_observation_id = generate_observation_id(d['experimentId'], tmp_student_name)
+            index += 1
+        warning_msg = ('repeated observation id:{} in this lab so the ' +
+                       'current, modified entry will be renamed to ' +
+                       '{}'.format(d['observationId'],tmp_observation_id))
+
         # Capitalize every input
         ds.add(m.Observation(experiment_id=d['experimentId'],
-                             id=d['observationId'],
-                             student_name=d['studentName'],
+                             id=tmp_observation_id,
+                             student_name=tmp_student_name,
                              datum=d['observationData'].upper()))
-        i += 1
-
     ds.commit()
     return warning_msg
 
