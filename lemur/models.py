@@ -297,4 +297,3 @@ class Permission:
                             Permission.USER_MANAGE,
                             Permission.SUPERADMIN]
         return permissions_list
-

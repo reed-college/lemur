@@ -15,7 +15,7 @@
 {% block content %}
     <div class="table-wrapper">
         <b>Guide:</b><br><br>
-        If you have multiple trials select “Add a new data entry” at the bottom of the page to create fields for your trials. Use the reset button to clear all fields or click submit to check/submit your data. A pop-up will show up to tell you whether your data looks good(according to the criteria of that entry set up by the lab instrutor). You can communicate with the instructor about the stange data you get; however, you can still submit the strange data forcefully. <b>You need to click confirm in order to submit the data you enter in the pop-up</b><br><br>
+        If you have multiple trials select “Add a new data entry” at the bottom of the page to create fields for your trials. Use the reset button to clear all fields or click submit to check/submit your data. A pop-up will show up to tell you whether your data looks good(according to the criteria of that entry set up by the lab instrutor). You can communicate with the instructor about the stange data you get; however, you can still submit the strange data forcefully. <b>You need to click confirm in order to submit the data you enter in the pop-up.</b><br><br>
 		{% if (experiments|length)==0 %}
 			<div class="title"> This lab doesn't exist </div>
 		{% else %}
@@ -68,6 +68,7 @@
 			<button name=submit data-toggle="modal" data-target="#errorChecking">Submit</button>
 			<button name=newDataEntry>Add a new data entry</button>
 			<a href="/student_select_lab"><button>Go back</button></a>
+            <p id="responseMsg">
 		{% endif %}
 	</div>
 
@@ -97,7 +98,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title" id="myModalLabel">An error occurs</h4>
                 </div>
-                <div class="modal-body" id="errorMsgs">
+                <div class="modal-body" id="errorMsgsPopUp">
                 ...
                 </div>
                 <div class="modal-footer">
