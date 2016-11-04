@@ -313,15 +313,20 @@ function IsJsonString(str) {
 function errorReport(operation, result){
     console.log(result);
     errorMsg = '';
-    result.responseText
-    if (result.responseText != undefined && IsJsonString(result.responseText)){
-        errorMsg = JSON.parse(result.responseText)['data'];
+    if (result.responseText){
+        if (result.responseText != undefined && IsJsonString(result.responseText)){
+            errorMsg = JSON.parse(result.responseText)['data'];
+        }
+        else{
+            errorMsg = result.statusText;
+        }
     }
     else{
-        errorMsg = result.statusText;
+        errorMsg = 'No Response';
     }
-    $('#errorMsgsPopUp').html('Fail to '+operation+'<br>errorMsg: '+errorMsg+'<br>result: '+result);
-    $('#errorPopup').modal("show");
+    console.log(errorMsg);
+    $('#errorMsgsPopUp').html('<br>errorMsg: '+errorMsg+'<br>');
+    $('#errorPopup').modal('show');
 }
 
 // The function will be invoked when an ajax request succeeds but a warning message is returned.

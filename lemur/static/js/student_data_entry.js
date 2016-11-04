@@ -35,13 +35,16 @@ $(document).ready(function(){
           data: JSON.stringify({'observationsGroupByStudent':dataArr2D}),
           success: function(result){
                     console.log('submit successfully!');
+                    $('#errorChecking').modal('hide');
+                    $('#responseMsg').html('Submit Successfully!');
+                    $('#responseMsg').delay(2000).fadeOut();
                 },
           error : function(result){
                     errorReport('submit', result);
+                    $('#responseMsg').html('Fail to submit');
+                    $('#responseMsg').delay(2000).fadeOut();
                 }
-        });
-        //Redirect to the enter data page
-        window.location.replace('/student_select_lab');
+        }); 
     });
 
     //Add a new column of entry

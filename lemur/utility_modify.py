@@ -23,6 +23,7 @@ from lemur.utility_find_and_get import (lab_exists,
                                         get_role,
                                         get_all_class,
                                         get_experiments_for_lab,
+                                        get_observations_for_experiment,
                                         find_lab_copy_id)
 ds = db.session
 
@@ -141,6 +142,12 @@ def duplicate_lab(old_lab_id):
 def change_lab_status(lab_id, new_status):
     lab_query = get_lab(lab_id)
     lab_query.status = new_status
+    # Automatically delete all the data in the lab if it's made unavailable
+    if new_status == "Unactivated":
+        experiments_query = get_experiments_for_lab(lab_query.id)
+        for e in experiments_query:
+            for d in get_observations_for_experiment(e.id):
+                ds.delete(d)
     ds.commit()
 
 
@@ -173,10 +180,11 @@ def add_observation(new_observations_list):
             warning_msg = 'repeted observation id:{} in this lab'.format(d['observationId'])
             count -= 1
             continue
+        # Capitalize every input
         ds.add(m.Observation(experiment_id=d['experimentId'],
                              id=d['observationId'],
                              student_name=d['studentName'],
-                             datum=d['observationData']))
+                             datum=d['observationData'].upper()))
 
     ds.commit()
     return warning_msg
@@ -209,11 +217,23 @@ def add_observations_sent_by_students(observations_group_by_student):
             experiment_id = generate_experiment_id(lab_id, experiment_name)
             observation_id = generate_observation_id(experiment_id,
                                                      student_name)
+
+            # To avoid repetition in student name field since it's used as part of
+            # key for an input we add an index at the end of each student name
+            tmp_student_name = student_name+'(1)'
+            index = 2
+            while (observation_exists(observation_id)):
+                tmp_student_name = student_name + '('+str(index)+')'
+                observation_id = generate_observation_id(experiment_id,
+                                                         tmp_student_name)
+                index += 1
+            student_name = tmp_student_name
+            # Capitalize every input
             if not observation_exists(observation_id):
                 ds.add(m.Observation(experiment_id=experiment_id,
                                      id=observation_id,
                                      student_name=student_name,
-                                     datum=ob['observation']))
+                                     datum=ob['observation'].upper()))
     ds.commit()
     return ''
 
