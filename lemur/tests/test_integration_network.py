@@ -215,7 +215,8 @@ class IntegrationTestNetwork(unittest.TestCase):
         observation_id = generate_observation_id(experiment.id,
                                                  student.id)
         observation_query = get_observation(observation_id)
-        self.assertEqual(observation_query.datum, observation_datum)
+        # Update: auto-capitalization feature for all data entered
+        self.assertEqual(observation_query.datum, observation_datum.upper())
 
     def test_admin_create_and_manage_lab(self):
         superadmin = get_user(self.built_in_ids['superadmin_id'])
