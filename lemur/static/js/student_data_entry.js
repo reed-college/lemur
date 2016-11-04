@@ -36,8 +36,13 @@ $(document).ready(function(){
           success: function(result){
                     console.log('submit successfully!');
                     $('#errorChecking').modal('hide');
-                    $('#responseMsg').html('Submit Successfully!');
-                    $('#responseMsg').delay(2000).fadeOut();
+                    // $('#responseMsg').html('Submit Successfully!');
+                    // $('#responseMsg').delay(300).fadeOut();
+                    // Redirect to previous page after 1 sec. This doesn't work now
+                    // window.setTimeout(function () {
+                    //     window.location.href = '/student_select_lab'; 
+                    // }, 1000); 
+                    window.location.replace('/student_select_lab');
                 },
           error : function(result){
                     errorReport('submit', result);
@@ -45,6 +50,7 @@ $(document).ready(function(){
                     $('#responseMsg').delay(2000).fadeOut();
                 }
         }); 
+
     });
 
     //Add a new column of entry

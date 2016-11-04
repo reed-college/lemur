@@ -170,14 +170,16 @@ def add_observation(new_observations_list):
         if err_msg != '':
             return err_msg
     count = len(new_observations_list)
-    for i in range(count):
+    i = 0
+    while i < count:
         d = new_observations_list[i]
         # Check if the observation name already repetes among all the
         # observations to be added into the database
         if [ob['observationId'] for ob in new_observations_list].count(d['observationId']) > 1:
             new_observations_list = (new_observations_list[0:i] +
                                      new_observations_list[i+1:len(new_observations_list)])
-            warning_msg = 'repeted observation id:{} in this lab'.format(d['observationId'])
+            warning_msg = ('repeated observation id:{} in this lab so this ' +
+                           'modified entry will not be saved'.format(d['observationId']))
             count -= 1
             continue
         # Capitalize every input
@@ -185,6 +187,7 @@ def add_observation(new_observations_list):
                              id=d['observationId'],
                              student_name=d['studentName'],
                              datum=d['observationData'].upper()))
+        i += 1
 
     ds.commit()
     return warning_msg
