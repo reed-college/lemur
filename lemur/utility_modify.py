@@ -154,11 +154,17 @@ def change_lab_status(lab_id, new_status):
 # --- Manage observations ---
 # delete observation from a list of observation ids sent from client
 def delete_observation(old_observation_ids_list):
+    err_msg = ''
     # delete all the old data by old observation_id
     for observation_id in old_observation_ids_list:
         observations_query = get_observation(observation_id)
-        ds.delete(observations_query)
+        # Check the existence of the observation to be deleted
+        if observation_exists(observation_id):
+            ds.delete(observations_query)
+            err_msg += ('To be deleted observation:' +
+                        '{} doesn\'t exits in db\n'.format(observations_query))
     ds.commit()
+    return err_msg
 
 
 # add observation from a list JSON format observations sent from client
@@ -181,9 +187,9 @@ def add_observation(new_observations_list):
             tmp_student_name = d['studentName'] + '('+str(index)+')'
             tmp_observation_id = generate_observation_id(d['experimentId'], tmp_student_name)
             index += 1
-        warning_msg = ('repeated observation id:{} in this lab so the ' +
-                       'current, modified entry will be renamed to ' +
-                       '{}'.format(d['observationId'], tmp_observation_id))
+        # warning_msg = ('repeated observation id:{} in this lab so the ' +
+        #                'current, modified entry will be renamed to ' +
+        #                '{}'.format(d['observationId'], tmp_observation_id))
 
         # Capitalize every input
         ds.add(m.Observation(experiment_id=d['experimentId'],

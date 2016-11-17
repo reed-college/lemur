@@ -373,7 +373,9 @@ def _admin_delete_data():
     if not(isinstance(jsonData['observationIdsToBeRemoved'], list)):
         err_msg = 'the value should be a list'
         return err_json(err_msg)
-    delete_observation(jsonData['observationIdsToBeRemoved'])
+    err_msg = delete_observation(jsonData['observationIdsToBeRemoved'])
+    if err_msg != '':
+            return err_json(err_msg)
     return normal_json(jsonData)
 
 
