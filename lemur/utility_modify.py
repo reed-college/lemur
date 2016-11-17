@@ -162,6 +162,7 @@ def delete_observation(old_observation_ids_list):
 
 
 # add observation from a list JSON format observations sent from client
+# This function is invoked when admin edits data of a lab
 def add_observation(new_observations_list):
     warning_msg = ''
     for d in new_observations_list:
@@ -182,7 +183,7 @@ def add_observation(new_observations_list):
             index += 1
         warning_msg = ('repeated observation id:{} in this lab so the ' +
                        'current, modified entry will be renamed to ' +
-                       '{}'.format(d['observationId'],tmp_observation_id))
+                       '{}'.format(d['observationId'], tmp_observation_id))
 
         # Capitalize every input
         ds.add(m.Observation(experiment_id=d['experimentId'],
@@ -194,6 +195,7 @@ def add_observation(new_observations_list):
 
 
 # add observations sent by students into the database
+# This function is invoked when a student send a group of data
 def add_observations_sent_by_students(observations_group_by_student):
     # the data type of observations should be a list
     if not(isinstance(observations_group_by_student, list)):
@@ -207,35 +209,31 @@ def add_observations_sent_by_students(observations_group_by_student):
         if err_msg != '':
             return err_msg
 
-        student_name = student['studentName']
         for ob in student['observationsForOneExperiment']:
             err_msg = check_existence(ob, 'labId', 'experimentName',
                                       'observation')
             if err_msg != '':
                 return err_msg
             # If everything is correct add the data to the database
-            lab_id = ob['labId']
-            experiment_name = ob['experimentName']
+            experiment_id = generate_experiment_id(ob['labId'], ob['experimentName'])
 
-            experiment_id = generate_experiment_id(lab_id, experiment_name)
+            # To avoid repetition in student name field since it's used as part
+            # of key for an input we add an unique index at the end of
+            # each student name
+            tmp_student_name = student['studentName']+'(1)'
             observation_id = generate_observation_id(experiment_id,
-                                                     student_name)
-
-            # To avoid repetition in student name field since it's used as part of
-            # key for an input we add an index at the end of each student name
-            tmp_student_name = student_name+'(1)'
+                                                     tmp_student_name)
             index = 2
-            while (observation_exists(observation_id)):
-                tmp_student_name = student_name + '('+str(index)+')'
+            while observation_exists(observation_id):
+                tmp_student_name = student['studentName'] + '('+str(index)+')'
                 observation_id = generate_observation_id(experiment_id,
                                                          tmp_student_name)
                 index += 1
-            student_name = tmp_student_name
             # Capitalize every input
             if not observation_exists(observation_id):
                 ds.add(m.Observation(experiment_id=experiment_id,
                                      id=observation_id,
-                                     student_name=student_name,
+                                     student_name=tmp_student_name,
                                      datum=ob['observation'].upper()))
     ds.commit()
     return ''
