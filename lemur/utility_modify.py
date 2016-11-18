@@ -161,8 +161,8 @@ def delete_observation(old_observation_ids_list):
         # Check the existence of the observation to be deleted
         if observation_exists(observation_id):
             ds.delete(observations_query)
-            err_msg += ('To be deleted observation:' +
-                        '{} doesn\'t exits in db\n'.format(observations_query))
+            # err_msg += ('To be deleted observation:' +
+            #             '{} doesn\'t exits in db\n'.format(observations_query))
     ds.commit()
     return err_msg
 
