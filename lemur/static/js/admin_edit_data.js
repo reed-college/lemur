@@ -1,4 +1,4 @@
-$(document).ready(function(){    
+$(document).ready(function(){
     $('button[name=saveAll]').click(function(){
         //Collect all the data in the table
         var allInput = document.getElementsByTagName('input');
@@ -38,14 +38,14 @@ $(document).ready(function(){
           success: function(result){
                     console.log('Delete data successfully');
                     $(this).closest('tr').remove();
-                    setTimeout(location.reload.bind(location), 100);   
+                    setTimeout(location.reload.bind(location), 100);
                 },
           error : function(result){
                     errorReport('delete data', result);
                 }
         });
-    });     
-    
+    });
+
     $('button[name=download]').click(function(){
         var undownloadableLabs = $('table').data('undownloadable').split(',').join('<br>');
         if (undownloadableLabs==''){
@@ -57,6 +57,6 @@ $(document).ready(function(){
               ' are not downloadable.<br>Please change its status to downloadable on'+
               ' <b>Create/Manage Lab page<b>');
             $("#errorPage").modal("show");
-        } 
+        }
     });
 });

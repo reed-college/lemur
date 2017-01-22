@@ -41,7 +41,7 @@
 					      		<td>{{s["lab_id"]}}</td>
 							    {%  for i in range(observations|length)  %}
 							        <td sorttable_customkey="{{s["observations"][i]["observation_data"]}}"><input class="data" data-observationid="{{s["observations"][i]["observation_id"]}}" data-rowid="{{s["observations"][i]["experiment_id"]}}" value="{{s["observations"][i]["observation_data"]}}"></td>
-							    {% endfor %}		
+							    {% endfor %}
 							    <td>
 								    <button class="deleteData"> Delete </button>
 			                        <div class="modal fade" id="deleteConfirm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -61,9 +61,9 @@
 									        </div>
 									    </div>
 									</div>
-							    </td>  
+							    </td>
 					    	</tr>
-				    	{% endfor %}    	
+				    	{% endfor %}
 				    </tbody>
 				</table>
 				<td><button name="saveAll">Save All</button></td>
@@ -101,13 +101,9 @@
 			    ...
 		        </div>
 		      	<div class="modal-footer">
-		        	<button data-dismiss="modal">Go back</button>   
+		        	<button data-dismiss="modal">Go back</button>
 		        </div>
 	        </div>
 	    </div>
 	</div>
 {% endblock %}
-
-
-
-
