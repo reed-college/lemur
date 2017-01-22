@@ -11,9 +11,9 @@ $(document).ready(function(){
     // Modify an existing lab
     $('.modifyLab').click(function(){
         var labId = $(this).closest('tr').data('labid');
-        window.location.replace('/admin_modify_lab/'+labId);        
+        window.location.replace('/admin_modify_lab/'+labId);
     });
-    
+
     // The reason that we use javascript to show the modal rather than html is that this enables us
     // to show the modal that is closest to the delete button such that the modal is within the tr
     // that we want to delete
@@ -25,7 +25,7 @@ $(document).ready(function(){
     $('.duplicateLab').add($('button[name=confirm]')).click(function(){
         var operation = $(this).data('operation');
         var labId = $(this).closest('tr').data('labid');
-        // Communicate the name of the lab to be duplicated with python via Ajax 
+        // Communicate the name of the lab to be duplicated with python via Ajax
         $.ajax({
           type: 'POST',
           contentType: 'application/json',
@@ -35,7 +35,7 @@ $(document).ready(function(){
           success: function(result){
                     console.log(operation+' successfully');
                     setTimeout(location.reload.bind(location), 100);
-               
+
                 },
           error : function(result){
                     errorReport(operation, result);
@@ -52,8 +52,8 @@ $(document).ready(function(){
         var labId = $(this).closest('tr').data('labid');
         var statusClassName = $(this).attr('class')
         var newStatus = translateOperationToStatus(statusClassName);
-        
-        //Communicate the name of the lab to be duplicated with python via Ajax 
+
+        //Communicate the name of the lab to be duplicated with python via Ajax
         $.ajax({
           type: 'POST',
           contentType: 'application/json',
@@ -68,7 +68,7 @@ $(document).ready(function(){
                     errorReport('change lab status', result);
                 }
         });
-        setTimeout(location.reload.bind(location), 100);  
+        setTimeout(location.reload.bind(location), 100);
     });
 
 });

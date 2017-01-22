@@ -1,9 +1,9 @@
 # lemur ![alt text](https://travis-ci.org/reed-college/lemur.svg?branch=master)
-This is a data collector for collecting biology data. It's run on reed.lemur.edu(a subdomain of Reed College). It can only be accessed by Reed faculty/staff/students who have registered biology classes. However, you are welcome to mirror the code and host it on another server and use it whatever way you like.
+This is a data collector for collecting biology data. It is a functional open-source web application built using Flask(a popular python web-framework), JS, HTML/CSS and PostgreSQL. Relatively comprehensive tests have been made. Lemur is currently hosted on reed.lemur.edu(a subdomain of Reed College). It can only be accessed by Reed faculty/staff/students who have registered biology classes. However, you are welcome to mirror the code and host it on another server and use it whatever way you like.
 
 
 ## Part1 App Description
-Lemur is an app built for efficient data consolidation from multiple independent sources. Classes with laboratory components that need to quickly collect data from all participants will benefit most. Consequently, there are three expected users of the app: lab instructors, professors, and students. Each of these corresponds to a different level of access. Lab instructors are considered Super Admins and are able to create, monitor, and edit the forms students submit data to. Additionally, they manage user access. Admins, or professors, are identical except that they cannot manage users. Students can only submit data. Professors that need to act as lab instructors should be given Super Admin status. 
+Lemur is an app built for efficient data consolidation from multiple independent sources. Classes with laboratory components that need to quickly collect data from all participants will benefit most. Consequently, there are three expected users of the app: lab instructors, professors, and students. Each of these corresponds to a different level of access. Lab instructors are considered Super Admins and are able to create, monitor, and edit the forms students submit data to. Additionally, they manage user access. Admins, or professors, are identical except that they cannot manage users. Students can only submit data. Professors that need to act as lab instructors should be given Super Admin status.
 
 
 ## Part2 Setup
@@ -14,7 +14,7 @@ Lemur is an app built for efficient data consolidation from multiple independent
 ` pip install -r requirements.txt `
 
 3. Create Local Database
-Set up a Postgres database. Add Python ORM SQLAlchemy to app. Once you have Postgres installed, create a database and name it lemur to use as a local database. 
+Set up a Postgres database. Add Python ORM SQLAlchemy to app. Once you have Postgres installed, create a database and name it lemur to use as a local database.
 * Run PostgreSQL command line client.
 * Create a database user with a password.
 * Create two database instances(one for the app and the other for testing).
@@ -24,8 +24,8 @@ Here is an example:
 ```
 psql
 create user zzy with password 'mypassword';
-create database lemur owner zzy encoding 'utf-8'; 
-create database travis_ci_test owner zzy encoding 'utf-8'; 
+create database lemur owner zzy encoding 'utf-8';
+create database travis_ci_test owner zzy encoding 'utf-8';
 ```
 
 4. Setup Database
@@ -71,10 +71,10 @@ The app will be run and the backend tests will be run automatically when one pus
 
 
 ## Part 4 User Guide
-The Home page of each section links to the pages available to the user. Users can also move through the app using the sidebar, which appears when the Lemur logo in the upper lefthand corner of the page is clicked. 
+The Home page of each section links to the pages available to the user. Users can also move through the app using the sidebar, which appears when the Lemur logo in the upper lefthand corner of the page is clicked.
 
 
-### Admin Guide: 
+### Admin Guide:
 
 **Create/Manage Lab**
 
@@ -86,9 +86,9 @@ After all students have submitted data and the lab is marked for download, navig
 
 **Create/Manage User (Super Admin Only)**
 
-Create new users by filling in the fields, selecting the appropriate user role, and clicking “Submit”. 
+Create new users by filling in the fields, selecting the appropriate user role, and clicking “Submit”.
 
-Edit a user's role by selecting/deselecting their user role in the drop down in the user's row in the user list table. Click the “Save” button to save the change you made. 
+Edit a user's role by selecting/deselecting their user role in the drop down in the user's row in the user list table. Click the “Save” button to save the change you made.
 
 Delete a user by clicking the delete button at the end of the user's row in the user list table.
 
@@ -96,16 +96,16 @@ Delete a user by clicking the delete button at the end of the user's row in the 
 
 Create a new class by filling in the fields, selecting the class' professor(s) and student(s).
 
-Add/delete students/professors to a class by selecting/deselecting their names in the dropdown in the class's row in the class list table. Click the “Save” button to save the change you made. 
+Add/delete students/professors to a class by selecting/deselecting their names in the dropdown in the class's row in the class list table. Click the “Save” button to save the change you made.
 
 Delete a class by clicking the delete button at the end of the class's row in the class list table.
 
-Enter Data For Lab 
+Enter Data For Lab
 
-Admins have access to the student data-entry page so they can review what students will see and can enter data for student groups when needed. Under the lab list select the desired lab and click the button to go to that page. Fill in the entry fields on the lab page and click submit to add data. Using the reset button will clear all data. The “Add a new data entry” button creates a duplicate entry field for each question. Duplicate fields are intended for inputting additional trials. 
+Admins have access to the student data-entry page so they can review what students will see and can enter data for student groups when needed. Under the lab list select the desired lab and click the button to go to that page. Fill in the entry fields on the lab page and click submit to add data. Using the reset button will clear all data. The “Add a new data entry” button creates a duplicate entry field for each question. Duplicate fields are intended for inputting additional trials.
 
 
-### Student Guide: 
+### Student Guide:
 
 Navigate to the app page and click “Enter Data for Lab” to see labs available for data collection. Select the appropriate lab and fill in the fields with your data. If you have multiple trials select “Add a new data entry” at the bottom of the page to create fields for your trials. Use the reset button to clear all fields or click submit to check/submit your data. A pop-up will show up to tell you whether your data looks good(according to the criteria of that entry set up by the lab instrutor). You can communicate with the instructor about the stange data you get; however, you can still submit the strange data forcefully.
 
