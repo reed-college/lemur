@@ -212,8 +212,10 @@ class IntegrationTestNetwork(unittest.TestCase):
 
         # Start a new session
         student = get_user(student_id)
+        # Append '(1)' to the end of student id since a new observation is
+        # automatically labeled (1)
         observation_id = generate_observation_id(experiment.id,
-                                                 student.id)
+                                                 student.id+'(1)')
         observation_query = get_observation(observation_id)
         # Update: auto-capitalization feature for all data entered
         self.assertEqual(observation_query.datum, observation_datum.upper())
