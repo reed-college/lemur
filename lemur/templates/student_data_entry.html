@@ -26,7 +26,7 @@
 		{% else %}
 		    <div class="title"> Lab Name: {{ lab_info[0].lab_name }} </div>
 		    {% for lab in lab_info %}
-		    	<div class="description"> Lab Description: {{ lab_info[0].lab_desc }}</div>
+		    	<div class="description"> Lab Description: {{ lab_info[0].description }}</div>
 		    {% endfor %}
 		    <form id="{{lab_info[0].lab_id}}">
 				<table class="table">
@@ -47,7 +47,7 @@
 						    <td>Enter students' names in your group separated with &quot; , &quot; </td>
 						    <td>Text</td>
 						    <td>N/A</td>
-						    <td><input class=studentName name=studentName required></input> </td>    
+						    <td><input class=studentName name=studentName required></input> </td>
 						</tr>
 						{% for i in range((experiments|length)) %}
 						<tr class="customizedExperiments" data-experimentname="{{experiments[i].experiment_name}}" data-valuetype="{{experiments[i].value_type}}" data-valuerange="{{experiments[i].value_range}}" data-valuecandidates="{{experiments[i].value_candidates}}">
@@ -107,7 +107,7 @@
                 ...
                 </div>
                 <div class="modal-footer">
-                    <button data-dismiss="modal">Go back</button>   
+                    <button data-dismiss="modal">Go back</button>
                 </div>
             </div>
         </div>
