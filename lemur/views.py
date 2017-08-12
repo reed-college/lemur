@@ -55,7 +55,8 @@ from lemur.utility_modify import (delete_lab,
                                   delete_class,
                                   change_class_users,
                                   populate_db_with_classes_and_professors,
-                                  update_students_by_data_from_iris)
+                                  update_students_by_data_from_iris,
+                                  delete_all_students)
 # Abbreviation for convenience
 ds = db.session
 
@@ -476,6 +477,22 @@ def _superadmin_update_info_from_iris():
     else:
         err_msg = 'invalid message:{}'.format(jsonData['message'])
         return err_json(err_msg)
+
+
+# Delete all students(This should be done at the beginning/end of every
+# academic year)
+@app.route('/_superadmin_delete_all_students', methods=['POST'])
+@permission_required(m.Permission.USER_MANAGE)
+def _superadmin_delete_all_students():
+    jsonData = request.get_json()
+    warning_msg = ''
+    err_msg = check_existence(jsonData, 'message')
+    if err_msg != '':
+        return err_json(err_msg)
+    if jsonData['message'] == 'delete all students':
+        warning_msg += delete_all_students()
+        return normal_json(warning_msg)
+
 
 
 @app.route('/superadmin_create_and_manage_class', methods=['GET', 'POST'])

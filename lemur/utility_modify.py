@@ -22,6 +22,7 @@ from lemur.utility_find_and_get import (lab_exists,
                                         get_class,
                                         get_role,
                                         get_all_class,
+                                        get_all_user,
                                         get_experiments_for_lab,
                                         get_observations_for_experiment,
                                         find_lab_copy_id)
@@ -521,5 +522,14 @@ def update_students_by_data_from_iris(class_id_list, registration_data):
             warning_msg += ('class_id: ' + class_id +
                             ' doesn\'t exist in received data\n')
     ds.commit()
-    all_user = ds.query(m.User).all()
     return warning_msg
+
+
+# Delete all students in the database
+# The current function will not report any warning messages
+def delete_all_students():
+    for u in get_all_user():
+        if u.role_name == "Student":
+            ds.delete(u)
+    ds.commit()
+    return ''

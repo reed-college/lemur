@@ -1,9 +1,10 @@
-$(document).ready(function(){ 
+$(document).ready(function(){
+
     // Toggle the accordion
     $(function(){
         $( "#accordion" ).accordion({
             collapsible: true,
-            heightStyle: 'content' 
+            heightStyle: 'content'
         });
     });
     $('button[name=delete]').click(function(){
@@ -23,7 +24,7 @@ $(document).ready(function(){
         });
         $(this).closest('tr').remove();
         location.reload();
-    });  
+    });
 
     $('button[name=save]').click(function(){
           var username = $(this).closest('tr').attr('id');
@@ -41,12 +42,12 @@ $(document).ready(function(){
             error : function(result){
                       errorReport('save user', result);
                   }
-          });   
-          //location.reload();      
-    });  
+          });
+          //location.reload();
+    });
 
     $('button[name=updateUserInfo]').add($('button[name=resetClass]')).click(function(){
-          var message = $(this).attr('id'); 
+          var message = $(this).attr('id');
           var classIds = $(this).closest('div').find('select[name=classIdsForUpdate]').val();
           $.ajax({
             type: 'POST',
@@ -62,5 +63,24 @@ $(document).ready(function(){
                       errorReport('send data to server', result);
                   }
           });
+    });
+    $('button[name=deleteAllStudents]').click(function(){
+        $(this).parent().find('#deleteConfirm').modal("show");
+    });
+    $('button[name=confirm]').click(function(){
+          $.ajax({
+            type: 'POST',
+            contentType: 'application/json',
+            dataType: 'json',
+            url: '/_superadmin_delete_all_students',
+            data: JSON.stringify({'message':'delete all students'}),
+            success: function(result){
+                      console.log('Delete successfully');
+                  },
+            error : function(result){
+                      errorReport('delete user', result);
+                  }
+          });
+          setTimeout(location.reload.bind(location), 100);
     });
 });
