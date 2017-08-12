@@ -10,9 +10,9 @@
 	<div class="table-wrapper">
 	    <div class="title"> Manage User </div>
 		<label> Guide:</label><br><br>
-		1.Create new users by filling in the fields, selecting the appropriate user role, and clicking “Submit”.<br><br> 
-		2.Edit a user's role by selecting/deselecting their user role in the drop down in the user's row in the user list table. Click the “Save” button to save the change you made. <br><br> 
-		3.Delete a user by clicking the delete button at the end of the user's row in the user list table.<br><br> 
+		1.Create new users by filling in the fields, selecting the appropriate user role, and clicking “Submit”.<br><br>
+		2.Edit a user's role by selecting/deselecting their user role in the drop down in the user's row in the user list table. Click the “Save” button to save the change you made. <br><br>
+		3.Delete a user by clicking the delete button at the end of the user's row in the user list table.<br><br>
 		4. User Name must be a <b>unique</b> combination of number(s),letter(s) and dash(s) with length between 3 and 60 <br><br>
 		5. Name is optional; It must be a combination of number(s),letter(s) and dash(s); its length cannot exceed 60<br><br>
 		6. By clicking 'Reset ClassInfo from Iris', the database will be populated with classes and their associated professors. The professors by default will be given an Admin account. If the class already exists, its professors will be updated to the latest version on Iris.<br><br>
@@ -21,7 +21,7 @@
 		    <h3>Add a new user:</h3>
 		    <div>
 				<form method=post action="/superadmin_create_and_manage_user">
-				    
+
 				    <div>
 						<label>User Name*: </label>
 						<input type="text" name="username" pattern="{{pattern_for_name}}" title="{{pattern_for_name_hint}}" required>
@@ -53,7 +53,7 @@
 				</form>
 			</div>
 
-		    <h3>Sync with Iris:</h3>
+		    <h3>Sync with Iris/Delete all students:</h3>
 	        <div>
 			    <div>
 					<button name="resetClass" id="update classes">Reset ClassInfo from Iris</button>
@@ -70,7 +70,7 @@
 		    <h3>User List:</h3>
 		    <div>
 				{% if user_list|length==0 %}
-					<p> No user exists </p> 
+					<p> No user exists </p>
 				{% else %}
 					<form id="existingUsers">
 						<table class="table sortable">
@@ -111,7 +111,7 @@
 						               </td>
 							      		<td>
 								      		<select class="selectpicker" data-style="btn-inverse" data-width="auto" name="classIds" multiple data-actions-box="true" data-live-search="true" title="Choose Classes">
-										    {% for c in class_ids %}    
+										    {% for c in class_ids %}
 											    {% if c in u["classes"] %}
 												    <option value="{{c}}" selected>{{c}}</option>
 												{% else %}
@@ -124,14 +124,34 @@
 								      		{% for l in u["labs"] %}
 								      		    {{l}}<br>
 								      		{% endfor %}
-							      		</td>   
-							      		<td><button name=save>Save</button></td>
-									    <td><button name=delete>Delete</button></td>
+							      		</td>
+							      		<td><button type='button' name=save>Save</button></td>
+									    <td><button type='button' name=delete>Delete</button></td>
 							    	</tr>
-						    	{% endfor %}    	
+						    	{% endfor %}
 						    </tbody>
 						</table>
-					</form> 
+                            <div>
+                                <button type='button' name="deleteAllStudents">Delete All Students</button>
+                                <div class="modal fade" id="deleteConfirm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                                  <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                      <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                        <h4 class="modal-title" id="myModalLabel">Confirmation</h4>
+                                      </div>
+                                      <div class="modal-body">
+                                      Are you sure that you want to delete all students?
+                                      </div>
+                                      <div class="modal-footer">
+                                        <button type='button' name="confirm">Yes</button>
+                                        <button type='button' data-dismiss="modal">No</button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                            </div>
+					</form>
 				{% endif%}
 			</div>
 		</div>
@@ -149,7 +169,7 @@
 			    ...
 		        </div>
 		      	<div class="modal-footer">
-		        	<button data-dismiss="modal">Go back</button>   
+		        	<button data-dismiss="modal">Go back</button>
 		        </div>
 	        </div>
 	    </div>
