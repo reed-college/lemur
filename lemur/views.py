@@ -454,7 +454,6 @@ def _superadmin_update_info_from_iris():
 
     if jsonData['message'] == 'update classes':
         class_data = json.loads(requests.get(class_api_url).text)
-        print(class_data)
         if (len(class_data) == 0):
             return 'empty class data'
         err_msg = check_existence(class_data[0], 'subject', 'course_number',

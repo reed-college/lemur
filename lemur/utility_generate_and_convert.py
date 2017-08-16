@@ -44,6 +44,10 @@ def generate_class_id(class_name, class_time):
 
 
 def generate_user_name(first_name, last_name):
+    if first_name is None:
+        first_name = ''
+    if last_name is None:
+        last_name = ''
     return first_name+' '+last_name
 
 
