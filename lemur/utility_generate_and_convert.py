@@ -189,8 +189,8 @@ def tranlate_term_code_to_semester(term_code):
     return ''
 
 
-# This method will remove all the 470 classes; for any of other classes,
-# combine the instructor field of all sections
+# This method will remove all the classes with course_number '470';
+# for any of other classes, combine the instructor field of all sections
 def cleanup_class_data(class_data):
     cleaned_class_data = []
     course_number_set = set()

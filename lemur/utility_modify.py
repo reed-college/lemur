@@ -429,12 +429,16 @@ def populate_db_with_classes_and_professors(class_data):
                 # handle the change of class and the labs associated with it
                 old_class_professors = [u for u in the_class.users if ((u.role_name == 'Admin') or (u.role_name == 'SuperAdmin'))]
                 for p in class_professors:
+                    # Add the class to the professor's class list if it is not
+                    # the list now.
                     if not (class_id in [c.id for c in p.classes]):
                         p.classes.append(the_class)
                         for lab in the_class.labs:
                             if not (lab in p.labs):
                                 p.labs.append(lab)
                 ds.commit()
+                # Remove the class from the old professor's class list
+                # if the professor is no longer in the class's user list.
                 for p in old_class_professors:
                     if not (p.id in class_professor_ids):
                         p.classes = [c for c in p.classes if c.id != class_id]
