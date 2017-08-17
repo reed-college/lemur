@@ -53,13 +53,13 @@
 				</form>
 			</div>
 
-		    <h3>Sync with Iris/Delete all students:</h3>
+		    <h3>Sync with Iris:</h3>
 	        <div>
 			    <div>
-					<button name="resetClass" id="update classes">Reset ClassInfo from Iris</button>
+					<button name="resetClass" id="update classes">Reset Class Info from Iris</button>
 				</div>
 			    <div>
-					<button name="updateUserInfo" id="update users">Update UserInfo from Iris</button>
+					<button name="updateUserInfo" id="update users">Update User Info from Iris</button>
 					<select class="selectpicker" name="classIdsForUpdate" data-style="btn-inverse" data-width="auto" data-dropup-auto="false" multiple data-actions-box="true" data-live-search="true" title="Choose Classes to sync with">
 					    {% for c in class_ids %}
 						    <option value="{{c}}">{{c}}</option>
@@ -67,7 +67,7 @@
 					</select>
 				</div>
 			</div>
-		    <h3>User List:</h3>
+		    <h3>User List/Delete all students:</h3>
 		    <div>
 				{% if user_list|length==0 %}
 					<p> No user exists </p>
