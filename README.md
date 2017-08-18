@@ -124,3 +124,40 @@ Student Data Entry Page
 
 Admin Data Collection Page
 <img width="1314" alt="admin_data_collection_page" src="https://cloud.githubusercontent.com/assets/12670254/19320867/e07f920a-9067-11e6-9ce9-cf1df2036ec6.png">
+
+## Part 6 File Structures
+```
+├── __main__.py                 # run this script to run the software; It's a script for invoking lemur/__main__.py
+├── db_populate.py              # Populate the database for the testing scripts.
+├── db_populate_real.py         # Populate the database for real usage.
+├── db_reset.py                 # Reset the database
+├── error_log
+│   └── errors.log              # Log errors
+├── instance
+│   ├── config.cfg              # Real configuration file
+│   └── config_example.cfg      # A template for configuration file
+├── lemur
+│   ├── __init__.py             # Initialize and run the software
+│   ├── models.py               # Data models in the database
+│   ├── static                  
+│   │   ├── css                 # CSS files(several 3rd party packages are used)
+│   │   ├── jquery-ui-1.12.0    # Contains jquery-ui library
+│   │   └── js                  # (Several 3rd party libraries including jquery are omitted here)
+│   │       ├── admin_*.js      # Control the interaction in the admin_*.html files
+│   │       ├── student_*       # Control the interaction in the student_*.html files
+│   │       ├── superadmin_*    # Control the interaction in the superadmin_*.html files
+│   │       └── utility.js      # Utility js functions
+│   ├── templates
+│   │   ├── admin_*             # Pages that can be accessed by admin or superadmin
+│   │   ├── error_*             # Template for error pages
+│   │   ├── layout.html         # Layout template of a single page
+│   │   ├── navbar.html         # Navigation bar
+│   │   ├── sidebar.html        # Side bar
+│   │   ├── student_*           # Pages that can be accessed by student, admin or superadmin
+│   │   ├── superadmin_*        # Pages that can only be accessed by superadmin
+│   ├── tests                   # A bunch of tests for both python script and js scripts.
+│   ├── utility_*               # Utility python functions
+│   └── views.py                # Main file for the back-end view functions
+├── requirements.txt            # A list of necessary python packages
+├── run.py                      # initialize/migrate the database
+```
