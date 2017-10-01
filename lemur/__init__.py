@@ -1,3 +1,15 @@
+# This is the wrong place for all of this to live. Despite the appealing name,
+# `__init__` files are exclusively for modifying what properties a module
+# exposes for import. These are *application* configurations and behavior
+# changes, which need to live somewhere clearer.
+#
+# One approach:
+# 1. Change the name of this file to app_init.py
+# 2. Create a method like `initialize_app_config`
+# 3. Import it and call it from where your app gets run.
+#
+# RMD 2017-08-26
+
 # File for initializing the application and set up global variables(app, db)
 import logging
 from logging.handlers import RotatingFileHandler
@@ -54,6 +66,9 @@ login_manager = create_app(app, config)
 db = SQLAlchemy(app)
 test_db_uri = config['app']['SQLALCHEMY_DATABASE_TEST_URI']
 
+# Basically 99% of the time, do not put imports anywhere but the top of the
+# file - RMD 2017-08-26
+#
 # These imports are useful. They help to avoid cyclic import
 from lemur import views, models
 if config['app']['DEBUG'] is True:

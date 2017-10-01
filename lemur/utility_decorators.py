@@ -20,7 +20,9 @@ ds = db.session
 # It will not be activated if the app is in debug mode
 # since debug mode can generate more detailed error feedback
 # already
+
 def db_exception_handler(request_type, msg="Unknown bug. "):
+    # ^ Since this isn't used, consider removing it. -- RMD 2017-08-26
     def decorator(f):
         @wraps(f)
         def wrapped(*args, **kwargs):
@@ -52,6 +54,7 @@ def db_exception_handler(request_type, msg="Unknown bug. "):
 
 # A decorator used to check the user's permission to access the current page
 # If the user doesn't have access, redirect to the login page
+# ^ Docstring -- RMD 2017-08-26
 def permission_required(permission):
     def decorator(f):
         @wraps(f)
@@ -65,6 +68,7 @@ def permission_required(permission):
 
 # A decorator that avoids the function to raise an exception but return
 # a None instead
+# ^ Docstring-- RMD 2017-08-26
 def failure_handler(f):
     def f_try(*args, **kwargs):
         try:

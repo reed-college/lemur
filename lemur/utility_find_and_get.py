@@ -100,12 +100,12 @@ def get_all_user():
 
 def get_all_admin():
     return ds.query(m.User).filter(
-           m.User.role_name == 'Admin').all()
+        m.User.role_name == 'Admin').all()
 
 
 def get_all_superadmin():
     return ds.query(m.User).filter(
-           m.User.role_name == 'SuperAdmin').all()
+        m.User.role_name == 'SuperAdmin').all()
 
 
 # --- Get a list of objects for an object of another class from database ---
@@ -116,6 +116,7 @@ def get_all_superadmin():
 # Get lab query for the user according to user's role
 # A SuperAdmin can select among all the labs
 # A student/Admin can only select his/her own labs
+# Docstring-- RMD 2017-08-26
 def get_available_labs_for_user(user):
     available_labs = [lab for lab in user.labs if lab.status == 'Activated']
     if user.role_name == 'SuperAdmin':
@@ -132,13 +133,14 @@ def get_experiments_for_lab(lab_id):
 def get_observations_for_experiment(experiment_id):
     return ds.query(m.Observation).filter(
         m.Observation.experiment_id == experiment_id).order_by(
-        m.Observation.id).all()
+            m.Observation.id).all()
 
 
 # Return the the professor of a class
 # We assume that a class only has one professor
 # Return None if the class cannot be found or the class
 # doesn't have a professor
+# Docstring-- RMD 2017-08-26
 def get_professors_for_class(class_id):
     professors = []
     the_class = get_class(class_id)
@@ -176,7 +178,7 @@ def find_lab_list_for_user(user):
         labs_query = ds.query(m.Lab).all()
     elif user.role_name == 'Admin':
         labs_query = user.labs
-    # get all the info of the labs
+        # get all the info of the labs
     for lab in labs_query:
         data_num = 0
         experiments_query = get_experiments_for_lab(lab.id)
@@ -185,10 +187,10 @@ def find_lab_list_for_user(user):
         # a lab
         if len(experiments_query) > 0:
             data_num += find_observation_number_for_experiment(experiments_query[0].id)
-        lab_list.append({'lab_id': lab.id, 'lab_name': lab.name,
-                         'class_id': lab.class_id,
-                         'lab_status': lab.status,
-                         'data_num': data_num})
+            lab_list.append({'lab_id': lab.id, 'lab_name': lab.name,
+                             'class_id': lab.class_id,
+                             'lab_status': lab.status,
+                             'data_num': data_num})
     return lab_list
 
 
@@ -267,8 +269,8 @@ def find_all_observations_for_labs(lab_ids):
                                 'experiment_id': observation.experiment_id,
                                 'observation_id': observation.id,
                                 'observation_data': observation.datum})
-                    index += 1
-        observations_group_by_student = change_observation_organization(observations_group_by_experiment_name)
+                            index += 1
+                            observations_group_by_student = change_observation_organization(observations_group_by_experiment_name)
 
     except Exception:
         exc_type, exc_obj, tb = sys.exc_info()

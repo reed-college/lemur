@@ -11,6 +11,9 @@ ds = db.session
 # Check the existence of args in a form
 # and generate an error message accordingly
 def check_existence(form, *expectedArgs):
+    # Python variables should be named in snake_case, not camelCase.
+    # Also, please specify what "form" means in this context -- an HTML form?
+    # Also that should be -- you guessed it -- a docstring. -- RMD 2017-08-26
     err_msg = ''
     for a in expectedArgs:
         if not(a in form):
@@ -39,6 +42,7 @@ def generate_observation_id(experiment_id, student_name):
     return experiment_id+':'+student_name
 
 
+# Why does class_id not get the same separator? -- RMD 2017-08-26
 def generate_class_id(class_name, class_time):
     return class_name+'_'+class_time
 
@@ -54,6 +58,9 @@ def generate_user_name(first_name, last_name):
 def decompose_lab_id(lab_id):
     return {'lab_name': lab_id.split(':')[0],
             'class_id': lab_id.split(':')[1]}
+# ^ No need to duplicate splitting. Either store the split result to a
+# variable, or decompose the tuple (eg: lab_name, class_id = lab_id.split(':'))
+# -- RMD 2017-08-26
 
 
 def decompose_class_id(class_id):
@@ -66,6 +73,13 @@ def decompose_class_id(class_id):
 # are relatively flexible. This group of functions receives a list
 # of objects and convert it into a python list of dictionaries
 # (close to JSON format) with the info contained by these objects
+
+# None of these functions are actually serializers. You're changing the shape
+# of your data, from one Python in-memory representation to another, but
+# serialization would mean converting data to a format appropriate for writing
+# to a file or transmitting over the wire (e.g. Python structures to a JSON
+# string, or Pickling a python object.) I'd recommend clearer names --
+# `convert_lab_list_format` et al, say. -- RMD 2017-08-26
 def serialize_lab_list(lab_list):
     labs = []
 
@@ -74,14 +88,15 @@ def serialize_lab_list(lab_list):
             class_id = lab.the_class.id
         else:
             class_id = None
-        prof_name = ','.join([u.name for u in lab.users if (u.name and ((u.role_name == 'SuperAdmin') or (u.role_name == 'Admin')))])
-        labs.append({'lab_id': lab.id,
-                     'lab_name': lab.name,
-                     'description': lab.description,
-                     'class_id': class_id,
-                     'prof_name': prof_name,
-                     'status': lab.status,
-                     'experiments': len(lab.experiments)})
+            prof_name = ','.join([u.name for u in lab.users if (u.name and ((u.role_name == 'SuperAdmin') or (u.role_name == 'Admin')))])
+            # ^ That is some line length you've got there. -- RMD 2017-08-26
+            labs.append({'lab_id': lab.id,
+                         'lab_name': lab.name,
+                         'description': lab.description,
+                         'class_id': class_id,
+                         'prof_name': prof_name,
+                         'status': lab.status,
+                         'experiments': len(lab.experiments)})
     return labs
 
 
@@ -129,8 +144,8 @@ def serialize_class_list(class_list):
 # Check and return lab information sent from the client
 def pack_labinfo_sent_from_client(client_form):
     err_msg = check_existence(client_form, 'labName', 'classId',
-                                           'labDescription',
-                                           'labQuestions')
+                              'labDescription',
+                              'labQuestions')
     if err_msg != '':
         return dict(), err_msg
     # to keep the interface consistent, assign empty string to lab_id
@@ -146,7 +161,7 @@ def pack_labinfo_sent_from_client(client_form):
                                 'value_type': '',
                                 'value_range': '',
                                 'value_candidates': ''} for r in range(int(client_form['labQuestions']))]
-    return lab_info, ''
+    return lab_info, '' # Why on _earth_ does this return a 2-tuple with empty string? -- RMD 2017-08-26
 
 
 # Change the datastructure that stores the observation data from using
@@ -186,6 +201,7 @@ def tranlate_term_code_to_semester(term_code):
     term_code_list = list(term_code)
     term_index = term_code_list[-1]
     year = ''.join(term_code_list[:4])
+    # ^ Could split on 0 -- RMD 2017-08-26
     if term_index == '1':
         year = str(int(year) - 1)
     if term_index in convert_table:
@@ -201,7 +217,7 @@ def cleanup_class_data(class_data):
     for c in class_data:
         if c['course_number'] != '470':
             course_number_set.add(c['course_number'])
-    course_number_list = list(course_number_set)
+            course_number_list = list(course_number_set)
     for course_number in course_number_list:
         # Get all the sections that have the same course number
         the_class_list = list(filter(lambda c: c['course_number'] == course_number, class_data))
@@ -213,7 +229,7 @@ def cleanup_class_data(class_data):
             for instructor in c['instructors']:
                 if not (instructor['username'] in class_instructor_usernames):
                     the_class['instructors'].append(instructor)
-        cleaned_class_data.append(the_class)
+                    cleaned_class_data.append(the_class)
     return cleaned_class_data
 
 
@@ -230,9 +246,9 @@ def format_download(observations_by_student, experiment_names, lab_ids):
         csv += (student['student_name']+dt+student['lab_id'])
         for data in student['observations']:
             csv += (dt+data['observation_data'])
-        csv += nl
-    lab_ids_str = '+'.join(lab_ids)
-    # create a response out of the CSV string
+            csv += nl
+            lab_ids_str = '+'.join(lab_ids)
+            # create a response out of the CSV string
     response = make_response(csv)
     # Set the right header for the response to be downloaded
     response.headers["Content-Disposition"] = ('attachment; filename=' +

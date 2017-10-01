@@ -2,7 +2,7 @@
 # Local
 from lemur import models as m
 from lemur import db
-ds = db.session
+ds = db.session # finish all imports before assignment unless it is 100% imperative not to (it almost always isn't)
 from lemur.utility_generate_and_convert import generate_experiment_id
 from lemur.utility_find_and_get import (lab_exists,
                                         experiment_exists,
@@ -19,8 +19,20 @@ from lemur.utility_find_and_get import (lab_exists,
 def populate_db():
     # Create a real lab example in the database. There is a exactly
     # the same corresponding one in the old data collector)
+    # ^ This comment should probably be a doc string -- RMD 2017-08-26
+
     def create_real_lab():
         # Create a real lab
+        #
+        # ^ This should be a doc string, and should explain what a real lab is.
+        # More importantly: this function doesn't make sense as a nested
+        # function like this, and needs to be DRYed up. I'd recommend moving it
+        # to the top level of the file. (Potentially, passing the lab creation
+        # function to `populate_db` would make `populate_db` more
+        # configurable). Also: you're repeating the same piece of work over and
+        # over (set name, set id, check existance, add to db) -- this would be
+        # much better as a single function that can get called on every element
+        # of a list. -- RMD 2017-08-26
         real_lab_name = '2Cortisol'
         real_lab_id = '2Cortisol:bio101_16fall'
         if not lab_exists(real_lab_id):
@@ -64,8 +76,9 @@ def populate_db():
                                       value_range='',
                                       lab=get_lab(real_lab_id))
             ds.add(experiment)
-        experiment3_name = 'TemperatureTreatment'
-        experiment3_id = generate_experiment_id(real_lab_id, experiment3_name)
+            experiment3_name = 'TemperatureTreatment'
+            experiment3_id = generate_experiment_id(real_lab_id, experiment3_name)
+            # ^ I suspect this is not the indentation you're looking for. -- RMD 2017-08-26
         if not experiment_exists(experiment3_id):
             experiment = m.Experiment(id=experiment3_id, name=experiment3_name,
                                       description=('Enter ICE for ice water or'
@@ -160,7 +173,7 @@ def populate_db():
                                       value_range='',
                                       lab=get_lab(real_lab_id))
             ds.add(experiment)
-        ds.commit()
+            ds.commit()
 
     superadmin_id = 'bob123'
     admin_id = 'amy'
@@ -189,16 +202,16 @@ def populate_db():
         ds.add(user)
 
     if not user_exists(student2_id):
-            user = m.User(id='tim',
-                          name='tim', role=get_role('Student'))
-            ds.add(user)
-    # Create a class
+        user = m.User(id='tim',
+                      name='tim', role=get_role('Student'))
+        ds.add(user)
+        # Create a class
     if not class_exists(class_id):
         c = m.Class(id=class_id, name='bio101', time='16fall',
                     users=[get_user(student_id),
                            get_user(admin_id)])
         ds.add(c)
-    ds.commit()
+        ds.commit()
 
     # Create a lab with an experiment
     if not lab_exists(lab_id):

@@ -3,6 +3,8 @@ import os
 import sys
 sys.path.append('..')
 
+# If you already have code for dropping the DB, why not have code for creating
+# the DB in the first place? -- RMD 2017-08-26
 
 def reset_database():
     os.system('dropdb lemur')
