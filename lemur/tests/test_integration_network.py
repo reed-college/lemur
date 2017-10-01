@@ -133,7 +133,7 @@ class IntegrationTestNetwork(LemurBaseCase):
         self.assertIn(superadmin.id,
                       soup.find('p', {'id': 'welcomeMsg'}).text)
 
-    def test_student_select_lab(self):
+    def test_student_select_lab_missing(self):
         student = get_user(self.built_in_ids['student_id'])
         self.login(student.id)
 
@@ -144,6 +144,7 @@ class IntegrationTestNetwork(LemurBaseCase):
         soup = self.decode(rv)
         self.assertEqual(None, soup.find('p', {'id': 'welcomeMsg'}))
 
+    def test_student_select_lab_present(self):
         # Start a new session
         # The lab should be visible after it is
         # added into the lab list of the student
