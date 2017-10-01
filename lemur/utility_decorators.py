@@ -5,8 +5,15 @@ import linecache
 from datetime import timedelta
 
 # Third-party libraries
-from flask import (render_template, jsonify, redirect, url_for, make_response,
-                   request, current_app)
+from flask import (
+    render_template,
+    jsonify,
+    redirect,
+    url_for,
+    make_response,
+    request,
+    current_app
+)
 from flask.ext.login import current_user
 
 # Local
