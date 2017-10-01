@@ -141,7 +141,9 @@ class UnitTestUtilityGenerateAndConvert(unittest.TestCase):
         create_lab_mock.return_value = generate_lab_mock()
         for i in range(r.rand_round()):
             lab_mock_list.append(create_lab_mock())
+
         lab_list_serialized = serialize_lab_list(lab_mock_list)
+
         for i in range(len(lab_list_serialized)):
             self.assertEqual(lab_mock_list[i].name, lab_list_serialized[i]['lab_name'])
             self.assertEqual(lab_mock_list[i].description, lab_list_serialized[i]['description'])
@@ -154,7 +156,9 @@ class UnitTestUtilityGenerateAndConvert(unittest.TestCase):
         create_experiment_mock.return_value = generate_experiment_mock()
         for i in range(r.rand_round()):
             experiment_mock_list.append(create_experiment_mock())
+
         experiment_list_serialized = serialize_experiment_list(experiment_mock_list)
+
         for i in range(len(experiment_list_serialized)):
             self.assertEqual(experiment_mock_list[i].name, experiment_list_serialized[i]['experiment_name'])
             self.assertEqual(experiment_mock_list[i].description, experiment_list_serialized[i]['description'])
@@ -170,7 +174,9 @@ class UnitTestUtilityGenerateAndConvert(unittest.TestCase):
         create_user_mock.return_value = generate_user_mock()
         for i in range(r.rand_round()):
             user_mock_list.append(create_user_mock())
+
         user_list_serialized = serialize_user_list(user_mock_list)
+
         for i in range(len(user_list_serialized)):
             self.assertEqual(user_mock_list[i].id, user_list_serialized[i]['username'])
             self.assertEqual(user_mock_list[i].name, user_list_serialized[i]['name'])
@@ -181,7 +187,9 @@ class UnitTestUtilityGenerateAndConvert(unittest.TestCase):
         create_class_mock.return_value = generate_class_mock()
         for i in range(r.rand_round()):
             class_mock_list.append(create_class_mock())
+
         class_list_serialized = serialize_class_list(class_mock_list)
+
         for i in range(len(class_list_serialized)):
             self.assertEqual(class_mock_list[i].id, class_list_serialized[i]['id'])
             self.assertEqual(class_mock_list[i].name, class_list_serialized[i]['name'])
