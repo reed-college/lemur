@@ -7,6 +7,7 @@ import unittest
 from random import randint
 
 # Local
+from base_case import LemurBaseCase
 from lemur.lemur import app, db
 from lemur import models as m
 import helper_random as r
@@ -59,6 +60,7 @@ class IntegrationTestUtilityFindAndGet(LemurBaseCase):
             student = r.create_user(db)
             student.role = student_role
             students.append(student)
+
         lab = r.create_lab(db)
         lab.users = students
         for j in range(experiment_num):
@@ -67,6 +69,7 @@ class IntegrationTestUtilityFindAndGet(LemurBaseCase):
                 observation = r.create_observation(db, experiment.id)
                 observation.student_name = students[k].name
                 experiment.observations.append(observation)
+
             lab.experiments.append(experiment)
         return lab
 
@@ -186,6 +189,7 @@ class IntegrationTestUtilityFindAndGet(LemurBaseCase):
                 count += 1
             elif user.role_name == 'SuperAdmin':
                 count += 1
+
             self.assertEqual(len(get_available_labs_for_user(user)), count)
 
     def test_get_experiments_for_lab(self):
@@ -234,6 +238,7 @@ class IntegrationTestUtilityFindAndGet(LemurBaseCase):
         for i in range(r.rand_round()):
             the_class = r.create_class(db)
             class_id_list.append(the_class.id)
+
         class_id_list_retrieved = get_class_id_list(user)
         if user.role_name == 'SuperAdmin':
             for class_id in class_id_list:
@@ -245,6 +250,7 @@ class IntegrationTestUtilityFindAndGet(LemurBaseCase):
             user = r.create_user(db)
             user.role_name = r.rand_role()
             usernames.append(user.id)
+
         usernames_retrieved = [u.id for u in get_all_user()]
         for username in usernames:
             self.assertIn(username, usernames_retrieved)
@@ -267,6 +273,7 @@ class IntegrationTestUtilityFindAndGet(LemurBaseCase):
                 count += 1
             elif user.role_name == 'SuperAdmin':
                 count += 1
+
         self.assertEqual(len(find_lab_list_for_user(user)), count)
 
     def test_find_all_labs(self):
@@ -274,11 +281,15 @@ class IntegrationTestUtilityFindAndGet(LemurBaseCase):
         user.role == get_role(r.rand_admin())
         for i in range(r.rand_round()):
             user.labs.append(r.create_lab(db))
+
         labs = find_all_labs(user)
+
         for lab in labs['activated']:
             self.assertEqual(lab['status'], 'Activated')
+
         for lab in labs['unactivated']:
             self.assertEqual(lab['status'], 'Unactivated')
+
         for lab in labs['downloadable']:
             self.assertEqual(lab['status'], 'Downloadable')
 

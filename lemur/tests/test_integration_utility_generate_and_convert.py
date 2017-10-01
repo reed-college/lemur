@@ -36,29 +36,7 @@ ds = db.session
 
 
 # This file consists of functions that generate strings and convert data format
-class IntegrationTestUtilityGenerateAndConvert(unittest.TestCase):
-    # this is automatically called for us when we run the test
-    def setUp(self):
-        # It disables the error catching during request handling so that we get
-        # better error reports when performing test requests against the
-        # application.
-        app.config['TESTING'] = True
-        # The database used for this suit of tests is not the one used by the
-        # app. Before we run this test, we need to create a local database
-        # called lemur_test
-        app.config['SQLALCHEMY_DATABASE_URI'] = test_db_uri
-        self.app = app.test_client()
-        # Create all the tables
-        db.create_all()
-        # Insert all the roles(Student, Admin, SuperAdmin) that will be used
-        m.Role.insert_roles()
-
-    # tidy up after a test has been run
-    def tearDown(self):
-        # remove and clean the database completely
-        ds.remove()
-        db.drop_all()
-
+class IntegrationTestUtilityGenerateAndConvert(LemurBaseCase):
     # Construct a lab with experiments which have observations input by
     # students(they will be stored in the database before the function returns)
     def construct_lab_observations(self, student_num=5, experiment_num=5):
