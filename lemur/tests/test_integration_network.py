@@ -46,21 +46,22 @@ class IntegrationTestNetwork(LemurBaseCase):
     # Generate a json format dictionary that consists of information needed to
     # create a new lab with random values
     def construct_lab_dict(self):
-        lab_dict = {'labName': r.randlength_word(),
-                    'classId': r.rand_classid(),
-                    'labDescription': r.randlength_word(),
-                    'experiments': [],
-                    'oldLabId': r.rand_lab_id()
-                    }
+        lab_dict = {
+            'labName': r.randlength_word(),
+            'classId': r.rand_classid(),
+            'labDescription': r.randlength_word(),
+            'experiments': [],
+            'oldLabId': r.rand_lab_id()
+        }
         for i in range(r.rand_round()):
-            exp_json = {'name': r.randlength_word(),
-                        'description': r.randlength_word(),
-                        'order': r.rand_order(),
-                        'valueType': r.rand_value_type(),
-                        'valueRange': r.rand_value_range(),
-                        'valueCandidates': r.rand_value_candidates()
-
-                        }
+            exp_json = {
+                'name': r.randlength_word(),
+                'description': r.randlength_word(),
+                'order': r.rand_order(),
+                'valueType': r.rand_value_type(),
+                'valueRange': r.rand_value_range(),
+                'valueCandidates': r.rand_value_candidates()
+            }
             lab_dict['experiments'].append(exp_json)
         return lab_dict
 
