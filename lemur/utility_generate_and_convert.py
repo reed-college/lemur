@@ -10,12 +10,11 @@ ds = db.session
 # --- Message/ID generator/decomposer ---
 # Check the existence of args in a form
 # and generate an error message accordingly
-def check_existence(form, *expectedArgs):
-    # Python variables should be named in snake_case, not camelCase.
+def check_existence(form, *expected_args):
     # Also, please specify what "form" means in this context -- an HTML form?
     # Also that should be -- you guessed it -- a docstring. -- RMD 2017-08-26
     err_msg = ''
-    for a in expectedArgs:
+    for a in expected_args:
         if not(a in form):
             err_msg += (a+' is not defined'+'\n')
     if err_msg != '':
