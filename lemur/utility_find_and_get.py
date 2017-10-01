@@ -1,14 +1,20 @@
 # Libraries
 # Standard library
 import linecache
+import logging
+import sys
 
 # Local
 from lemur import models as m
-from lemur import db
+from lemur.lemur import db
 from lemur.utility_decorators import failure_handler
-from lemur.utility_generate_and_convert import (serialize_lab_list,
-                                                change_observation_organization)
+from lemur.utility_generate_and_convert import (
+    serialize_lab_list,
+    change_observation_organization
+)
 ds = db.session
+
+logger = logging.getLogger(__name__)
 
 
 # --- Check existence ---
