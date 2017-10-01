@@ -10,7 +10,7 @@ from flask import (render_template, jsonify, redirect, url_for, make_response,
 from flask.ext.login import current_user
 
 # Local
-from lemur import (app, db)
+from lemur.lemur import app, db
 ds = db.session
 
 
