@@ -27,7 +27,7 @@ association_table_role_power = db.Table('association_role_power',
                                                   db.ForeignKey('Role.name')),
                                         db.Column('power_id', db.String(64),
                                                   db.ForeignKey(
-                                                    'Power.id')))
+                                                      'Power.id')))
 
 
 # set up class to track the date and time information for an object
@@ -198,6 +198,8 @@ class User(UserMixin, db.Model):
 class AnonymousUser(AnonymousUserMixin):
     def can(self, permissions):
         return False
+
+
 # Associate the LoginManager with the anonymous user class
 login_manager.anonymous_user = AnonymousUser
 
@@ -227,19 +229,24 @@ class Role(db.Model):
         for p in Permission.all_permissions():
             if db.session.query(Power).filter(Power.id == p).count() == 0:
                 db.session.add(Power(id=p))
+
         roles = {
             'Student': [Permission.DATA_ENTRY],
-            'Admin': [Permission.DATA_ENTRY,
-                      Permission.DATA_EDIT,
-                      Permission.LAB_SETUP,
-                      Permission.ADMIN],
-            'SuperAdmin': [Permission.DATA_ENTRY,
-                           Permission.DATA_EDIT,
-                           Permission.LAB_SETUP,
-                           Permission.ADMIN,
-                           Permission.LAB_MANAGE,
-                           Permission.USER_MANAGE,
-                           Permission.SUPERADMIN]
+            'Admin': [
+                Permission.DATA_ENTRY,
+                Permission.DATA_EDIT,
+                Permission.LAB_SETUP,
+                Permission.ADMIN
+            ],
+            'SuperAdmin': [
+                Permission.DATA_ENTRY,
+                Permission.DATA_EDIT,
+                Permission.LAB_SETUP,
+                Permission.ADMIN,
+                Permission.LAB_MANAGE,
+                Permission.USER_MANAGE,
+                Permission.SUPERADMIN
+            ]
         }
         for r in roles:
             role = Role.query.filter_by(name=r).first()
@@ -247,8 +254,11 @@ class Role(db.Model):
                 role = Role(name=r)
             for p in roles[r]:
                 role.powers.append(db.session.query(Power).filter(
-                     Power.id == p).one())
+                    Power.id == p
+                ).one())
+
             db.session.add(role)
+
         db.session.commit()
 
     def __repr__(self):
