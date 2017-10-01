@@ -9,6 +9,8 @@ import unittest
 # Local
 print(sys.path)
 from lemur.lemur import app, db
+from base_case import LemurBaseCase
+from lemur.lemur import db
 from lemur import models as m
 import helper_random as r
 from lemur.utility_generate_and_convert import (
