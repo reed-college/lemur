@@ -1,31 +1,35 @@
 # Libraries
 # Local
 from lemur import models as m
-from lemur import (app, db)
-from lemur.utility_generate_and_convert import (check_existence,
-                                                generate_lab_id,
-                                                generate_experiment_id,
-                                                generate_observation_id,
-                                                generate_class_id,
-                                                generate_user_name,
-                                                decompose_lab_id,
-                                                tranlate_term_code_to_semester,
-                                                cleanup_class_data)
-from lemur.utility_find_and_get import (lab_exists,
-                                        experiment_exists,
-                                        class_exists,
-                                        observation_exists,
-                                        user_exists,
-                                        get_lab,
-                                        get_observation,
-                                        get_user,
-                                        get_class,
-                                        get_role,
-                                        get_all_class,
-                                        get_all_user,
-                                        get_experiments_for_lab,
-                                        get_observations_for_experiment,
-                                        find_lab_copy_id)
+from lemur.lemur import app, db
+from lemur.utility_generate_and_convert import (
+    check_existence,
+    generate_lab_id,
+    generate_experiment_id,
+    generate_observation_id,
+    generate_class_id,
+    generate_user_name,
+    decompose_lab_id,
+    tranlate_term_code_to_semester,
+    cleanup_class_data
+)
+from lemur.utility_find_and_get import (
+    lab_exists,
+    experiment_exists,
+    class_exists,
+    observation_exists,
+    user_exists,
+    get_lab,
+    get_observation,
+    get_user,
+    get_class,
+    get_role,
+    get_all_class,
+    get_all_user,
+    get_experiments_for_lab,
+    get_observations_for_experiment,
+    find_lab_copy_id
+)
 ds = db.session
 
 
@@ -36,6 +40,7 @@ def delete_lab(lab_id):
     experiments_query = get_experiments_for_lab(lab_id)
     for e in experiments_query:
         ds.delete(e)
+
     ds.commit()
 
 
@@ -48,7 +53,7 @@ def modify_lab(lab_json):
     lab_id = None
 
     err_msg = check_existence(lab_json, 'labName', 'classId', 'labDescription',
-                                        'experiments', 'oldLabId')
+                              'experiments', 'oldLabId')
     if lab_exists(lab_json['oldLabId']):
         lab_status = get_lab(lab_json['oldLabId']).status
         delete_lab(lab_json['oldLabId'])
@@ -60,27 +65,28 @@ def modify_lab(lab_json):
     # Build connection between the current lab and the existing users/class
     if the_class is not None:
         class_users = the_class.users
+
     lab_id = generate_lab_id(lab_json['labName'], lab_json['classId'])
     if lab_exists(lab_id):
         return 'lab id:{0} already exists'.format(lab_id)
     for e in lab_json['experiments']:
         err_msg = check_existence(e, 'name', 'description', 'order',
-                                     'valueType', 'valueRange',
-                                     'valueCandidates')
+                                  'valueType', 'valueRange',
+                                  'valueCandidates')
 
         if err_msg != '':
             return err_msg
     for e in lab_json['experiments']:
-            experiment_name = e['name']
-            # Check if the experiment name already repetes among all the
-            # experiments to be added into the current lab
-            for i in range(len(lab_json['experiments'])):
-                if [exp['name'] for exp in lab_json['experiments']].count(experiment_name) > 1:
-                    lab_json['experiments'] = (lab_json['experiments'][0:i] +
-                                               lab_json['experiments'][i+1:len(lab_json['experiments'])])
-                    warning_msg = 'repeted experiment name:{} in this lab'.format(experiment_name)
-                    app.logger.warning(warning_msg)
-                    continue
+        experiment_name = e['name']
+        # Check if the experiment name already repetes among all the
+        # experiments to be added into the current lab
+        for i in range(len(lab_json['experiments'])):
+            if [exp['name'] for exp in lab_json['experiments']].count(experiment_name) > 1:
+                lab_json['experiments'] = (lab_json['experiments'][0:i] +
+                                           lab_json['experiments'][i+1:len(lab_json['experiments'])])
+                warning_msg = 'repeted experiment name:{} in this lab'.format(experiment_name)
+                app.logger.warning(warning_msg)
+                continue
             experiment_id = generate_experiment_id(lab_id, experiment_name)
 
             if experiment_exists(experiment_id):
@@ -88,14 +94,19 @@ def modify_lab(lab_json):
                 app.logger.warning(warning_msg)
                 continue
             else:
-                experiments_for_lab.append(m.Experiment(lab_id=lab_id,
-                                                        id=experiment_id,
-                                                        name=experiment_name,
-                                                        description=e['description'],
-                                                        order=e['order'],
-                                                        value_type=e['valueType'],
-                                                        value_range=e['valueRange'],
-                                                        value_candidates=e['valueCandidates']))
+                experiments_for_lab.append(
+                    m.Experiment(
+                        lab_id=lab_id,
+                        id=experiment_id,
+                        name=experiment_name,
+                        description=e['description'],
+                        order=e['order'],
+                        value_type=e['valueType'],
+                        value_range=e['valueRange'],
+                        value_candidates=e['valueCandidates']
+                    )
+                )
+
     the_lab = m.Lab(id=lab_id, name=lab_json['labName'],
                     description=lab_json['labDescription'],
                     status=lab_status,
@@ -134,6 +145,7 @@ def duplicate_lab(old_lab_id):
                                       value_range=e.value_range,
                                       value_candidates=e.value_candidates)
         new_experiments.append(new_experiment)
+
     new_lab.experiments = new_experiments
     ds.add(new_lab)
     ds.commit()
@@ -149,6 +161,7 @@ def change_lab_status(lab_id, new_status):
         for e in experiments_query:
             for d in get_observations_for_experiment(e.id):
                 ds.delete(d)
+
     ds.commit()
 
 
@@ -188,15 +201,16 @@ def add_observation(new_observations_list):
             tmp_student_name = d['studentName'] + '('+str(index)+')'
             tmp_observation_id = generate_observation_id(d['experimentId'], tmp_student_name)
             index += 1
-        # warning_msg = ('repeated observation id:{} in this lab so the ' +
-        #                'current, modified entry will be renamed to ' +
-        #                '{}'.format(d['observationId'], tmp_observation_id))
+            # warning_msg = ('repeated observation id:{} in this lab so the ' +
+            #                'current, modified entry will be renamed to ' +
+            #                '{}'.format(d['observationId'], tmp_observation_id))
 
         # Capitalize every input
         ds.add(m.Observation(experiment_id=d['experimentId'],
                              id=tmp_observation_id,
                              student_name=tmp_student_name,
                              datum=d['observationData'].upper()))
+
     ds.commit()
     return warning_msg
 
@@ -236,12 +250,13 @@ def add_observations_sent_by_students(observations_group_by_student):
                 observation_id = generate_observation_id(experiment_id,
                                                          tmp_student_name)
                 index += 1
-            # Capitalize every input
+                # Capitalize every input
             if not observation_exists(observation_id):
                 ds.add(m.Observation(experiment_id=experiment_id,
                                      id=observation_id,
                                      student_name=tmp_student_name,
                                      datum=ob['observation'].upper()))
+
     ds.commit()
     return ''
 
@@ -271,6 +286,7 @@ def add_user(user_info):
         name = None
         if 'name' in user_info:
             name = user_info['name']
+
         new_user = m.User(id=user_info['username'],
                           name=name,
                           role=user_role,
@@ -294,6 +310,7 @@ def change_user_info(username, role, class_ids):
             classes.append(the_class)
             for lab in the_class.labs:
                 labs.append(lab)
+
     user.role = get_role(role)
     user.classes = classes
     user.labs = labs
@@ -341,10 +358,12 @@ def add_class(class_info):
                     usernames.append(s)
         for username in usernames:
             users.append(get_user(username))
+
         new_class = m.Class(id=new_class_id,
                             name=class_info['className'],
                             time=class_info['classTime'],
                             users=users)
+
         ds.add(new_class)
         ds.commit()
     else:
@@ -365,6 +384,7 @@ def delete_class(class_id):
     for l in class_to_be_removed.labs:
         if lab_exists(l.id):
             ds.delete(get_lab(l.id))
+
     ds.delete(class_to_be_removed)
     ds.commit()
 
@@ -386,6 +406,7 @@ def change_class_users(class_id, new_users):
             if not (u in the_class.users):
                 the_class.users.append(user)
                 user.labs = the_class.labs
+
     # Delete the class and the associated labs from old users who
     # are not in the class anymore
     for u in old_users:
@@ -395,7 +416,9 @@ def change_class_users(class_id, new_users):
             for lab in u.labs:
                 if lab.the_class.id != class_id:
                     new_lab_list.append(lab)
+
             u.labs = new_lab_list
+
     ds.commit()
     return ''
 
@@ -418,6 +441,7 @@ def populate_db_with_classes_and_professors(class_data):
                 name = generate_user_name(p['first_name'], p['last_name'])
                 ds.add(m.User(id=p['username'], name=name, role=get_role('Admin')))
                 ds.commit()
+
             the_user = get_user(p['username'])
             class_professors.append(the_user)
         if class_name and class_time:
@@ -436,6 +460,7 @@ def populate_db_with_classes_and_professors(class_data):
                         for lab in the_class.labs:
                             if not (lab in p.labs):
                                 p.labs.append(lab)
+
                 ds.commit()
                 # Remove the class from the old professor's class list
                 # if the professor is no longer in the class's user list.
@@ -443,12 +468,14 @@ def populate_db_with_classes_and_professors(class_data):
                     if not (p.id in class_professor_ids):
                         p.classes = [c for c in p.classes if c.id != class_id]
                         p.labs = [lab for lab in p.labs if lab.class_id != class_id]
+
             # otherwise create a class with the professors
             else:
                 ds.add(m.Class(id=class_id, name=class_name, time=class_time,
                                users=class_professors))
         else:
             return 'class_time is not valid:{}'.format(class_time)
+
     ds.commit()
     return ''
 
@@ -475,7 +502,7 @@ def update_students_by_data_from_iris(class_id_list, registration_data):
         name = generate_user_name(registration_object['first_name'],
                                   registration_object['last_name'])
         class_id = generate_class_id((registration_object['subject'] +
-                                     registration_object['course_number']),
+                                      registration_object['course_number']),
                                      tranlate_term_code_to_semester(registration_object['term_code']))
         # only students who registered courses in the list will be updated
         if class_id not in class_id_list:
@@ -497,6 +524,7 @@ def update_students_by_data_from_iris(class_id_list, registration_data):
                 the_user = m.User(id=username, name=name, classes=[the_class],
                                   role=get_role('Student'), labs=the_class.labs)
                 ds.add(the_user)
+
         # else return a warning message to notify the user
         else:
             warning_msg += ('class_id: ' + class_id +
@@ -521,10 +549,12 @@ def update_students_by_data_from_iris(class_id_list, registration_data):
             # received data
             for student_id in registration_by_class[c.id]:
                 class_new_users.append(get_user(student_id))
+
             c.users = class_new_users
         else:
             warning_msg += ('class_id: ' + class_id +
                             ' doesn\'t exist in received data\n')
+
     ds.commit()
     return warning_msg
 
@@ -535,5 +565,6 @@ def delete_all_students():
     for u in get_all_user():
         if u.role_name == "Student":
             ds.delete(u)
+
     ds.commit()
     return ''
