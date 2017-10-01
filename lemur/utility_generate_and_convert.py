@@ -3,7 +3,7 @@
 from flask import make_response, render_template, jsonify
 
 # Local
-from lemur import (app, db)
+from lemur.lemur import app, db
 ds = db.session
 
 
