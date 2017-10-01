@@ -25,6 +25,12 @@
 1. Install Required Packages
    ` pip install -r requirements.txt `
 
+   **Note**: if you're installing requirements on OSX, you may encounter problems linking `psycopg2` to brew-managed OpenSSL. This will help:
+
+   ```sh
+   env LDFLAGS="-I/usr/local/opt/openssl/include -L/usr/local/opt/openssl/lib" pip install -r requirements.txt
+   ```
+
 1. Create Local Databases
    `lemur` expects Postgres 9.5+; by default, it looks for two databases:
 
