@@ -45,6 +45,7 @@ class IntegrationTestDBAndModels(LemurBaseCase):
             name = r.randlength_word()
             time = r.randlength_word()
             class_id = generate_class_id(name, time)
+
         the_class = m.Class(id=class_id, name=name, time=time)
         ds.add(the_class)
         ds.commit()
@@ -89,11 +90,14 @@ class IntegrationTestDBAndModels(LemurBaseCase):
             name = r.randlength_word()
             lab_id = r.rand_lab_id()
             experiment_id = generate_experiment_id(lab_id, name)
-        experiment = m.Experiment(id=experiment_id, name=name,
-                                  description=description, order=order,
-                                  value_type=value_type,
-                                  value_range=value_range,
-                                  value_candidates=value_candidates)
+
+        experiment = m.Experiment(
+            id=experiment_id, name=name,
+            description=description, order=order,
+            value_type=value_type,
+            value_range=value_range,
+            value_candidates=value_candidates
+        )
         ds.add(experiment)
         ds.commit()
         experiment_query = ds.query(m.Experiment).filter(m.Experiment.id == experiment_id).first()
@@ -113,11 +117,16 @@ class IntegrationTestDBAndModels(LemurBaseCase):
         while ds.query(m.Observation).filter(m.Observation.id == observation_id).count() != 0:
             student_name = r.randlength_word()
             experiment_id = r.rand_experiment_id()
-            observation_id = generate_observation_id(experiment_id,
-                                                     student_name)
-        observation = m.Observation(id=observation_id,
-                                    student_name=student_name,
-                                    datum=datum)
+            observation_id = generate_observation_id(
+                experiment_id,
+                student_name
+            )
+
+        observation = m.Observation(
+            id=observation_id,
+            student_name=student_name,
+            datum=datum
+        )
 
         ds.add(observation)
         ds.commit()
@@ -131,6 +140,7 @@ class IntegrationTestDBAndModels(LemurBaseCase):
         username = r.randlength_word()
         while ds.query(m.User).filter(m.User.id == username).count() != 0:
             username = r.randlength_word()
+
         name = r.randlength_word()
         user = m.User(id=username,
                       name=name)
@@ -145,6 +155,7 @@ class IntegrationTestDBAndModels(LemurBaseCase):
         name = r.randlength_word()
         while ds.query(m.Role).filter(m.Role.name == name).count() != 0:
             name = r.randlength_word()
+
         powers = r.rand_powers()
         role = m.Role(name=name, powers=powers)
         ds.add(role)
@@ -158,6 +169,7 @@ class IntegrationTestDBAndModels(LemurBaseCase):
         id = r.randlength_word()
         while ds.query(m.Power).filter(m.Power.id == id).count() != 0:
             id = r.randlength_word()
+
         power = m.Power(id=id)
         ds.add(power)
         ds.commit()
