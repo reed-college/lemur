@@ -6,19 +6,24 @@ sys.path.append('../..')
 # Standard library
 import unittest
 # Local
-from lemur import (app, db, test_db_uri)
+from base_case import LemurBaseCase
+from lemur.lemur import db
 from lemur import models as m
 import helper_random as r
-from lemur.utility_generate_and_convert import (generate_lab_id,
-                                                generate_experiment_id,
-                                                generate_observation_id,
-                                                generate_class_id)
-from lemur.utility_find_and_get import (get_experiment,
-                                        get_observation,
-                                        get_user,
-                                        get_role,
-                                        get_power,
-                                        get_class)
+from lemur.utility_generate_and_convert import (
+    generate_lab_id,
+    generate_experiment_id,
+    generate_observation_id,
+    generate_class_id
+)
+from lemur.utility_find_and_get import (
+    get_experiment,
+    get_observation,
+    get_user,
+    get_role,
+    get_power,
+    get_class
+)
 ds = db.session
 
 
