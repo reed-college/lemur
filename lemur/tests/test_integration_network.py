@@ -233,14 +233,15 @@ class IntegrationTestNetwork(LemurBaseCase):
     def test_admin_setup_labs(self):
         superadmin = get_user(self.built_in_ids['superadmin_id'])
         self.login(superadmin.id)
-        clinet_form = {'labName': r.randlength_word(),
-                       'className': r.randlength_word(),
-                       'classTime': r.rand_classtime(),
-                       'professorName': r.randlength_word(),
-                       'labDescription': r.randlength_word(),
-                       'labQuestions': randint(1, 100)
-                       }
-        lab_info, err_msg = pack_labinfo_sent_from_client(clinet_form)
+        client_form = {
+            'labName': r.randlength_word(),
+            'className': r.randlength_word(),
+            'classTime': r.rand_classtime(),
+            'professorName': r.randlength_word(),
+            'labDescription': r.randlength_word(),
+            'labQuestions': randint(1, 100)
+        }
+        lab_info, err_msg = pack_labinfo_sent_from_client(client_form)
         rv = self.app.get('/admin_create_and_manage_lab?lab_info='+json.dumps(dict(labinfo=lab_info)),
                           follow_redirects=True)
         soup = self.decode(rv)
