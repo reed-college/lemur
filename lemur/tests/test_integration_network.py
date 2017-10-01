@@ -187,7 +187,7 @@ class IntegrationTestNetwork(LemurBaseCase):
                                          'experimentName': experiment.name,
                                          'observation': observation_datum}]
         observationsGroupByStudent = [{'studentName': student.name,
-                                      'observationsForOneExperiment': observationsForOneExperiment}]
+                                       'observationsForOneExperiment': observationsForOneExperiment}]
         data_to_be_sent = dict(observationsGroupByStudent=observationsGroupByStudent)
         self.app.post('/_student_receive_data',
                       data=json.dumps(data_to_be_sent),
@@ -389,11 +389,12 @@ class IntegrationTestNetwork(LemurBaseCase):
         soup = self.decode(rv)
         self.assertIn(admin_id, soup.tbody.text)
         # POST
-        user_form = {'username': r.randlength_word(),
-                     'name': r.randlength_word(),
-                     'role': r.rand_role(),
-                     'classIds': []
-                     }
+        user_form = {
+            'username': r.randlength_word(),
+            'name': r.randlength_word(),
+            'role': r.rand_role(),
+            'classIds': []
+        }
         headers = {'Content-type': 'application/x-www-form-urlencoded',
                    'Accept': 'text/plain'}
         rv = self.app.post('/superadmin_create_and_manage_user',
