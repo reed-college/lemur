@@ -7,8 +7,6 @@ sys.path.append('../..')
 import unittest
 
 # Local
-print(sys.path)
-from lemur.lemur import app, db
 from base_case import LemurBaseCase
 from lemur.lemur import db
 from lemur import models as m
@@ -48,6 +46,7 @@ class IntegrationTestUtilityGenerateAndConvert(LemurBaseCase):
             student = r.create_user(db)
             student.role = student_role
             students.append(student)
+
         lab = r.create_lab(db)
         lab.users = students
         for j in range(experiment_num):
@@ -56,6 +55,7 @@ class IntegrationTestUtilityGenerateAndConvert(LemurBaseCase):
                 observation = r.create_observation(db, experiment.id)
                 observation.student_name = students[k].name
                 experiment.observations.append(observation)
+
             lab.experiments.append(experiment)
         return lab
 
@@ -64,7 +64,9 @@ class IntegrationTestUtilityGenerateAndConvert(LemurBaseCase):
     def test_serialize_lab_list(self):
         for i in range(r.rand_round()):
             r.create_lab(db)
+
         lab_list_serialized = serialize_lab_list(get_all_lab())
+
         for lab in lab_list_serialized:
             lab_query = get_lab(lab['lab_id'])
             self.assertEqual(lab_query.name, lab['lab_name'])
@@ -75,7 +77,9 @@ class IntegrationTestUtilityGenerateAndConvert(LemurBaseCase):
     def test_serialize_experiment_list(self):
         for i in range(r.rand_round()):
             r.create_experiment(db)
+
         experiment_list_serialized = serialize_experiment_list(get_all_experiment())
+
         for exp in experiment_list_serialized:
             experiment_query = get_experiment(exp['experiment_id'])
             self.assertEqual(experiment_query.name, exp['experiment_name'])
@@ -90,7 +94,9 @@ class IntegrationTestUtilityGenerateAndConvert(LemurBaseCase):
         for i in range(r.rand_round()):
             user = r.create_user(db)
             user.role_name = r.rand_role()
+
         user_list_serialized = serialize_user_list(get_all_user())
+
         for user in user_list_serialized:
             user_query = get_user(user['username'])
             self.assertEqual(user_query.id, user['username'])
@@ -99,7 +105,9 @@ class IntegrationTestUtilityGenerateAndConvert(LemurBaseCase):
     def test_serialize_class_list(self):
         for i in range(r.rand_round()):
             r.create_class(db)
+
         class_list_serialized = serialize_class_list(get_all_class())
+
         for c in class_list_serialized:
             class_query = get_class(c['id'])
             self.assertEqual(class_query.id, c['id'])
