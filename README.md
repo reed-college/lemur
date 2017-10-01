@@ -1,78 +1,117 @@
 # lemur ![alt text](https://travis-ci.org/reed-college/lemur.svg?branch=master)
-This is a data collector for collecting biology data. It is a functional open-source web application built using Flask(a popular python web-framework), JS, HTML/CSS and PostgreSQL. Relatively comprehensive tests have been made. Lemur is currently hosted on reed.lemur.edu(a subdomain of Reed College). It can only be accessed by Reed faculty/staff/students who have registered biology classes. However, you are welcome to mirror the code and host it on another server and use it whatever way you like.
+`lemur` is a data collection app for the Reed College biology department, built using Flask, JavaScript, and PostgreSQL. Lemur is currently hosted on reed.lemur.edu. It can only be accessed by Reed faculty/staff/students who have registered biology classes. However, you are welcome to mirror the code and host it on another server and use it whatever way you like. (Do note that it is fairly tightly coupled with Reed College infrastructure, so considerable work will be needed to use it well yourself.)
 
 
-## Part1 App Description
-Lemur is an app built for efficient data consolidation from multiple independent sources. Classes with laboratory components that need to quickly collect data from all participants will benefit most. Consequently, there are three expected users of the app: lab instructors, professors, and students. Each of these corresponds to a different level of access. Lab instructors are considered Super Admins and are able to create, monitor, and edit the forms students submit data to. Additionally, they manage user access. Admins, or professors, are identical except that they cannot manage users. Students can only submit data. Professors that need to act as lab instructors should be given Super Admin status.
+## Part 1: App Description
+`lemur` is an app built for efficient data consolidation from multiple independent sources. Classes with laboratory components that need to quickly collect data from all participants will benefit most. Consequently, there are three expected users of the app: lab instructors, professors, and students. Each of these corresponds to a different level of access. Lab instructors are considered Super Admins and are able to create, monitor, and edit the forms students submit data to. Additionally, they manage user access. Admins, or professors, are identical except that they cannot manage users. Students can only submit data. Professors that need to act as lab instructors should be given Super Admin status.
 
 
-## Part2 Setup
-1. Create Virtual Environment for All Required Dependencies
-` mkvirtualenv lemur --python=python3 `
+## Part 2: Setup
 
-2. Install Required Packages
-` pip install -r requirements.txt `
+**Note**: `lemur` is written in Python 3, and is currently tested on [travis.ci](https://travis-ci.org/reed-college/lemur) against 3.4, 3.5, and 3.6.
 
-3. Create Local Database
-Set up a Postgres database. Add Python ORM SQLAlchemy to app. Once you have Postgres installed, create a database and name it lemur to use as a local database.
-* Run PostgreSQL command line client.
-* Create a database user with a password.
-* Create two database instances(one for the app and the other for testing).
+1. Create your virtual environment; be sure to use python3!
+   Vanilla python3:
+   ```sh
+   python3 -m venv env
+   ```
 
-Here is an example:
+   or with `virtualenvwrapper`:
 
-```
-psql
-create user zzy with password 'mypassword';
-create database lemur owner zzy encoding 'utf-8';
-create database travis_ci_test owner zzy encoding 'utf-8';
-```
+    ```sh
+    mkvirtualenv lemur --python=python3
+    ```
 
-4. Setup Database
-` python3 run.py db init `
+1. Install Required Packages
+   ` pip install -r requirements.txt `
 
-5. (optional)You may want to set up database migration version
-```
-python3 run.py db migrate
-python3 run.py db upgrade
-```
+1. Create Local Databases
+   `lemur` expects Postgres 9.5+; by default, it looks for two databases:
 
-6. (optional)You may want to populate the database
-
-` 'python3 db_populate_real.py' `
-
-7. Ask Reed College CIT for the private configuaration file
-In order to run the app
-You need to create a file named ’config.cfg’ and put it into both the ` instance ` folder and ` lemur/tests ` folder
-Its content should look like the content in `instance/config_example.cfg`(all the values need to be set up)
-8. Run the app `python3 __main__.py`
+   - `lemur`: local application database
+   - `travis_ci_test`: tests (including local)
 
 
-## Part3 Utility commands
+   Here is an example of creating the two user databases using `psql`:
+
+   ```sql
+   create user <user name> with password 'mypassword';
+   create database lemur owner <user name> encoding 'utf-8';
+   create database travis_ci_test owner <user name> encoding 'utf-8';
+   ```
+
+   Note that by default, `lemur` connects to Postgres on the current user's account; to configure it to use the service account created in the above example, see the [Configuration] section.
+
+1. Local Config File
+
+    Copy `instance/config_example.cfg` to `isntance/config.cfg` and set you your config values.
+
+1. Setup Database
+
+    `python3 run.py db init`
+
+1. (optional) Set up database migration version
+
+    ```sh
+    python3 run.py db migrate
+    python3 run.py db upgrade
+    ```
+
+1. (optional) Populate the database
+
+    ```sh
+    python3 db_populate_real.py
+    ```
+
+1. (Production): Ask Reed College CIT for the private configuaration file
+
+    In order to run the app
+    You need to create a file named ’config.cfg’ and put it into both the ` instance ` folder and ` lemur/tests ` folder
+    Its content should look like the content in `instance/config_example.cfg`(all the values need to be set up)
+
+1. Run the app
+    `python3 __main__.py`
+
+
+## Part 3: Utility commands
+
 ### 1: Reset databse
+
 Warning: This command will drop all the tables of the database so all the data in the database will be lost.
-` python3 db_reset.py `
+
+`python3 db_reset.py`
+
 ### 2: Initialize database
+
 This command will populate the database with some examples. It is mainly for testing.
+
 ` python3 db_populate.py `
+
 ### 3: Database migration
+
 This will migrate the database's update and upgrade the database to the latest version of the database.
 Warning: Not all changes are well supported by database migration(especially the change of a column's name will probably confuse the program). For details, please check out: [the official document for flask-migrate](http://flask-migrate.readthedocs.io/en/latest/)
-```
+
+```sh
 python3 run.py db migrate
 python3 run.py db upgrade
 ```
+
 ### 4: Testing
-Tests for the backend code: ` nose2 ` in lemur/lemur/tests
+
+#### Python
+
+The server is tested using `nose2`; run the tests with the `nose2` command from the root of the project. [Travis](https://travis-ci.org/reed-college/lemur) automatically runs nose against your branch on push.
+
+#### JavaScript
 
 Tests for the frontend code: Use any main stream browser to open js_test.html in lemur/lemur/tests
 
 The app will be run and the backend tests will be run automatically when one pushs new changes to the app's github repo
 
-
 ## Part 4 User Guide
-The Home page of each section links to the pages available to the user. Users can also move through the app using the sidebar, which appears when the Lemur logo in the upper lefthand corner of the page is clicked.
 
+The Home page of each section links to the pages available to the user. Users can also move through the app using the sidebar, which appears when the Lemur logo in the upper lefthand corner of the page is clicked.
 
 ### Admin Guide:
 
@@ -139,7 +178,7 @@ Admin Data Collection Page
 ├── lemur
 │   ├── __init__.py             # Initialize and run the software
 │   ├── models.py               # Data models in the database
-│   ├── static                  
+│   ├── static
 │   │   ├── css                 # CSS files(several 3rd party packages are used)
 │   │   ├── jquery-ui-1.12.0    # Contains jquery-ui library
 │   │   └── js                  # (Several 3rd party libraries including jquery are omitted here)
