@@ -60,21 +60,22 @@ class IntegrationTestUtilityModify(LemurBaseCase):
     # Generate a json format dictionary that consists of information needed to
     # create a new lab with random values
     def construct_lab_dict(self):
-        lab_dict = {'labName': r.randlength_word(),
-                    'classId': r.rand_classid(),
-                    'labDescription': r.randlength_word(),
-                    'experiments': [],
-                    'oldLabId': r.rand_lab_id()
-                    }
+        lab_dict = {
+            'labName': r.randlength_word(),
+            'classId': r.rand_classid(),
+            'labDescription': r.randlength_word(),
+            'experiments': [],
+            'oldLabId': r.rand_lab_id()
+        }
         for i in range(r.rand_round()):
-            exp_json = {'name': r.randlength_word(),
-                        'description': r.randlength_word(),
-                        'order': r.rand_order(),
-                        'valueType': r.rand_value_type(),
-                        'valueRange': r.rand_value_range(),
-                        'valueCandidates': r.rand_value_candidates()
-
-                        }
+            exp_json = {
+                'name': r.randlength_word(),
+                'description': r.randlength_word(),
+                'order': r.rand_order(),
+                'valueType': r.rand_value_type(),
+                'valueRange': r.rand_value_range(),
+                'valueCandidates': r.rand_value_candidates()
+            }
             lab_dict['experiments'].append(exp_json)
         return lab_dict
 
@@ -87,14 +88,17 @@ class IntegrationTestUtilityModify(LemurBaseCase):
             student = r.create_user(db)
             student.role = student_role
             students.append(student)
+
         lab = r.create_lab(db)
         lab.users = students
+
         for j in range(experiment_num):
             experiment = r.create_experiment(db, lab.id)
             for k in range(student_num):
                 observation = r.create_observation(db, experiment.id)
                 observation.student_name = students[k].name
                 experiment.observations.append(observation)
+
             lab.experiments.append(experiment)
         return lab
 
@@ -135,7 +139,9 @@ class IntegrationTestUtilityModify(LemurBaseCase):
         for i in range(r.rand_round()):
             observation = r.create_observation(db)
             observation_ids.append(observation.id)
+
         delete_observation(observation_ids)
+
         for observation_id in observation_ids:
             self.assertFalse(check_existence(observation_id))
 
@@ -147,11 +153,15 @@ class IntegrationTestUtilityModify(LemurBaseCase):
             observation_datum = r.randlength_word()
             experiment_id = experiment.id
             observation_id = generate_observation_id(experiment_id, student_name)
-            observation_list.append({'studentName': student_name,
-                                     'observationData': observation_datum,
-                                     'experimentId': experiment_id,
-                                     'observationId': observation_id
-                                     })
+            observation_list.append(
+                {
+                    'studentName': student_name,
+                    'observationData': observation_datum,
+                    'experimentId': experiment_id,
+                    'observationId': observation_id
+                }
+            )
+
         add_observation(observation_list)
         observation_num = find_observation_number_for_experiment(experiment.id)
         self.assertEqual(observation_num, len(observation_list))
@@ -162,8 +172,7 @@ class IntegrationTestUtilityModify(LemurBaseCase):
         lab = self.construct_lab_observations(student_num, experiment_num)
         observations_group_by_experiment_name, observations_group_by_student, _, _, _ = find_all_observations_for_labs([lab.id])
         err_msg = add_observations_sent_by_students(observations_group_by_student)
-        self.assertEqual(student_num * experiment_num,
-                         ds.query(m.Observation).count(), err_msg)
+        self.assertEqual(student_num * experiment_num, ds.query(m.Observation).count(), err_msg)
 
     def test_add_user(self):
         username = r.randlength_word()
@@ -204,8 +213,10 @@ class IntegrationTestUtilityModify(LemurBaseCase):
                                 ('classTime', r.rand_classtime())])
         for i in range(r.rand_round()):
             class_info['students'] += (r.randlength_word()+',')
+
         class_info['students'] = class_info['students'].rstrip(',')
         err_msg = add_class(class_info)
+
         if err_msg == '':
             class_id = generate_class_id(class_info['className'],
                                          class_info['classTime'])
@@ -236,7 +247,7 @@ class IntegrationTestUtilityModify(LemurBaseCase):
                                                                                                                                                                                 {"username": "prof4", "last_name": "Prof", "first_name": "Four"},
                                                                                                                                                                                 {"username": "prof5", "last_name": "Prof", "first_name": "Five"}]},
                       {'course_id': '10010', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '470', 'section': 'YJS', 'section_type': 'Ind. study', 'instructors': [{"username": "prof6", "last_name": "Prof", "first_name": "Six"}]}
-                      ]
+        ]
         populate_db_with_classes_and_professors(class_data)
         # Pick a random professor and a random class to test their existence
 
@@ -255,7 +266,7 @@ class IntegrationTestUtilityModify(LemurBaseCase):
                              {"user_name": "fake2", "last_name": "Fake", "first_name": "Two", "course_id": "11055", "term_code": "201701", "subject": "BIOL", "course_number": "351", "section": "FL1"},
                              {"user_name": "fake3", "last_name": "Fake", "first_name": "Three", "course_id": "11055", "term_code": "201701", "subject": "BIOL", "course_number": "351", "section": "FL1"},
                              {"user_name": "null", "last_name": "Fake", "first_name": "Four", "course_id": "10369", "term_code": "201701", "subject": "BIOL", "course_number": "342", "section": "FL1"}
-                             ]
+        ]
         class_id_list = ['BIOL342_FALL2016', 'BIOL351_FALL2016', 'BIOL356_FALL2016']
         # The classes don't exist in db so the users shouldn't be added
         err_msg = update_students_by_data_from_iris(class_id_list, registration_data)
