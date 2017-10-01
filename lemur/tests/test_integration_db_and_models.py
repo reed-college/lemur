@@ -27,29 +27,7 @@ from lemur.utility_find_and_get import (
 ds = db.session
 
 
-class IntegrationTestDBAndModels(unittest.TestCase):
-    # this is automatically called for us when we run the test
-    def setUp(self):
-        # It disables the error catching during request handling so that we get
-        # better error reports when performing test requests against the
-        # application.
-        app.config['TESTING'] = True
-        # The database used for this suit of tests is not the one used by the
-        # app. Before we run this test, we need to create a local database
-        # called lemur_test
-        app.config['SQLALCHEMY_DATABASE_URI'] = test_db_uri
-        self.app = app.test_client()
-        # Create all the tables
-        db.create_all()
-        # Insert all the roles(Student, Admin, SuperAdmin) that will be used
-        m.Role.insert_roles()
-
-    # tidy up after a test has been run
-    def tearDown(self):
-        # remove and clean the database completely
-        ds.remove()
-        db.drop_all()
-
+class IntegrationTestDBAndModels(LemurBaseCase):
     # --- Test data models in models.py ---
     # Notes:
     # 1.These tests don't check the relationship related values between
