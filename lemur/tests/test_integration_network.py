@@ -13,54 +13,36 @@ from bs4 import BeautifulSoup
 from werkzeug.datastructures import MultiDict
 
 # Local
-from lemur import (app, db, test_db_uri)
+from lemur.lemur import app, db
 from lemur import models as m
 from db_populate import populate_db
 import helper_random as r
-from lemur.utility_generate_and_convert import (generate_lab_id,
-                                                generate_experiment_id,
-                                                generate_observation_id,
-                                                generate_class_id,
-                                                pack_labinfo_sent_from_client)
-from lemur.utility_find_and_get import (lab_exists,
-                                        user_exists,
-                                        class_exists,
-                                        observation_exists,
-                                        get_lab,
-                                        get_experiment,
-                                        get_observation,
-                                        get_user,
-                                        get_role,
-                                        get_power,
-                                        get_class)
+from base_case import LemurBaseCase
+from lemur.utility_generate_and_convert import (
+    generate_lab_id,
+    #    generate_experiment_id,
+    generate_observation_id,
+    generate_class_id,
+    pack_labinfo_sent_from_client
+)
+
+from lemur.utility_find_and_get import (
+    lab_exists,
+    user_exists,
+    class_exists,
+    observation_exists,
+    get_lab,
+    get_experiment,
+    get_observation,
+    get_user,
+    get_role,
+    get_power,
+    get_class
+)
 ds = db.session
 
 
-class IntegrationTestNetwork(unittest.TestCase):
-    # this is automatically called for us when we run the test
-    def setUp(self):
-        # It disables the error catching during request handling so that we get
-        # better error reports when performing test requests against the
-        # application.
-        app.config['TESTING'] = True
-        # The database used for this suit of tests is not the one used by the
-        # app. Before we run this test, we need to create a local database
-        # called lemur_test
-        app.config['SQLALCHEMY_DATABASE_URI'] = test_db_uri
-        self.app = app.test_client()
-        # Create all the tables
-        db.create_all()
-        # Insert all the roles(Student, Admin, SuperAdmin) that will be used
-        m.Role.insert_roles()
-        # Populate db with objects
-        self.built_in_ids = populate_db()
-
-    # tidy up after a test has been run
-    def tearDown(self):
-        # remove and clean the database completely
-        ds.remove()
-        db.drop_all()
-
+class IntegrationTestNetwork(LemurBaseCase):
     # Generate a json format dictionary that consists of information needed to
     # create a new lab with random values
     def construct_lab_dict(self):

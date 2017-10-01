@@ -8,26 +8,30 @@ import unittest
 
 # Local
 print(sys.path)
-from lemur import (app, db, test_db_uri)
+from lemur.lemur import app, db
 from lemur import models as m
 import helper_random as r
-from lemur.utility_generate_and_convert import (serialize_lab_list,
-                                                        serialize_experiment_list,
-                                                        serialize_user_list,
-                                                        serialize_class_list,
-                                                        change_observation_organization
-                                                        )
-from lemur.utility_find_and_get import (get_lab,
-                                                get_experiment,
-                                                get_user,
-                                                get_role,
-                                                get_power,
-                                                get_class,
-                                                get_all_lab,
-                                                get_all_experiment,
-                                                get_all_user,
-                                                get_all_class,
-                                                find_all_observations_for_labs)
+from lemur.utility_generate_and_convert import (
+    serialize_lab_list,
+    serialize_experiment_list,
+    serialize_user_list,
+    serialize_class_list,
+    change_observation_organization
+)
+
+from lemur.utility_find_and_get import (
+    get_lab,
+    get_experiment,
+    get_user,
+    get_role,
+    get_power,
+    get_class,
+    get_all_lab,
+    get_all_experiment,
+    get_all_user,
+    get_all_class,
+    find_all_observations_for_labs
+)
 ds = db.session
 
 

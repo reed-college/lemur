@@ -1,20 +1,22 @@
 # Libraries
 # Local
 from lemur import models as m
-from lemur import db
-ds = db.session # finish all imports before assignment unless it is 100% imperative not to (it almost always isn't)
+from lemur.lemur import db
 from lemur.utility_generate_and_convert import generate_experiment_id
-from lemur.utility_find_and_get import (lab_exists,
-                                        experiment_exists,
-                                        observation_exists,
-                                        user_exists,
-                                        class_exists,
-                                        get_lab,
-                                        get_experiment,
-                                        get_class,
-                                        get_user,
-                                        get_role)
+from lemur.utility_find_and_get import (
+    lab_exists,
+    experiment_exists,
+    observation_exists,
+    user_exists,
+    class_exists,
+    get_lab,
+    get_experiment,
+    get_class,
+    get_user,
+    get_role
+)
 
+ds = db.session
 
 def populate_db():
     # Create a real lab example in the database. There is a exactly
@@ -76,9 +78,9 @@ def populate_db():
                                       value_range='',
                                       lab=get_lab(real_lab_id))
             ds.add(experiment)
-            experiment3_name = 'TemperatureTreatment'
-            experiment3_id = generate_experiment_id(real_lab_id, experiment3_name)
-            # ^ I suspect this is not the indentation you're looking for. -- RMD 2017-08-26
+
+        experiment3_name = 'TemperatureTreatment'
+        experiment3_id = generate_experiment_id(real_lab_id, experiment3_name)
         if not experiment_exists(experiment3_id):
             experiment = m.Experiment(id=experiment3_id, name=experiment3_name,
                                       description=('Enter ICE for ice water or'

@@ -10,39 +10,48 @@ from random import randint
 
 # Local
 import helper_random as r
-from helper_mock import (generate_lab_mock,
-                         generate_experiment_mock,
-                         generate_observation_mock,
-                         generate_user_mock,
-                         generate_class_mock)
-from lemur.utility_generate_and_convert import (check_existence,
-                                                generate_err_msg,
-                                                generate_lab_id,
-                                                generate_experiment_id,
-                                                generate_observation_id,
-                                                generate_class_id,
-                                                generate_user_name,
-                                                decompose_lab_id,
-                                                decompose_class_id,
-                                                serialize_lab_list,
-                                                serialize_experiment_list,
-                                                serialize_user_list,
-                                                serialize_class_list,
-                                                tranlate_term_code_to_semester,
-                                                cleanup_class_data,
-                                                pack_labinfo_sent_from_client,
-                                                change_observation_organization)
-from lemur.utility_find_and_get import (get_lab,
-                                        get_experiment,
-                                        get_user,
-                                        get_role,
-                                        get_power,
-                                        get_class,
-                                        get_all_lab,
-                                        get_all_experiment,
-                                        get_all_user,
-                                        get_all_class,
-                                        find_all_observations_for_labs)
+from helper_mock import (
+    generate_lab_mock,
+    generate_experiment_mock,
+    generate_observation_mock,  # Unused
+    generate_user_mock,
+    generate_class_mock
+)
+
+from lemur.utility_generate_and_convert import (
+    check_existence,
+    generate_err_msg,
+    generate_lab_id,
+    generate_experiment_id,
+    generate_observation_id,
+    generate_class_id,
+    generate_user_name,
+    decompose_lab_id,
+    decompose_class_id,
+    serialize_lab_list,
+    serialize_experiment_list,
+    serialize_user_list,
+    serialize_class_list,
+    tranlate_term_code_to_semester,
+    cleanup_class_data,
+    pack_labinfo_sent_from_client,
+    change_observation_organization
+)
+
+# ...most of these might be unused?
+from lemur.utility_find_and_get import (
+    get_lab,
+    get_experiment,
+    get_user,
+    get_role,
+    get_power,
+    get_class,
+    get_all_lab,
+    get_all_experiment,
+    get_all_user,
+    get_all_class,
+    find_all_observations_for_labs
+)
 
 
 # This file consists of functions that generate strings and convert data format

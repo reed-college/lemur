@@ -7,40 +7,45 @@ import unittest
 from random import randint
 
 # Local
-from lemur import (app, db, test_db_uri)
+from lemur.lemur import app, db
 from lemur import models as m
 import helper_random as r
-from lemur.utility_generate_and_convert import (generate_lab_id,
-                                                generate_experiment_id,
-                                                generate_observation_id,
-                                                generate_class_id)
-from lemur.utility_find_and_get import (lab_exists,
-                                        experiment_exists,
-                                        observation_exists,
-                                        user_exists,
-                                        class_exists,
-                                        get_lab,
-                                        get_experiment,
-                                        get_observation,
-                                        get_user,
-                                        get_role,
-                                        get_power,
-                                        get_class,
-                                        get_all_lab,
-                                        get_all_experiment,
-                                        get_all_user,
-                                        get_all_admin,
-                                        get_all_superadmin,
-                                        get_all_class,
-                                        get_available_labs_for_user,
-                                        get_experiments_for_lab,
-                                        get_observations_for_experiment,
-                                        get_class_id_list,
-                                        find_all_labs,
-                                        find_lab_copy_id,
-                                        find_all_observations_for_labs,
-                                        find_lab_list_for_user,
-                                        find_observation_number_for_experiment)
+# Entirely unused?
+from lemur.utility_generate_and_convert import (
+    generate_lab_id,
+    generate_experiment_id,
+    generate_observation_id,
+    generate_class_id
+)
+from lemur.utility_find_and_get import (
+    lab_exists,
+    experiment_exists,
+    observation_exists,
+    user_exists,
+    class_exists,
+    get_lab,
+    get_experiment,
+    get_observation,
+    get_user,
+    get_role,
+    get_power,
+    get_class,
+    get_all_lab,
+    get_all_experiment,
+    get_all_user,
+    get_all_admin,
+    get_all_superadmin,
+    get_all_class,
+    get_available_labs_for_user,
+    get_experiments_for_lab,
+    get_observations_for_experiment,
+    get_class_id_list,
+    find_all_labs,
+    find_lab_copy_id,
+    find_all_observations_for_labs,
+    find_lab_list_for_user,
+    find_observation_number_for_experiment
+)
 ds = db.session
 
 
