@@ -11,7 +11,6 @@ import helper_random as r
 from helper_mock import (
     generate_lab_mock,
     generate_experiment_mock,
-    generate_observation_mock,  # Unused
     generate_user_mock,
     generate_class_mock
 )
@@ -34,21 +33,6 @@ from lemur.utility_generate_and_convert import (
     cleanup_class_data,
     pack_labinfo_sent_from_client,
     change_observation_organization
-)
-
-# ...most of these might be unused?
-from lemur.utility_find_and_get import (
-    get_lab,
-    get_experiment,
-    get_user,
-    get_role,
-    get_power,
-    get_class,
-    get_all_lab,
-    get_all_experiment,
-    get_all_user,
-    get_all_class,
-    find_all_observations_for_labs
 )
 
 
