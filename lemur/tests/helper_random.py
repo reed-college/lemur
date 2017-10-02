@@ -22,7 +22,7 @@ from lemur.utility_find_and_get import (get_power,
 # with a random length within the interval
 def randlength_word(min_len=5, max_len=10):
     return ''.join(choice(ascii_lowercase + ascii_uppercase +
-                   digits) for i in range(randint(min_len, max_len)))
+                          digits) for i in range(randint(min_len, max_len)))
 
 
 # generate a random lab status
@@ -114,7 +114,9 @@ def rand_student_names(number=5):
         # Avoid repetition of username
         while s.find(username) != -1:
             username = randlength_word()
+
         s += (username+',')
+
     s = s.rstrip(',')
     return s
 
@@ -138,47 +140,49 @@ def rand_observations_group_by_experiment_name():
                            'lab_id': lab_id,
                            'experiment_id': experiment_id}
             experiment['observations'].append(observation)
+
         observations_group_by_experiment_name.append(experiment)
     return observations_group_by_experiment_name
 
 
 # - A list of helper functions for creating a random object in database -
-def create_class(db):
+def create_class(ds):
     name = randlength_word()
     time = randlength_word()
     class_id = generate_class_id(name, time)
-    while db.session.query(m.Class).filter(m.Class.id == class_id).count() != 0:
+    while ds.query(m.Class).filter(m.Class.id == class_id).count() != 0:
         name = randlength_word()
         time = randlength_word()
         class_id = generate_class_id(name, time)
+
     the_class = m.Class(id=class_id, name=name, time=time)
-    db.session.add(the_class)
-    db.session.commit()
-    class_query = db.session.query(m.Class).filter(m.Class.id == class_id).first()
+    ds.add(the_class)
+    ds.commit()
+    class_query = ds.query(m.Class).filter(m.Class.id == class_id).first()
     return class_query
 
 
-def create_lab(db):
-    the_class = create_class(db)
+def create_lab(ds):
+    the_class = create_class(ds)
     name = randlength_word()
     class_id = the_class.id
     description = randlength_word()
     status = 'Activated'
     lab_id = generate_lab_id(name, class_id)
-    while db.session.query(m.Lab).filter(m.Lab.id == lab_id).count() != 0:
+    while ds.query(m.Lab).filter(m.Lab.id == lab_id).count() != 0:
         class_id = rand_classid()
         description = randlength_word()
         lab_id = generate_lab_id(name, class_id)
 
     lab = m.Lab(id=lab_id, name=name, the_class=the_class,
                 description=description, status=status)
-    db.session.add(lab)
-    db.session.commit()
-    lab_query = db.session.query(m.Lab).filter(m.Lab.id == lab_id).first()
+    ds.add(lab)
+    ds.commit()
+    lab_query = ds.query(m.Lab).filter(m.Lab.id == lab_id).first()
     return lab_query
 
 
-def create_experiment(db, lab_id=rand_lab_id()):
+def create_experiment(ds, lab_id=rand_lab_id()):
     name = randlength_word()
     description = randlength_word()
     order = rand_order()
@@ -186,71 +190,76 @@ def create_experiment(db, lab_id=rand_lab_id()):
     value_range = rand_value_range()
     value_candidates = rand_value_candidates()
     experiment_id = generate_experiment_id(lab_id, name)
-    while db.session.query(m.Experiment).filter(m.Experiment.id == experiment_id).count() != 0:
+    while ds.query(m.Experiment).filter(m.Experiment.id == experiment_id).count() != 0:
         name = randlength_word()
         lab_id = rand_lab_id()
         experiment_id = generate_experiment_id(lab_id, name)
+
     experiment = m.Experiment(id=experiment_id, name=name,
                               description=description, order=order,
                               value_type=value_type,
                               value_range=value_range,
                               value_candidates=value_candidates)
-    db.session.add(experiment)
-    db.session.commit()
-    experiment_query = db.session.query(m.Experiment).filter(m.Experiment.id == experiment_id).first()
+    ds.add(experiment)
+    ds.commit()
+    experiment_query = ds.query(m.Experiment).filter(m.Experiment.id == experiment_id).first()
     return experiment_query
 
 
-def create_observation(db, experiment_id=rand_experiment_id()):
+def create_observation(ds, experiment_id=rand_experiment_id()):
     student_name = randlength_word()
     datum = randlength_word()
     observation_id = generate_observation_id(experiment_id, student_name)
-    while db.session.query(m.Observation).filter(m.Observation.id == observation_id).count() != 0:
+    while ds.query(m.Observation).filter(m.Observation.id == observation_id).count() != 0:
         student_name = randlength_word()
         experiment_id = rand_experiment_id()
         observation_id = generate_observation_id(experiment_id,
                                                  student_name)
+
     observation = m.Observation(id=observation_id,
                                 student_name=student_name,
                                 datum=datum)
 
-    db.session.add(observation)
-    db.session.commit()
-    observation_query = db.session.query(m.Observation).filter(m.Observation.id == observation_id).first()
+    ds.add(observation)
+    ds.commit()
+    observation_query = ds.query(m.Observation).filter(m.Observation.id == observation_id).first()
     return observation_query
 
 
-def create_user(db):
+def create_user(ds):
     username = randlength_word()
-    while db.session.query(m.User).filter(m.User.id == username).count() != 0:
+    while ds.query(m.User).filter(m.User.id == username).count() != 0:
         username = randlength_word()
+
     name = randlength_word()
     user = m.User(id=username,
                   name=name)
-    db.session.add(user)
-    db.session.commit()
-    user_query = db.session.query(m.User).filter(m.User.id == username).first()
+    ds.add(user)
+    ds.commit()
+    user_query = ds.query(m.User).filter(m.User.id == username).first()
     return user_query
 
 
-def create_role(db):
+def create_role(ds):
     name = randlength_word()
-    while db.session.query(m.Role).filter(m.Role.name == name).count() != 0:
+    while ds.query(m.Role).filter(m.Role.name == name).count() != 0:
         name = randlength_word()
+
     powers = rand_powers()
     role = m.Role(name=name, powers=powers)
-    db.session.add(role)
-    db.session.commit()
+    ds.add(role)
+    ds.commit()
     role_query = get_role(name)
     return role_query
 
 
-def create_power(db):
+def create_power(ds):
     id = randlength_word()
-    while db.session.query(m.Power).filter(m.Power.id == id).count() != 0:
+    while ds.query(m.Power).filter(m.Power.id == id).count() != 0:
         id = randlength_word()
+
     power = m.Power(id=id)
-    db.session.add(power)
-    db.session.commit()
+    ds.add(power)
+    ds.commit()
     power_query = get_power(id)
     return power_query
