@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 from werkzeug.datastructures import MultiDict
 
 # Local
-from lemur.lemur import app, db
+from lemur import app, db
 from lemur import models as m
 from db_populate import populate_db
 import helper_random as r
@@ -148,7 +148,11 @@ class IntegrationTestNetwork(LemurBaseCase):
         # Start a new session
         # The lab should be visible after it is
         # added into the lab list of the student
-        student = get_user(student.id)
+        # Note! The login action will cause the student object associated
+        # with that ID to become detatched, which is why we load *after*
+        # we login.
+        self.login(self.built_in_ids['student_id'])
+        student = get_user(self.built_in_ids['student_id'])
         lab = get_lab(self.built_in_ids['lab_id'])
         student.labs.append(lab)
         ds.commit()
