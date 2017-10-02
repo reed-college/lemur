@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from lemur.lemur import app, db
+from lemur import app, db
 from lemur import models as m
 from db_populate import populate_db
 

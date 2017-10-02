@@ -7,56 +7,64 @@ import json
 import ast
 
 # Third-party libraries
-from flask import (render_template, request, redirect, url_for,
-                   flash)
+from flask import (
+    render_template,
+    request,
+    redirect,
+    url_for
+)
 from flask.ext.login import (login_user, logout_user, current_user,
                              login_required)
 import requests
 
 # Other modules
-from lemur import (app, db, student_api_url, class_api_url)
+from lemur import app, db
 from lemur import models as m
 from lemur.utility_decorators import permission_required
-from lemur.utility_generate_and_convert import (check_existence,
-                                                serialize_lab_list,
-                                                serialize_experiment_list,
-                                                serialize_user_list,
-                                                serialize_class_list,
-                                                pack_labinfo_sent_from_client,
-                                                format_download,
-                                                normal_json,
-                                                err_json,
-                                                err_html)
-from lemur.utility_find_and_get import (lab_exists,
-                                        get_lab,
-                                        get_experiment,
-                                        get_user,
-                                        get_class,
-                                        get_all_lab,
-                                        get_all_class,
-                                        get_all_user,
-                                        get_available_labs_for_user,
-                                        get_experiments_for_lab,
-                                        get_class_id_list,
-                                        find_lab_list_for_user,
-                                        find_all_labs,
-                                        find_all_observations_for_labs)
-from lemur.utility_modify import (delete_lab,
-                                  modify_lab,
-                                  duplicate_lab,
-                                  change_lab_status,
-                                  delete_observation,
-                                  add_observation,
-                                  add_observations_sent_by_students,
-                                  add_user,
-                                  change_user_info,
-                                  delete_user,
-                                  add_class,
-                                  delete_class,
-                                  change_class_users,
-                                  populate_db_with_classes_and_professors,
-                                  update_students_by_data_from_iris,
-                                  delete_all_students)
+from lemur.utility_generate_and_convert import (
+    check_existence,
+    serialize_lab_list,
+    serialize_experiment_list,
+    serialize_user_list,
+    serialize_class_list,
+    pack_labinfo_sent_from_client,
+    format_download,
+    normal_json,
+    err_json,
+    err_html
+)
+from lemur.utility_find_and_get import (
+    lab_exists,
+    get_lab,
+    get_user,
+    get_all_lab,
+    get_all_class,
+    get_all_user,
+    get_available_labs_for_user,
+    get_experiments_for_lab,
+    get_class_id_list,
+    find_lab_list_for_user,
+    find_all_labs,
+    find_all_observations_for_labs
+)
+from lemur.utility_modify import (
+    delete_lab,
+    modify_lab,
+    duplicate_lab,
+    change_lab_status,
+    delete_observation,
+    add_observation,
+    add_observations_sent_by_students,
+    add_user,
+    change_user_info,
+    delete_user,
+    add_class,
+    delete_class,
+    change_class_users,
+    populate_db_with_classes_and_professors,
+    update_students_by_data_from_iris,
+    delete_all_students
+)
 # Abbreviation for convenience
 ds = db.session
 

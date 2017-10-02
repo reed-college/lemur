@@ -1,7 +1,7 @@
 # Libraries
 # Local
 from lemur import models as m
-from lemur.lemur import app, db
+from lemur import app, db
 from lemur.utility_generate_and_convert import (
     check_existence,
     generate_lab_id,

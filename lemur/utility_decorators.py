@@ -17,7 +17,7 @@ from flask import (
 from flask.ext.login import current_user
 
 # Local
-from lemur.lemur import app, db
+from lemur import app, db
 ds = db.session
 
 

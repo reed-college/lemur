@@ -8,7 +8,7 @@ from datetime import datetime
 from flask.ext.login import UserMixin, AnonymousUserMixin
 
 # Other modules
-from lemur.lemur import db, login_manager
+from lemur import db, login_manager
 
 # Association tables for Many-To-Many relationships between various tables
 association_table_class_user = db.Table('association_class_user',
