@@ -2,14 +2,12 @@
 # Libraries
 # Standard library
 import unittest
-import json
 from random import randint
 
 # Third-party libraries
 from werkzeug.datastructures import MultiDict
 
 # Local
-from lemur.lemur import db
 from lemur import models as m
 from db_populate import populate_db
 import helper_random as r
@@ -17,7 +15,6 @@ from base_case import LemurBaseCase
 from lemur.utility_generate_and_convert import (
     check_existence,
     generate_lab_id,
-    generate_experiment_id,     # Unused
     generate_observation_id,
     generate_class_id,
     tranlate_term_code_to_semester
@@ -28,7 +25,6 @@ from lemur.utility_find_and_get import (
     class_exists,
     get_user,
     get_role,
-    get_power,                  # Unused
     get_class,
     find_all_observations_for_labs,
     find_observation_number_for_experiment
