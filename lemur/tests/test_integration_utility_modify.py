@@ -303,7 +303,7 @@ class IntegrationTestUtilityModify(LemurBaseCase):
 
         random_index = randint(0, len(class_data) - 1)
         professor_id = class_data[random_index]['instructors'][0]["username"]
-        print('Looking for ' + professor_id)
+
         # 'prof6' has course_number 470, which will be filtered out of the
         # course list; any other user should be created.
         if professor_id == 'prof6':
