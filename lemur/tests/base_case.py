@@ -10,6 +10,7 @@ ds = db.session
 class LemurBaseCase(TestCase):
     def setUp(self):
         self.app = app.test_client()
+        self.ds = db.session
         # Create all the tables
         db.create_all()
         # Insert all the roles(Student, Admin, SuperAdmin) that will be used
