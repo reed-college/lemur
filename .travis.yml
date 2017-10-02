@@ -4,7 +4,7 @@ python:
   - '3.5'
   - '3.6'
 env:
-  - LEMUR_CONFIG=config_travis.cfg
+  - LEMUR_CONFIG=$(PWD)/config_travis.cfg # needs to be set to an absolute path
 # command to install dependencies
 install: "pip install -r requirements.txt"
 # command to run tests
