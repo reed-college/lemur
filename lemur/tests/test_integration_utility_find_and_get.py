@@ -1,6 +1,4 @@
 # This file consists of testing for functions that find/get objects from db
-import sys
-sys.path.append('../..')
 # Libraries
 # Standard library
 import unittest

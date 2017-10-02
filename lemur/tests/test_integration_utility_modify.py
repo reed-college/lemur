@@ -1,6 +1,4 @@
 # This file consists of functions that add/delete/modify objects in db
-import sys
-sys.path.append('../..')
 # Libraries
 # Standard library
 import unittest

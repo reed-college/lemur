@@ -1,7 +1,5 @@
 # This file consists of testing for the creation of objects and their
 # relationship in db
-import sys
-sys.path.append('../..')
 # Libraries
 # Standard library
 import unittest

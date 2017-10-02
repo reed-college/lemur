@@ -1,7 +1,5 @@
 # This file consists of testing for functions that generate messages/strings
 # and convert data into another format
-import sys
-sys.path.append('../..')
 # Libraries
 # Standard library
 import unittest
