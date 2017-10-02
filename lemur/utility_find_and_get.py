@@ -6,7 +6,7 @@ import sys
 
 # Local
 from lemur import models as m
-from lemur.lemur import db
+from lemur import db
 from lemur.utility_decorators import failure_handler
 from lemur.utility_generate_and_convert import (
     serialize_lab_list,
@@ -63,8 +63,7 @@ def get_observation(observation_id):
 
 @failure_handler
 def get_user(username):
-    return ds.query(m.User).filter(
-        m.User.id == username).one()
+    return ds.query(m.User).filter(m.User.id == username).one()
 
 
 @failure_handler
@@ -193,10 +192,11 @@ def find_lab_list_for_user(user):
         # a lab
         if len(experiments_query) > 0:
             data_num += find_observation_number_for_experiment(experiments_query[0].id)
-            lab_list.append({'lab_id': lab.id, 'lab_name': lab.name,
-                             'class_id': lab.class_id,
-                             'lab_status': lab.status,
-                             'data_num': data_num})
+
+        lab_list.append({'lab_id': lab.id, 'lab_name': lab.name,
+                         'class_id': lab.class_id,
+                         'lab_status': lab.status,
+                         'data_num': data_num})
     return lab_list
 
 
@@ -275,8 +275,10 @@ def find_all_observations_for_labs(lab_ids):
                                 'experiment_id': observation.experiment_id,
                                 'observation_id': observation.id,
                                 'observation_data': observation.datum})
-                            index += 1
-                            observations_group_by_student = change_observation_organization(observations_group_by_experiment_name)
+
+                    index += 1
+
+        observations_group_by_student = change_observation_organization(observations_group_by_experiment_name)
 
     except Exception:
         exc_type, exc_obj, tb = sys.exc_info()
