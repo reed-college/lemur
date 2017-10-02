@@ -47,8 +47,6 @@ from lemur.utility_modify import (
     update_students_by_data_from_iris
 )
 
-ds = db.session
-
 
 class IntegrationTestUtilityModify(LemurBaseCase):
     # Generate a json format dictionary that consists of information needed to
@@ -79,17 +77,17 @@ class IntegrationTestUtilityModify(LemurBaseCase):
         student_role = get_role('Student')
         students = []
         for _ in range(student_num):
-            student = r.create_user(db)
+            student = r.create_user(self.ds)
             student.role = student_role
             students.append(student)
 
-        lab = r.create_lab(db)
+        lab = r.create_lab(self.ds)
         lab.users = students
 
         for j in range(experiment_num):
-            experiment = r.create_experiment(db, lab.id)
+            experiment = r.create_experiment(self.ds, lab.id)
             for k in range(student_num):
-                observation = r.create_observation(db, experiment.id)
+                observation = r.create_observation(self.ds, experiment.id)
                 observation.student_name = students[k].name
                 experiment.observations.append(observation)
 
@@ -99,7 +97,7 @@ class IntegrationTestUtilityModify(LemurBaseCase):
     # - Testing functions for functions that add/delete/modify an object or
     # related functions with the input in a certain format -
     def test_delete_lab(self):
-        lab = r.create_lab(db)
+        lab = r.create_lab(self.ds)
         lab_id = lab.id
         delete_lab(lab_id)
         self.assertFalse(lab_exists(lab_id))
@@ -123,7 +121,7 @@ class IntegrationTestUtilityModify(LemurBaseCase):
         self.assertTrue(lab_exists('copy1-'+lab_id))
 
     def test_change_lab_status(self):
-        lab = r.create_lab(db)
+        lab = r.create_lab(self.ds)
         new_status = r.rand_lab_status()
         change_lab_status(lab.id, new_status)
         self.assertEqual(lab.status, new_status)
@@ -131,7 +129,7 @@ class IntegrationTestUtilityModify(LemurBaseCase):
     def test_delete_observation(self):
         observation_ids = []
         for i in range(r.rand_round()):
-            observation = r.create_observation(db)
+            observation = r.create_observation(self.ds)
             observation_ids.append(observation.id)
 
         delete_observation(observation_ids)
@@ -140,7 +138,7 @@ class IntegrationTestUtilityModify(LemurBaseCase):
             self.assertFalse(check_existence(observation_id))
 
     def test_add_observation(self):
-        experiment = r.create_experiment(db)
+        experiment = r.create_experiment(self.ds)
         observation_list = []
         for i in range(r.rand_round()):
             student_name = r.randlength_word()
@@ -163,10 +161,16 @@ class IntegrationTestUtilityModify(LemurBaseCase):
     def test_add_observations_sent_by_students(self):
         student_num = 5
         experiment_num = 5
+        expected = student_num * experiment_num
         lab = self.construct_lab_observations(student_num, experiment_num)
+        experiment_ids = [experiment.id for experiment in lab.experiments]
         observations_group_by_experiment_name, observations_group_by_student, _, _, _ = find_all_observations_for_labs([lab.id])
         err_msg = add_observations_sent_by_students(observations_group_by_student)
-        self.assertEqual(student_num * experiment_num, ds.query(m.Observation).count(), err_msg)
+        # There is often other bootstrapped crap in the DB; be sure to match
+        # precisely on what we need
+        found_by_query = self.ds.query(m.Observation).filter(m.Observation.experiment_id.in_(experiment_ids))
+
+        self.assertEqual(expected, found_by_query.count(), err_msg)
 
     def test_add_user(self):
         username = r.randlength_word()
@@ -180,16 +184,16 @@ class IntegrationTestUtilityModify(LemurBaseCase):
 
     def test_delete_user(self):
         admin_role = get_role(r.rand_admin())
-        admin = r.create_user(db)
+        admin = r.create_user(self.ds)
         admin_id = admin.id
         admin.role = admin_role
         delete_user(admin_id)
         self.assertFalse(user_exists(admin_id))
 
     def test_change_user_info(self):
-        username = r.create_user(db).id
+        username = r.create_user(self.ds).id
         role_name = r.rand_role()
-        class_ids = [r.create_class(db).id]
+        class_ids = [r.create_class(self.ds).id]
         change_user_info(username, role_name, class_ids)
         the_user = get_user(username)
         class_id_list = [c.id for c in the_user.classes]
@@ -218,7 +222,7 @@ class IntegrationTestUtilityModify(LemurBaseCase):
             self.assertEqual(the_class.id, class_id, err_msg)
 
     def test_delete_class(self):
-        the_class = r.create_class(db)
+        the_class = r.create_class(self.ds)
         class_id = the_class.id
         delete_class(class_id)
         self.assertFalse(class_exists(class_id))
@@ -233,29 +237,93 @@ class IntegrationTestUtilityModify(LemurBaseCase):
         for user_id in new_user_ids:
             self.assertIn(user_id, class_user_ids)
 
+    # This test has a non-deterministic failure! What fun.
     def test_populate_db_with_classes_and_professors(self):
         # A snippet from real data
-        class_data = [{'course_id': '11069', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '331', 'section': 'F', 'section_type': 'Lecture', 'instructors': [{"username": "prof1", "last_name": "Prof", "first_name": "One"}]},
-                      {'course_id': '10236', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '101', 'section': 'F22', 'section_type': 'Lab', 'instructors': [{"username": "prof2", "last_name": "Prof", "first_name": "Two"}]},
-                      {'course_id': '10447', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '101', 'section': 'F01', 'section_type': 'Lab Lecture', 'instructors': [{"username": "prof3", "last_name": "Prof", "first_name": "Three"},
-                                                                                                                                                                                {"username": "prof4", "last_name": "Prof", "first_name": "Four"},
-                                                                                                                                                                                {"username": "prof5", "last_name": "Prof", "first_name": "Five"}]},
-                      {'course_id': '10010', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '470', 'section': 'YJS', 'section_type': 'Ind. study', 'instructors': [{"username": "prof6", "last_name": "Prof", "first_name": "Six"}]}
-        ]
+        class_data = [
+            {
+                'course_id': '11069',
+                'term_code': '201701',
+                'subject': 'BIOL',
+                'course_number': '331',
+                'section': 'F',
+                'section_type': 'Lecture',
+                'instructors': [{
+                    "username": "prof1",
+                    "last_name": "Prof",
+                    "first_name": "One"
+                }]
+            }, {
+                'course_id': '10236',
+                'term_code': '201701',
+                'subject': 'BIOL',
+                'course_number': '101',
+                'section': 'F22',
+                'section_type': 'Lab',
+                'instructors': [{
+                    "username": "prof2",
+                    "last_name": "Prof",
+                    "first_name": "Two"
+                }]
+            }, {
+                'course_id': '10447',
+                'term_code': '201701',
+                'subject': 'BIOL',
+                'course_number': '101',
+                'section': 'F01',
+                'section_type': 'Lab Lecture',
+                'instructors': [{
+                    "username": "prof3",
+                    "last_name": "Prof",
+                    "first_name": "Three"
+                }, {
+                    "username": "prof4",
+                    "last_name": "Prof",
+                    "first_name": "Four"
+                }, {
+                    "username": "prof5",
+                    "last_name": "Prof",
+                    "first_name": "Five"
+                }]
+            }, {
+                'course_id': '10010',
+                'term_code': '201701',
+                'subject': 'BIOL',
+                'course_number': '470',
+                'section': 'YJS',
+                'section_type': 'Ind. study',
+                'instructors': [{
+                    "username": "prof6",
+                    "last_name": "Prof",
+                    "first_name": "Six"
+                }]
+            }]
         populate_db_with_classes_and_professors(class_data)
         # Pick a random professor and a random class to test their existence
 
-        random_index = randint(0, len(class_data)-2)
+        random_index = randint(0, len(class_data) - 1)
         professor_id = class_data[random_index]['instructors'][0]["username"]
-        self.assertTrue(user_exists(professor_id))
+        print('Looking for ' + professor_id)
+        # 'prof6' has course_number 470, which will be filtered out of the
+        # course list; any other user should be created.
+        if professor_id == 'prof6':
+            self.assertFalse(user_exists(professor_id))
+        else:
+            self.assertTrue(user_exists(professor_id))
+
+        # Same thing. If the randomly selected course is 10010, it should _not_ exist.
+        course_id = class_data[random_index]['course_id']
         class_name = class_data[random_index]['subject'] + class_data[random_index]['course_number']
         class_time = tranlate_term_code_to_semester(class_data[random_index]['term_code'])
         class_id = generate_class_id(class_name, class_time)
-        self.assertTrue(class_exists(class_id))
+        if course_id == '10010':
+            self.assertFalse(class_exists(class_id))
+        else:
+            self.assertTrue(class_exists(class_id))
 
     def test_update_students_by_data_from_iris(self):
-        ds.add(m.Class(id='BIOL351_FALL2016', name='BIOL351', time='FALL2016'))
-        ds.commit()
+        self.ds.add(m.Class(id='BIOL351_FALL2016', name='BIOL351', time='FALL2016'))
+        self.ds.commit()
         registration_data = [{"user_name": "fake1", "last_name": "Fake", "first_name": "One", "course_id": "10508", "term_code": "201701", "subject": "BIOL", "course_number": "356", "section": "FL1"},
                              {"user_name": "fake2", "last_name": "Fake", "first_name": "Two", "course_id": "11055", "term_code": "201701", "subject": "BIOL", "course_number": "351", "section": "FL1"},
                              {"user_name": "fake3", "last_name": "Fake", "first_name": "Three", "course_id": "11055", "term_code": "201701", "subject": "BIOL", "course_number": "351", "section": "FL1"},

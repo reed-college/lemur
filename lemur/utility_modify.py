@@ -87,25 +87,26 @@ def modify_lab(lab_json):
                 warning_msg = 'repeted experiment name:{} in this lab'.format(experiment_name)
                 app.logger.warning(warning_msg)
                 continue
-            experiment_id = generate_experiment_id(lab_id, experiment_name)
 
-            if experiment_exists(experiment_id):
-                warning_msg = 'The same experiment name has already exist in the same lab'
-                app.logger.warning(warning_msg)
-                continue
-            else:
-                experiments_for_lab.append(
-                    m.Experiment(
-                        lab_id=lab_id,
-                        id=experiment_id,
-                        name=experiment_name,
-                        description=e['description'],
-                        order=e['order'],
-                        value_type=e['valueType'],
-                        value_range=e['valueRange'],
-                        value_candidates=e['valueCandidates']
-                    )
+        experiment_id = generate_experiment_id(lab_id, experiment_name)
+
+        if experiment_exists(experiment_id):
+            warning_msg = 'The same experiment name has already exist in the same lab'
+            app.logger.warning(warning_msg)
+            continue
+        else:
+            experiments_for_lab.append(
+                m.Experiment(
+                    lab_id=lab_id,
+                    id=experiment_id,
+                    name=experiment_name,
+                    description=e['description'],
+                    order=e['order'],
+                    value_type=e['valueType'],
+                    value_range=e['valueRange'],
+                    value_candidates=e['valueCandidates']
                 )
+            )
 
     the_lab = m.Lab(id=lab_id, name=lab_json['labName'],
                     description=lab_json['labDescription'],

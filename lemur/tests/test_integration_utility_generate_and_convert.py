@@ -26,7 +26,6 @@ from lemur.utility_find_and_get import (
     get_all_class,
     find_all_observations_for_labs
 )
-ds = db.session
 
 
 # This file consists of functions that generate strings and convert data format
@@ -37,16 +36,16 @@ class IntegrationTestUtilityGenerateAndConvert(LemurBaseCase):
         student_role = get_role('Student')
         students = []
         for _ in range(student_num):
-            student = r.create_user(db)
+            student = r.create_user(self.ds)
             student.role = student_role
             students.append(student)
 
-        lab = r.create_lab(db)
+        lab = r.create_lab(self.ds)
         lab.users = students
         for j in range(experiment_num):
-            experiment = r.create_experiment(db, lab.id)
+            experiment = r.create_experiment(self.ds, lab.id)
             for k in range(student_num):
-                observation = r.create_observation(db, experiment.id)
+                observation = r.create_observation(self.ds, experiment.id)
                 observation.student_name = students[k].name
                 experiment.observations.append(observation)
 
@@ -57,7 +56,7 @@ class IntegrationTestUtilityGenerateAndConvert(LemurBaseCase):
     # a list of python dictionary
     def test_serialize_lab_list(self):
         for i in range(r.rand_round()):
-            r.create_lab(db)
+            r.create_lab(self.ds)
 
         lab_list_serialized = serialize_lab_list(get_all_lab())
 
@@ -70,7 +69,7 @@ class IntegrationTestUtilityGenerateAndConvert(LemurBaseCase):
 
     def test_serialize_experiment_list(self):
         for i in range(r.rand_round()):
-            r.create_experiment(db)
+            r.create_experiment(self.ds)
 
         experiment_list_serialized = serialize_experiment_list(get_all_experiment())
 
@@ -86,7 +85,7 @@ class IntegrationTestUtilityGenerateAndConvert(LemurBaseCase):
 
     def test_serialize_user_list(self):
         for i in range(r.rand_round()):
-            user = r.create_user(db)
+            user = r.create_user(self.ds)
             user.role_name = r.rand_role()
 
         user_list_serialized = serialize_user_list(get_all_user())
@@ -98,7 +97,7 @@ class IntegrationTestUtilityGenerateAndConvert(LemurBaseCase):
 
     def test_serialize_class_list(self):
         for i in range(r.rand_round()):
-            r.create_class(db)
+            r.create_class(self.ds)
 
         class_list_serialized = serialize_class_list(get_all_class())
 
@@ -115,6 +114,7 @@ class IntegrationTestUtilityGenerateAndConvert(LemurBaseCase):
         observations_group_by_experiment_name, _, _, _, _ = find_all_observations_for_labs([lab.id])
         observations_group_by_student = change_observation_organization(observations_group_by_experiment_name)
         self.assertEqual(len(observations_group_by_student), student_num)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -15,8 +15,8 @@ def check_existence(form, *expected_args):
     # Also that should be -- you guessed it -- a docstring. -- RMD 2017-08-26
     err_msg = ''
     for a in expected_args:
-        if not(a in form):
-            err_msg += (a+' is not defined'+'\n')
+        if a not in form:
+            err_msg += (a + ' is not defined'+'\n')
     if err_msg != '':
         app.logger.error(err_msg)
     return err_msg
@@ -87,15 +87,20 @@ def serialize_lab_list(lab_list):
             class_id = lab.the_class.id
         else:
             class_id = None
-            prof_name = ','.join([u.name for u in lab.users if (u.name and ((u.role_name == 'SuperAdmin') or (u.role_name == 'Admin')))])
-            # ^ That is some line length you've got there. -- RMD 2017-08-26
-            labs.append({'lab_id': lab.id,
-                         'lab_name': lab.name,
-                         'description': lab.description,
-                         'class_id': class_id,
-                         'prof_name': prof_name,
-                         'status': lab.status,
-                         'experiments': len(lab.experiments)})
+
+        prof_name = ','.join([u.name for u in lab.users if (u.name and ((u.role_name == 'SuperAdmin') or (u.role_name == 'Admin')))])
+        # ^ That is some line length you've got there. -- RMD 2017-08-26
+        labs.append(
+            {
+                'lab_id': lab.id,
+                'lab_name': lab.name,
+                'description': lab.description,
+                'class_id': class_id,
+                'prof_name': prof_name,
+                'status': lab.status,
+                'experiments': len(lab.experiments)
+            }
+        )
     return labs
 
 
@@ -216,7 +221,8 @@ def cleanup_class_data(class_data):
     for c in class_data:
         if c['course_number'] != '470':
             course_number_set.add(c['course_number'])
-            course_number_list = list(course_number_set)
+
+    course_number_list = list(course_number_set)
     for course_number in course_number_list:
         # Get all the sections that have the same course number
         the_class_list = list(filter(lambda c: c['course_number'] == course_number, class_data))
@@ -228,7 +234,9 @@ def cleanup_class_data(class_data):
             for instructor in c['instructors']:
                 if not (instructor['username'] in class_instructor_usernames):
                     the_class['instructors'].append(instructor)
-                    cleaned_class_data.append(the_class)
+
+        cleaned_class_data.append(the_class)
+
     return cleaned_class_data
 
 

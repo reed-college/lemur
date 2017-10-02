@@ -76,7 +76,7 @@ class UnitTestUtilityGenerateAndConvert(unittest.TestCase):
     def test_generate_experiment_id(self):
         lab_id = r.randlength_word()
         experiment_name = r.randlength_word()
-        expected_experiment_id = lab_id+':'+experiment_name
+        expected_experiment_id = lab_id + ':' + experiment_name
         generated_experiment_id = generate_experiment_id(lab_id, experiment_name)
         self.assertEqual(generated_experiment_id, expected_experiment_id)
 
@@ -117,6 +117,9 @@ class UnitTestUtilityGenerateAndConvert(unittest.TestCase):
 
     # Get all objects of one class and then serialize them into
     # a list of python dictionary
+    #
+    # Why the imponderable hell does this mock out a test method for creating
+    # data -- RMD 2017-10-01
     @patch('test_unit_utility_generate_and_convert.r.create_lab')
     def test_serialize_lab_list(self, create_lab_mock):
         lab_mock_list = []
@@ -200,7 +203,7 @@ class UnitTestUtilityGenerateAndConvert(unittest.TestCase):
                                                                                                                                                                                 {"username": "prof4", "last_name": "Prof", "first_name": "Four"},
                                                                                                                                                                                 {"username": "prof5", "last_name": "Prof", "first_name": "Five"}]},
                       {'course_id': '10010', 'term_code': '201701', 'subject': 'BIOL', 'course_number': '470', 'section': 'YJS', 'section_type': 'Ind. study', 'instructors': [{"username": "prof6", "last_name": "Prof", "first_name": "Six"}]}
-                      ]
+        ]
         cleaned_class_data = cleanup_class_data(class_data)
         course_numbers = [c['course_number'] for c in cleaned_class_data]
         # 470 should have been removed
@@ -213,7 +216,7 @@ class UnitTestUtilityGenerateAndConvert(unittest.TestCase):
                        'professorName': r.randlength_word(),
                        'labDescription': r.randlength_word(),
                        'labQuestions': randint(1, 100)
-                       }
+        }
         lab_info, err_msg = pack_labinfo_sent_from_client(clinet_form)
         self.assertEqual(len(lab_info['experiments']), clinet_form['labQuestions'], err_msg)
 

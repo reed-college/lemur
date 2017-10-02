@@ -76,14 +76,14 @@ ds = db.session
 def login():
     if 'REMOTE_USER' in request.environ:
         user = get_user(request.environ['REMOTE_USER'])
-    # if not on the server
+        # if not on the server
     else:
         all_users = get_all_user()
         if len(all_users) > 0:
             user = all_users[0]
         else:
             return 'No user available in db'
-    # check existence of the use
+        # check existence of the use
     if user is not None:
         # If the username is valid, redirect the user to
         # the corresponding homepage
@@ -188,8 +188,8 @@ def _student_receive_data():
 
 # --- Admin Side ---
 # Main page for setting up and managing the labs
-    # SuperAdmin can see/edit all the labs
-    # Admin can only see/edit labs in his/her own zone
+# SuperAdmin can see/edit all the labs
+# Admin can only see/edit labs in his/her own zone
 @app.route('/admin_create_and_manage_lab', methods=['GET', 'POST'])
 @permission_required(m.Permission.LAB_SETUP)
 def admin_create_and_manage_lab():
@@ -334,7 +334,7 @@ def admin_edit_data(lab_ids):
     lab_ids_str = (',').join(lab_ids)
     # Get all the observations of the labs with lab_ids
     (observations, observations_by_student, _,
-        err_msg, undownloadable_labs) = find_all_observations_for_labs(lab_ids)
+     err_msg, undownloadable_labs) = find_all_observations_for_labs(lab_ids)
     if err_msg == '':
         return render_template('admin_edit_data.html',
                                observations=observations,
@@ -366,7 +366,7 @@ def _admin_change_data():
     err_msg = add_observation(jsonData['newObservationList'])
     if err_msg != '':
             return err_json(err_msg)
-    # return success to the ajax call from flask
+        # return success to the ajax call from flask
     return normal_json(jsonData)
 
 
@@ -472,7 +472,7 @@ def _superadmin_update_info_from_iris():
         return normal_json(warning_msg)
     elif jsonData['message'] == 'update users':
         class_id_list = [str(c) for c in jsonData['classIds']]
-        registration_data = json.loads(requests.get(student_api_url).text)
+        registration_data = json.loads(requests.get(app.config['STUDENT_API_URL']).text)
         if (len(registration_data) == 0):
             return 'empty registration data'
         err_msg = check_existence(registration_data[0], 'subject',
@@ -510,8 +510,8 @@ def superadmin_create_and_manage_class():
         err_msg = add_class(request.form)
         if err_msg != '':
             return err_json(err_msg)
-    # query professors' names and current classes from the database and
-    # convert them into JSON format
+        # query professors' names and current classes from the database and
+        # convert them into JSON format
     classes_query = get_all_class()
     all_users = get_all_user()
     current_classes = serialize_class_list(classes_query)
@@ -548,7 +548,7 @@ def _superadmin_modify_class():
         new_usernames += jsonData['studentUserNames']
     if jsonData['professorUserNames'] is not None:
         new_usernames += jsonData['professorUserNames']
-    err_msg = change_class_users(jsonData['classId'], new_usernames)
+        err_msg = change_class_users(jsonData['classId'], new_usernames)
     if err_msg != '':
         return err_json(err_msg)
     return normal_json(jsonData)
@@ -591,7 +591,7 @@ def inject_patterns():
                                        ' and other symbols'
                                        ' are not allowed)'
                                        ' e.g. Cortisol-Carey-Tuesday'
-                                       ),
+                ),
                 pattern_for_experiment_description='.{,500}',
                 pattern_for_experiment_description_hint=('no more than 500'
                                                          'characters'),
